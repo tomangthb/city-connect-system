@@ -12,6 +12,7 @@ import {
   User,
   CreditCard
 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SidebarProps {
   userType: 'employee' | 'resident';
@@ -19,27 +20,29 @@ interface SidebarProps {
   onTabChange: (tab: string) => void;
 }
 
-const employeeMenuItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: Home },
-  { id: 'resources', label: 'Resource Management', icon: Map },
-  { id: 'services', label: 'City Services', icon: FileText },
-  { id: 'appeals', label: 'Citizens Appeals', icon: MessageSquare },
-  { id: 'documents', label: 'Document Management', icon: FileText },
-  { id: 'analytics', label: 'Analytics & Reports', icon: Calendar },
-  { id: 'administration', label: 'Administration', icon: Settings },
-];
-
-const residentMenuItems = [
-  { id: 'dashboard', label: 'Home', icon: Home },
-  { id: 'services', label: 'City Services', icon: FileText },
-  { id: 'appeals', label: 'Submit Appeal', icon: MessageSquare },
-  { id: 'resources', label: 'City Resources', icon: Map },
-  { id: 'news', label: 'News & Events', icon: Calendar },
-  { id: 'account', label: 'My Account', icon: User },
-  { id: 'payments', label: 'Payments', icon: CreditCard },
-];
-
 const Sidebar = ({ userType, activeTab, onTabChange }: SidebarProps) => {
+  const { t } = useLanguage();
+
+  const employeeMenuItems = [
+    { id: 'dashboard', label: t('dashboard'), icon: Home },
+    { id: 'resources', label: t('resourceManagement'), icon: Map },
+    { id: 'services', label: t('cityServices'), icon: FileText },
+    { id: 'appeals', label: t('citizensAppeals'), icon: MessageSquare },
+    { id: 'documents', label: t('documentManagement'), icon: FileText },
+    { id: 'analytics', label: t('analyticsReports'), icon: Calendar },
+    { id: 'administration', label: t('administration'), icon: Settings },
+  ];
+
+  const residentMenuItems = [
+    { id: 'dashboard', label: t('home'), icon: Home },
+    { id: 'services', label: t('cityServices'), icon: FileText },
+    { id: 'appeals', label: t('submitAppeal'), icon: MessageSquare },
+    { id: 'resources', label: t('cityResources'), icon: Map },
+    { id: 'news', label: t('newsEvents'), icon: Calendar },
+    { id: 'account', label: t('myAccount'), icon: User },
+    { id: 'payments', label: t('payments'), icon: CreditCard },
+  ];
+
   const menuItems = userType === 'employee' ? employeeMenuItems : residentMenuItems;
 
   return (

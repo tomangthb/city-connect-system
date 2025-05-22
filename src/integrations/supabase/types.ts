@@ -9,7 +9,195 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      appeals: {
+        Row: {
+          category: string
+          content: string | null
+          created_at: string | null
+          id: string
+          priority: string | null
+          status: string | null
+          submitted_by: string | null
+          title: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          priority?: string | null
+          status?: string | null
+          submitted_by?: string | null
+          title: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          priority?: string | null
+          status?: string | null
+          submitted_by?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      news: {
+        Row: {
+          content: string | null
+          content_uk: string | null
+          created_at: string | null
+          id: string
+          image_url: string | null
+          summary: string | null
+          summary_uk: string | null
+          title: string
+          title_uk: string
+        }
+        Insert: {
+          content?: string | null
+          content_uk?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          summary?: string | null
+          summary_uk?: string | null
+          title: string
+          title_uk: string
+        }
+        Update: {
+          content?: string | null
+          content_uk?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          summary?: string | null
+          summary_uk?: string | null
+          title?: string
+          title_uk?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          type?: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      resources: {
+        Row: {
+          category: string
+          category_uk: string
+          created_at: string | null
+          description: string | null
+          description_uk: string | null
+          id: string
+          location: string | null
+          name: string
+          name_uk: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          category_uk: string
+          created_at?: string | null
+          description?: string | null
+          description_uk?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          name_uk: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          category_uk?: string
+          created_at?: string | null
+          description?: string | null
+          description_uk?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          name_uk?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          category: string
+          category_uk: string
+          created_at: string | null
+          description: string | null
+          description_uk: string | null
+          id: string
+          name: string
+          name_uk: string
+          processing_time: string | null
+          requests: number | null
+          status: string | null
+        }
+        Insert: {
+          category: string
+          category_uk: string
+          created_at?: string | null
+          description?: string | null
+          description_uk?: string | null
+          id?: string
+          name: string
+          name_uk: string
+          processing_time?: string | null
+          requests?: number | null
+          status?: string | null
+        }
+        Update: {
+          category?: string
+          category_uk?: string
+          created_at?: string | null
+          description?: string | null
+          description_uk?: string | null
+          id?: string
+          name?: string
+          name_uk?: string
+          processing_time?: string | null
+          requests?: number | null
+          status?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
