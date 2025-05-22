@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
 import EmployeeDashboard from '@/components/Employee/EmployeeDashboard';
@@ -17,37 +17,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Globe } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
   const [userType, setUserType] = useState<'employee' | 'resident' | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const { language, setLanguage, t } = useLanguage();
-  const navigate = useNavigate();
-  const { user, userType: authUserType, profile } = useAuth();
-
-  // Check if user is already logged in
-  useEffect(() => {
-    if (user && authUserType) {
-      setUserType(authUserType);
-    }
-  }, [user, authUserType]);
 
   // Toggle language
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'uk' : 'en');
-  };
-
-  // Handle user type selection or login
-  const handleUserTypeSelection = (type: 'employee' | 'resident') => {
-    if (user) {
-      // If already logged in, just set the user type
-      setUserType(type);
-    } else {
-      // If not logged in, navigate to auth page with the selected type
-      navigate('/auth', { state: { userType: type } });
-    }
   };
 
   // Login selection screen
@@ -69,7 +47,7 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Employee Portal */}
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleUserTypeSelection('employee')}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setUserType('employee')}>
               <CardHeader className="text-center">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,14 +68,12 @@ const Index = () => {
                   <li>{language === 'en' ? '• Document management system' : '• Система управління документами'}</li>
                   <li>{language === 'en' ? '• Reporting and administration tools' : '• Інструменти звітності та адміністрування'}</li>
                 </ul>
-                <Button className="w-full mt-6">
-                  {user ? t('accessEmployeePortal') : t('loginAsEmployee')}
-                </Button>
+                <Button className="w-full mt-6">{t('accessEmployeePortal')}</Button>
               </CardContent>
             </Card>
 
             {/* Resident Portal */}
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleUserTypeSelection('resident')}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setUserType('resident')}>
               <CardHeader className="text-center">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,9 +94,7 @@ const Index = () => {
                   <li>{language === 'en' ? '• City news and events' : '• Міські новини та події'}</li>
                   <li>{language === 'en' ? '• Interactive city map and resources' : '• Інтерактивна карта міста та ресурси'}</li>
                 </ul>
-                <Button className="w-full mt-6" variant="outline">
-                  {user ? t('accessResidentPortal') : t('loginAsResident')}
-                </Button>
+                <Button className="w-full mt-6" variant="outline">{t('accessResidentPortal')}</Button>
               </CardContent>
             </Card>
           </div>
@@ -166,7 +140,7 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header 
         userType={userType} 
-        userName={profile?.full_name || (user ? user.email : 'User')}
+        userName={userType === 'employee' ? 'Admin User' : 'John Doe'} 
       />
       <div className="flex flex-1">
         <Sidebar userType={userType} activeTab={activeTab} onTabChange={setActiveTab} />
