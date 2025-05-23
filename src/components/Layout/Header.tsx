@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Bell, Settings, User, LogOut, Globe } from 'lucide-react';
@@ -70,11 +71,6 @@ const Header = ({ userType, userName = 'User' }: HeaderProps) => {
   // Handle logout
   const handleLogout = async () => {
     await signOut();
-    navigate('/'); // Navigate to the portal selection screen
-  };
-
-  // Handle change portal
-  const handleChangePortal = () => {
     navigate('/'); // Navigate to the portal selection screen
   };
   
@@ -198,10 +194,6 @@ const Header = ({ userType, userName = 'User' }: HeaderProps) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-md">
-              <DropdownMenuItem onClick={handleChangePortal}>
-                <User className="h-4 w-4 mr-2" />
-                {t('changePortal') || 'Change Portal'}
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleSettings}>
                 <Settings className="h-4 w-4 mr-2" />
                 {t('settings')}
