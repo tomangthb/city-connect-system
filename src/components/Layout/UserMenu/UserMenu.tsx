@@ -26,8 +26,14 @@ const UserMenu = ({ userName }: UserMenuProps) => {
   
   // Handle logout
   const handleLogout = async () => {
-    await signOut();
-    navigate('/'); // Navigate to the portal selection screen
+    try {
+      await signOut();
+      navigate('/'); // Navigate to the portal selection screen
+      console.log('User logged out successfully');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      toast.error(t('logoutError') || 'Error during logout');
+    }
   };
   
   // Handle settings
