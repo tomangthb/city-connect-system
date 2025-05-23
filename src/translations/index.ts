@@ -1,56 +1,78 @@
 
-// Define available languages
 export type Language = 'en' | 'uk';
 
-// Translation type
-export type Translations = {
-  [key: string]: {
-    en: string;
-    uk: string;
-  };
-};
-
-// Define our translations
-export const translations: Translations = {
-  // Common
+export const translations: Record<string, Record<Language, string>> = {
+  // App title and navigation
   appTitle: {
-    en: 'City Council Information System',
-    uk: 'Інформаційна система міської ради'
+    en: 'Municipal Portal',
+    uk: 'Муніципальний Портал'
   },
+  employeePortal: {
+    en: 'Employee Portal',
+    uk: 'Портал Співробітника'
+  },
+  residentPortal: {
+    en: 'Resident Portal',
+    uk: 'Портал Мешканця'
+  },
+
+  // Authentication
+  login: {
+    en: 'Login',
+    uk: 'Увійти'
+  },
+  logout: {
+    en: 'Logout',
+    uk: 'Вийти'
+  },
+  register: {
+    en: 'Register',
+    uk: 'Зареєструватися'
+  },
+
+  // Portal selection
+  selectUserType: {
+    en: 'Choose the portal you want to access',
+    uk: 'Оберіть портал, до якого хочете отримати доступ'
+  },
+  accessEmployeePortal: {
+    en: 'Access Employee Portal',
+    uk: 'Перейти до Порталу Співробітника'
+  },
+  accessResidentPortal: {
+    en: 'Access Resident Portal',
+    uk: 'Перейти до Порталу Мешканця'
+  },
+  needHelp: {
+    en: 'Need help? Contact municipal support',
+    uk: 'Потрібна допомога? Зв\'яжіться з муніципальною підтримкою'
+  },
+
+  // User menu
+  changePortal: {
+    en: 'Change Portal',
+    uk: 'Змінити Портал'
+  },
+  settings: {
+    en: 'Settings',
+    uk: 'Налаштування'
+  },
+
+  // Languages
+  english: {
+    en: 'English',
+    uk: 'Англійська'
+  },
+  ukrainian: {
+    en: 'Ukrainian',
+    uk: 'Українська'
+  },
+
+  // Sidebar menu items - Employee
   dashboard: {
     en: 'Dashboard',
     uk: 'Панель управління'
   },
-  employeePortal: {
-    en: 'Employee Portal',
-    uk: 'Портал працівника'
-  },
-  residentPortal: {
-    en: 'Resident Portal',
-    uk: 'Портал мешканця'
-  },
-  selectUserType: {
-    en: 'Select your user type to access the portal',
-    uk: 'Оберіть свій тип користувача для доступу до порталу'
-  },
-  accessEmployeePortal: {
-    en: 'Access Employee Portal',
-    uk: 'Увійти як працівник'
-  },
-  accessResidentPortal: {
-    en: 'Access Resident Portal',
-    uk: 'Увійти як мешканець'
-  },
-  needHelp: {
-    en: 'Need help? Contact support at support@citycouncil.gov or call (555) 123-4567',
-    uk: 'Потрібна допомога? Зверніться до служби підтримки support@citycouncil.gov або зателефонуйте (555) 123-4567'
-  },
-  home: {
-    en: 'Home',
-    uk: 'Головна'
-  },
-  
-  // Employee features
   resourceManagement: {
     en: 'Resource Management',
     uk: 'Управління ресурсами'
@@ -75,8 +97,12 @@ export const translations: Translations = {
     en: 'Administration',
     uk: 'Адміністрування'
   },
-  
-  // Resident features
+
+  // Sidebar menu items - Resident
+  home: {
+    en: 'Home',
+    uk: 'Головна'
+  },
   submitAppeal: {
     en: 'Submit Appeal',
     uk: 'Подати звернення'
@@ -91,124 +117,64 @@ export const translations: Translations = {
   },
   myAccount: {
     en: 'My Account',
-    uk: 'Мій обліковий запис'
+    uk: 'Мій профіль'
   },
   payments: {
     en: 'Payments',
     uk: 'Платежі'
   },
   
-  // Dashboard items
-  pendingAppeals: {
-    en: 'Pending Appeals',
-    uk: 'Звернення в очікуванні'
+  // New notification translations
+  notifications: {
+    en: 'Notifications',
+    uk: 'Сповіщення'
   },
-  activeServices: {
-    en: 'Active Services',
-    uk: 'Активні послуги'
+  clearAll: {
+    en: 'Clear All',
+    uk: 'Очистити все'
   },
-  registeredCitizens: {
-    en: 'Registered Citizens',
-    uk: 'Зареєстровані громадяни'
+  noNotifications: {
+    en: 'No notifications',
+    uk: 'Немає сповіщень'
   },
-  monthlyRevenue: {
-    en: 'Monthly Revenue',
-    uk: 'Місячний дохід'
+  markAsRead: {
+    en: 'Mark as read',
+    uk: 'Позначити як прочитане'
   },
-  recentActivities: {
-    en: 'Recent Activities',
-    uk: 'Останні дії'
+  newTaskAssigned: {
+    en: 'New Task Assigned',
+    uk: 'Призначено нове завдання'
   },
-  quickActions: {
-    en: 'Quick Actions',
-    uk: 'Швидкі дії'
+  youHaveNewTask: {
+    en: 'You have been assigned a new task to review.',
+    uk: 'Вам призначено нове завдання для розгляду.'
   },
-  generateReport: {
-    en: 'Generate Report',
-    uk: 'Створити звіт'
+  documentUpdated: {
+    en: 'Document Updated',
+    uk: 'Документ оновлено'
   },
-  reviewAppeals: {
-    en: 'Review Appeals',
-    uk: 'Переглянути звернення'
+  documentWasUpdated: {
+    en: 'The document "City Budget Plan" has been updated.',
+    uk: 'Документ "План міського бюджету" було оновлено.'
   },
-  manageUsers: {
-    en: 'Manage Users',
-    uk: 'Керування користувачами'
+  meetingReminder: {
+    en: 'Meeting Reminder',
+    uk: 'Нагадування про зустріч'
   },
-  viewAnalytics: {
-    en: 'View Analytics',
-    uk: 'Переглянути аналітику'
+  teamMeetingScheduled: {
+    en: 'Team meeting scheduled for tomorrow at 10:00 AM.',
+    uk: 'Командна зустріч запланована на завтра о 10:00.'
   },
-  
-  // Language toggle
-  language: {
-    en: 'Language',
-    uk: 'Мова'
+  notificationMarkedAsRead: {
+    en: 'Notification marked as read',
+    uk: 'Сповіщення позначено як прочитане'
   },
-  english: {
-    en: 'English',
-    uk: 'Англійська'
+  allNotificationsCleared: {
+    en: 'All notifications cleared',
+    uk: 'Усі сповіщення очищено'
   },
-  ukrainian: {
-    en: 'Ukrainian',
-    uk: 'Українська'
-  },
-  
-  // Login/logout/auth
-  login: {
-    en: 'Login',
-    uk: 'Увійти'
-  },
-  logout: {
-    en: 'Logout',
-    uk: 'Вихід'
-  },
-  settings: {
-    en: 'Settings',
-    uk: 'Налаштування'
-  },
-  register: {
-    en: 'Register',
-    uk: 'Зареєструватися'
-  },
-  loginDescription: {
-    en: 'Sign in to your account',
-    uk: 'Увійдіть в свій обліковий запис'
-  },
-  registerDescription: {
-    en: 'Create a new account',
-    uk: 'Створити новий обліковий запис'
-  },
-  email: {
-    en: 'Email',
-    uk: 'Електронна пошта'
-  },
-  password: {
-    en: 'Password',
-    uk: 'Пароль'
-  },
-  confirmPassword: {
-    en: 'Confirm Password',
-    uk: 'Підтвердити пароль'
-  },
-  firstName: {
-    en: 'First Name',
-    uk: 'Ім\'я'
-  },
-  lastName: {
-    en: 'Last Name',
-    uk: 'Прізвище'
-  },
-  patronymic: {
-    en: 'Patronymic',
-    uk: 'По батькові'
-  },
-  address: {
-    en: 'Address',
-    uk: 'Адреса'
-  },
-  changePortal: {
-    en: 'Change Portal',
-    uk: 'Змінити портал'
+  settingsOpened: {
+    en: 'Settings opened',
+    uk: 'Налаштування відкрито'
   }
 };
