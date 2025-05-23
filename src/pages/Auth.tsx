@@ -28,6 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from '@/hooks/use-toast';
 
 // Login form schema
 const loginFormSchema = z.object({
@@ -100,6 +101,10 @@ export function Auth() {
     setIsLoading(true);
     const { error } = await signIn(data.email, data.password);
     if (!error) {
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+      });
       navigate('/');
     }
     setIsLoading(false);
@@ -108,6 +113,7 @@ export function Auth() {
   // Handle registration form submission
   const onRegisterSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
+    console.log('Registration data:', data);
     const { error } = await signUp(data.email, data.password, {
       firstName: data.firstName,
       lastName: data.lastName,
@@ -119,6 +125,10 @@ export function Auth() {
     if (!error) {
       setActiveTab('login');
       registerForm.reset();
+      toast({
+        title: "Registration Successful",
+        description: "Please check your email for verification.",
+      });
     }
     setIsLoading(false);
   };
