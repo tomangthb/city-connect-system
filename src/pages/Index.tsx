@@ -45,11 +45,11 @@ export default function Index() {
         case 'dashboard':
           return <EmployeeDashboard />;
         case 'resources':
-          return <ResourcesModule />;
+          return <ResourcesModule userType={userType} />;
         case 'services':
-          return <ServicesModule />;
+          return <ServicesModule userType={userType} />;
         case 'appeals':
-          return <AppealsModule />;
+          return <AppealsModule userType={userType} />;
         case 'documents':
           return <DocumentsModule />;
         case 'analytics':
@@ -64,11 +64,11 @@ export default function Index() {
         case 'dashboard':
           return <ResidentDashboard />;
         case 'services':
-          return <ServicesModule />;
+          return <ServicesModule userType={userType} />;
         case 'appeals':
-          return <AppealsModule />;
+          return <AppealsModule userType={userType} />;
         case 'resources':
-          return <ResourcesModule />;
+          return <ResourcesModule userType={userType} />;
         case 'news':
           return <NewsModule />;
         case 'account':
