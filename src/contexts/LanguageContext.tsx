@@ -156,7 +156,11 @@ const translations: Translations = {
     uk: 'Українська'
   },
   
-  // Login/logout
+  // Login/logout/auth
+  login: {
+    en: 'Login',
+    uk: 'Увійти'
+  },
   logout: {
     en: 'Logout',
     uk: 'Вихід'
@@ -164,6 +168,50 @@ const translations: Translations = {
   settings: {
     en: 'Settings',
     uk: 'Налаштування'
+  },
+  register: {
+    en: 'Register',
+    uk: 'Зареєструватися'
+  },
+  loginDescription: {
+    en: 'Sign in to your account',
+    uk: 'Увійдіть в свій обліковий запис'
+  },
+  registerDescription: {
+    en: 'Create a new account',
+    uk: 'Створити новий обліковий запис'
+  },
+  email: {
+    en: 'Email',
+    uk: 'Електронна пошта'
+  },
+  password: {
+    en: 'Password',
+    uk: 'Пароль'
+  },
+  confirmPassword: {
+    en: 'Confirm Password',
+    uk: 'Підтвердити пароль'
+  },
+  firstName: {
+    en: 'First Name',
+    uk: 'Ім\'я'
+  },
+  lastName: {
+    en: 'Last Name',
+    uk: 'Прізвище'
+  },
+  patronymic: {
+    en: 'Patronymic',
+    uk: 'По батькові'
+  },
+  address: {
+    en: 'Address',
+    uk: 'Адреса'
+  },
+  changePortal: {
+    en: 'Change Portal',
+    uk: 'Змінити портал'
   }
 };
 

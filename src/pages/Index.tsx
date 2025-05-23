@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
 import EmployeeDashboard from '@/components/Employee/EmployeeDashboard';
@@ -16,19 +17,27 @@ import PaymentsModule from '@/components/Payments/PaymentsModule';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Globe } from 'lucide-react';
 
 const Index = () => {
-  const [userType, setUserType] = useState<'employee' | 'resident' | null>(null);
-  const [activeTab, setActiveTab] = useState('dashboard');
   const { language, setLanguage, t } = useLanguage();
+  const { user, userType: authUserType, signOut } = useAuth();
+  const [userType, setUserType] = useState<'employee' | 'resident' | null>(authUserType);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const navigate = useNavigate();
 
   // Toggle language
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'uk' : 'en');
   };
+  
+  // Handle login button click
+  const handleLoginClick = () => {
+    navigate('/auth');
+  };
 
-  // Login selection screen
+  // Login selection screen - show only if not authenticated or if user wants to switch portals
   if (!userType) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -47,7 +56,13 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Employee Portal */}
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setUserType('employee')}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => {
+              if (user) {
+                setUserType('employee');
+              } else {
+                navigate('/auth');
+              }
+            }}>
               <CardHeader className="text-center">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,12 +83,20 @@ const Index = () => {
                   <li>{language === 'en' ? '• Document management system' : '• Система управління документами'}</li>
                   <li>{language === 'en' ? '• Reporting and administration tools' : '• Інструменти звітності та адміністрування'}</li>
                 </ul>
-                <Button className="w-full mt-6">{t('accessEmployeePortal')}</Button>
+                <Button className="w-full mt-6">
+                  {user ? t('accessEmployeePortal') : t('login') || 'Login'}
+                </Button>
               </CardContent>
             </Card>
 
             {/* Resident Portal */}
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setUserType('resident')}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => {
+              if (user) {
+                setUserType('resident');
+              } else {
+                navigate('/auth');
+              }
+            }}>
               <CardHeader className="text-center">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,7 +117,9 @@ const Index = () => {
                   <li>{language === 'en' ? '• City news and events' : '• Міські новини та події'}</li>
                   <li>{language === 'en' ? '• Interactive city map and resources' : '• Інтерактивна карта міста та ресурси'}</li>
                 </ul>
-                <Button className="w-full mt-6" variant="outline">{t('accessResidentPortal')}</Button>
+                <Button className="w-full mt-6" variant="outline">
+                  {user ? t('accessResidentPortal') : t('login') || 'Login'}
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -103,6 +128,18 @@ const Index = () => {
             <p className="text-sm text-gray-500">
               {t('needHelp')}
             </p>
+            {user && (
+              <Button 
+                variant="link" 
+                className="mt-4 text-red-600" 
+                onClick={() => {
+                  signOut();
+                  setUserType(null);
+                }}
+              >
+                {t('logout') || 'Logout'}
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -140,7 +177,7 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header 
         userType={userType} 
-        userName={userType === 'employee' ? 'Admin User' : 'John Doe'} 
+        userName={user ? `${user.email}` : (userType === 'employee' ? 'Admin User' : 'John Doe')} 
       />
       <div className="flex flex-1">
         <Sidebar userType={userType} activeTab={activeTab} onTabChange={setActiveTab} />

@@ -9,6 +9,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   userType: 'employee' | 'resident';
@@ -17,10 +19,23 @@ interface HeaderProps {
 
 const Header = ({ userType, userName = 'User' }: HeaderProps) => {
   const { language, setLanguage, t } = useLanguage();
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
 
   // Toggle language
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'uk' : 'en');
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  // Handle change portal
+  const handleChangePortal = () => {
+    navigate('/');
   };
 
   return (
@@ -54,11 +69,15 @@ const Header = ({ userType, userName = 'User' }: HeaderProps) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-md">
+              <DropdownMenuItem onClick={handleChangePortal}>
+                <User className="h-4 w-4 mr-2" />
+                {t('changePortal') || 'Change Portal'}
+              </DropdownMenuItem>
               <DropdownMenuItem>
                 <Settings className="h-4 w-4 mr-2" />
                 {t('settings')}
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 {t('logout')}
               </DropdownMenuItem>
