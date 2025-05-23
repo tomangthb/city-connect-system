@@ -28,7 +28,8 @@ const UserMenu = ({ userName }: UserMenuProps) => {
   const handleLogout = async () => {
     try {
       await signOut();
-      navigate('/'); // Navigate to the portal selection screen
+      // Force navigation to root and reset any state
+      navigate('/', { replace: true });
       console.log('User logged out successfully');
     } catch (error) {
       console.error('Error during logout:', error);
