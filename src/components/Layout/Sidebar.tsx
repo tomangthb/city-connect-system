@@ -10,14 +10,9 @@ import {
   Map,
   Calendar,
   User,
-  CreditCard,
-  BarChart,
-  Users,
-  CircleDollarSign
+  CreditCard
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
   userType: 'employee' | 'resident';
@@ -27,15 +22,6 @@ interface SidebarProps {
 
 const Sidebar = ({ userType, activeTab, onTabChange }: SidebarProps) => {
   const { t } = useLanguage();
-  const { user } = useAuth();
-  const navigate = useNavigate();
-
-  // Redirect to auth if not logged in
-  React.useEffect(() => {
-    if (!user) {
-      navigate('/auth');
-    }
-  }, [user, navigate]);
 
   const employeeMenuItems = [
     { id: 'dashboard', label: t('dashboard'), icon: Home },
@@ -43,7 +29,7 @@ const Sidebar = ({ userType, activeTab, onTabChange }: SidebarProps) => {
     { id: 'services', label: t('cityServices'), icon: FileText },
     { id: 'appeals', label: t('citizensAppeals'), icon: MessageSquare },
     { id: 'documents', label: t('documentManagement'), icon: FileText },
-    { id: 'analytics', label: t('analyticsReports'), icon: BarChart },
+    { id: 'analytics', label: t('analyticsReports'), icon: Calendar },
     { id: 'administration', label: t('administration'), icon: Settings },
   ];
 
@@ -54,7 +40,7 @@ const Sidebar = ({ userType, activeTab, onTabChange }: SidebarProps) => {
     { id: 'resources', label: t('cityResources'), icon: Map },
     { id: 'news', label: t('newsEvents'), icon: Calendar },
     { id: 'account', label: t('myAccount'), icon: User },
-    { id: 'payments', label: t('payments'), icon: CircleDollarSign },
+    { id: 'payments', label: t('payments'), icon: CreditCard },
   ];
 
   const menuItems = userType === 'employee' ? employeeMenuItems : residentMenuItems;

@@ -1,196 +1,209 @@
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-// Define available languages and their translations
-const translations: Record<string, Record<string, string>> = {
-  en: {
-    // App
-    appTitle: 'City Management Portal',
-    loading: 'Loading',
-    saving: 'Saving',
-    updating: 'Updating',
-    cancel: 'Cancel',
-    confirm: 'Confirm',
-    delete: 'Delete',
-    welcome: 'Welcome',
-    welcomeBack: 'Welcome back',
-    save: 'Save',
-    saveChanges: 'Save Changes',
-    refresh: 'Refresh',
-    
-    // Authorization
-    login: 'Login',
-    logout: 'Logout',
-    register: 'Register',
-    loginDescription: 'Enter your credentials to access your account',
-    registerDescription: 'Create a new account to access city services',
-    email: 'Email',
-    password: 'Password',
-    confirmPassword: 'Confirm Password',
-    firstName: 'First Name',
-    lastName: 'Last Name',
-    patronymic: 'Patronymic',
-    address: 'Address',
-    userType: 'User Type',
-    selectUserType: 'Select user type',
-    settings: 'Settings',
-    profileSettings: 'Profile',
-    security: 'Security',
-    profileInformation: 'Profile Information',
-    updateProfileDescription: 'Update your personal information',
-    changePassword: 'Change Password',
-    passwordDescription: 'Update your password to keep your account secure',
-    currentPassword: 'Current Password',
-    newPassword: 'New Password',
-    confirmNewPassword: 'Confirm New Password',
-    authFooter: 'By using this service, you agree to our Terms of Service and Privacy Policy',
-    
-    // Portal sections
-    dashboard: 'Dashboard',
-    employeePortal: 'Employee Portal',
-    residentPortal: 'Resident Portal',
-    citizen: 'Citizen',
-    employee: 'Employee',
-    resident: 'Resident',
-    
-    // Portals
-    home: 'Home',
-    resourceManagement: 'Resource Management',
-    cityServices: 'City Services',
-    citizensAppeals: 'Citizens Appeals',
-    documentManagement: 'Document Management',
-    analyticsReports: 'Analytics & Reports',
-    administration: 'Administration',
-    cityResources: 'City Resources',
-    submitAppeal: 'Submit Appeal',
-    newsEvents: 'News & Events',
-    myAccount: 'My Account',
-    payments: 'Payments',
-    
-    // Notifications
-    notifications: 'Notifications',
-    noNotifications: 'No notifications',
-    markAllRead: 'Mark all as read',
-    markAsRead: 'Mark as read',
-    allNotificationsRead: 'All notifications read',
-    allNotificationsReadDescription: 'All notifications have been marked as read',
+// Define available languages
+export type Language = 'en' | 'uk';
+
+// Translation type
+type Translations = {
+  [key: string]: {
+    en: string;
+    uk: string;
+  };
+};
+
+// Define our translations
+const translations: Translations = {
+  // Common
+  appTitle: {
+    en: 'City Council Information System',
+    uk: 'Інформаційна система міської ради'
+  },
+  dashboard: {
+    en: 'Dashboard',
+    uk: 'Панель управління'
+  },
+  employeePortal: {
+    en: 'Employee Portal',
+    uk: 'Портал працівника'
+  },
+  residentPortal: {
+    en: 'Resident Portal',
+    uk: 'Портал мешканця'
+  },
+  selectUserType: {
+    en: 'Select your user type to access the portal',
+    uk: 'Оберіть свій тип користувача для доступу до порталу'
+  },
+  accessEmployeePortal: {
+    en: 'Access Employee Portal',
+    uk: 'Увійти як працівник'
+  },
+  accessResidentPortal: {
+    en: 'Access Resident Portal',
+    uk: 'Увійти як мешканець'
+  },
+  needHelp: {
+    en: 'Need help? Contact support at support@citycouncil.gov or call (555) 123-4567',
+    uk: 'Потрібна допомога? Зверніться до служби підтримки support@citycouncil.gov або зателефонуйте (555) 123-4567'
+  },
+  home: {
+    en: 'Home',
+    uk: 'Головна'
   },
   
-  uk: {
-    // App
-    appTitle: 'Портал управління містом',
-    loading: 'Завантаження',
-    saving: 'Збереження',
-    updating: 'Оновлення',
-    cancel: 'Скасувати',
-    confirm: 'Підтвердити',
-    delete: 'Видалити',
-    welcome: 'Вітаємо',
-    welcomeBack: 'З поверненням',
-    save: 'Зберегти',
-    saveChanges: 'Зберегти зміни',
-    refresh: 'Оновити',
-    
-    // Authorization
-    login: 'Увійти',
-    logout: 'Вийти',
-    register: 'Реєстрація',
-    loginDescription: 'Введіть свої дані для входу в систему',
-    registerDescription: 'Створіть новий обліковий запис для доступу до послуг міста',
-    email: 'Електронна пошта',
-    password: 'Пароль',
-    confirmPassword: 'Підтвердіть пароль',
-    firstName: 'Ім\'я',
-    lastName: 'Прізвище',
-    patronymic: 'По батькові',
-    address: 'Адреса',
-    userType: 'Тип користувача',
-    selectUserType: 'Оберіть тип користувача',
-    settings: 'Налаштування',
-    profileSettings: 'Профіль',
-    security: 'Безпека',
-    profileInformation: 'Інформація профілю',
-    updateProfileDescription: 'Оновіть вашу персональну інформацію',
-    changePassword: 'Змінити пароль',
-    passwordDescription: 'Оновіть свій пароль для підвищення безпеки облікового запису',
-    currentPassword: 'Поточний пароль',
-    newPassword: 'Новий пароль',
-    confirmNewPassword: 'Підтвердіть новий пароль',
-    authFooter: 'Використовуючи цей сервіс, ви погоджуєтесь з Умовами використання та Політикою конфіденційності',
-    
-    // Portal sections
-    dashboard: 'Панель керування',
-    employeePortal: 'Портал співробітника',
-    residentPortal: 'Портал мешканця',
-    citizen: 'Громадянин',
-    employee: 'Співробітник',
-    resident: 'Мешканець',
-    
-    // Portals
-    home: 'Головна',
-    resourceManagement: 'Управління ресурсами',
-    cityServices: 'Послуги міста',
-    citizensAppeals: 'Звернення громадян',
-    documentManagement: 'Управління документами',
-    analyticsReports: 'Аналітика та звіти',
-    administration: 'Адміністрування',
-    cityResources: 'Міські ресурси',
-    submitAppeal: 'Подати звернення',
-    newsEvents: 'Новини та події',
-    myAccount: 'Мій профіль',
-    payments: 'Платежі',
-    
-    // Notifications
-    notifications: 'Сповіщення',
-    noNotifications: 'Немає сповіщень',
-    markAllRead: 'Позначити всі як прочитані',
-    markAsRead: 'Позначити як прочитане',
-    allNotificationsRead: 'Всі сповіщення прочитані',
-    allNotificationsReadDescription: 'Всі сповіщення були позначені як прочитані',
+  // Employee features
+  resourceManagement: {
+    en: 'Resource Management',
+    uk: 'Управління ресурсами'
+  },
+  cityServices: {
+    en: 'City Services',
+    uk: 'Міські послуги'
+  },
+  citizensAppeals: {
+    en: 'Citizens Appeals',
+    uk: 'Звернення громадян'
+  },
+  documentManagement: {
+    en: 'Document Management',
+    uk: 'Управління документами'
+  },
+  analyticsReports: {
+    en: 'Analytics & Reports',
+    uk: 'Аналітика та звіти'
+  },
+  administration: {
+    en: 'Administration',
+    uk: 'Адміністрування'
+  },
+  
+  // Resident features
+  submitAppeal: {
+    en: 'Submit Appeal',
+    uk: 'Подати звернення'
+  },
+  cityResources: {
+    en: 'City Resources',
+    uk: 'Міські ресурси'
+  },
+  newsEvents: {
+    en: 'News & Events',
+    uk: 'Новини та події'
+  },
+  myAccount: {
+    en: 'My Account',
+    uk: 'Мій обліковий запис'
+  },
+  payments: {
+    en: 'Payments',
+    uk: 'Платежі'
+  },
+  
+  // Dashboard items
+  pendingAppeals: {
+    en: 'Pending Appeals',
+    uk: 'Звернення в очікуванні'
+  },
+  activeServices: {
+    en: 'Active Services',
+    uk: 'Активні послуги'
+  },
+  registeredCitizens: {
+    en: 'Registered Citizens',
+    uk: 'Зареєстровані громадяни'
+  },
+  monthlyRevenue: {
+    en: 'Monthly Revenue',
+    uk: 'Місячний дохід'
+  },
+  recentActivities: {
+    en: 'Recent Activities',
+    uk: 'Останні дії'
+  },
+  quickActions: {
+    en: 'Quick Actions',
+    uk: 'Швидкі дії'
+  },
+  generateReport: {
+    en: 'Generate Report',
+    uk: 'Створити звіт'
+  },
+  reviewAppeals: {
+    en: 'Review Appeals',
+    uk: 'Переглянути звернення'
+  },
+  manageUsers: {
+    en: 'Manage Users',
+    uk: 'Керування користувачами'
+  },
+  viewAnalytics: {
+    en: 'View Analytics',
+    uk: 'Переглянути аналітику'
+  },
+  
+  // Language toggle
+  language: {
+    en: 'Language',
+    uk: 'Мова'
+  },
+  english: {
+    en: 'English',
+    uk: 'Англійська'
+  },
+  ukrainian: {
+    en: 'Ukrainian',
+    uk: 'Українська'
+  },
+  
+  // Login/logout
+  logout: {
+    en: 'Logout',
+    uk: 'Вихід'
+  },
+  settings: {
+    en: 'Settings',
+    uk: 'Налаштування'
   }
 };
 
-// Create language context
-interface LanguageContextType {
-  language: string;
-  setLanguage: (language: string) => void;
+// Create the context type
+type LanguageContextType = {
+  language: Language;
+  setLanguage: (language: Language) => void;
   t: (key: string) => string;
-}
+};
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+// Create the context with default values
+const LanguageContext = createContext<LanguageContextType>({
+  language: 'en',
+  setLanguage: () => {},
+  t: (key) => key,
+});
 
-export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
-  // Use browser language or default to English
-  const getBrowserLanguage = () => {
-    const browserLang = navigator.language.split('-')[0];
-    return browserLang === 'uk' ? 'uk' : 'en';
-  };
+// Create a provider component
+export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+  const [language, setLanguage] = useState<Language>('en');
 
-  const [language, setLanguage] = useState(
-    localStorage.getItem('language') || getBrowserLanguage()
-  );
-
-  // Save language preference to localStorage
-  const changeLanguage = (newLanguage: string) => {
-    localStorage.setItem('language', newLanguage);
-    setLanguage(newLanguage);
-  };
-
-  // Translation function
   const t = (key: string): string => {
-    return translations[language]?.[key] || key;
+    if (!translations[key]) {
+      console.warn(`Translation key not found: ${key}`);
+      return key;
+    }
+    return translations[key][language] || key;
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage: changeLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );
 };
 
+// Create a hook for using the language context
 export const useLanguage = () => {
   const context = useContext(LanguageContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useLanguage must be used within a LanguageProvider');
   }
   return context;
