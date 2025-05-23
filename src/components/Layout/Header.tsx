@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Bell, Settings, User, LogOut, Globe } from 'lucide-react';
@@ -76,7 +75,7 @@ const Header = ({ userType, userName = 'User' }: HeaderProps) => {
 
   // Handle change portal
   const handleChangePortal = () => {
-    navigate('/');
+    navigate('/'); // Navigate to the portal selection screen
   };
   
   // Handle settings

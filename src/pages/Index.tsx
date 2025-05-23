@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Layout/Header';
@@ -146,6 +145,7 @@ const Index = () => {
     );
   }
 
+  // Content rendering
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
