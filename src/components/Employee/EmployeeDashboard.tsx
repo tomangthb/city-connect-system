@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
@@ -19,7 +18,11 @@ import MetricsChart from './MetricsChart';
 import QuickActions from './QuickActions';
 import { toast } from 'sonner';
 
-const EmployeeDashboard = () => {
+interface EmployeeDashboardProps {
+  onTabChange?: (tab: string) => void;
+}
+
+const EmployeeDashboard = ({ onTabChange }: EmployeeDashboardProps) => {
   const { language, t } = useLanguage();
   const [typeFilter, setTypeFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
@@ -102,7 +105,7 @@ const EmployeeDashboard = () => {
       change: getMetricByName('pendingAppeals')?.metric_change,
       icon: MessageSquare, 
       color: 'text-orange-600',
-      onClick: () => toast.info(t('loadingAppeals'))
+      onClick: () => onTabChange ? onTabChange('appeals') : toast.info(t('loadingAppeals'))
     },
     { 
       title: t('activeServices'), 
@@ -111,7 +114,7 @@ const EmployeeDashboard = () => {
       change: getMetricByName('activeServices')?.metric_change,
       icon: FileText, 
       color: 'text-blue-600',
-      onClick: () => toast.info(t('loadingServices'))
+      onClick: () => onTabChange ? onTabChange('services') : toast.info(t('loadingServices'))
     },
     { 
       title: t('registeredCitizens'), 
@@ -120,7 +123,7 @@ const EmployeeDashboard = () => {
       change: getMetricByName('registeredCitizens')?.metric_change,
       icon: Users, 
       color: 'text-green-600',
-      onClick: () => toast.info(t('loadingCitizens'))
+      onClick: () => onTabChange ? onTabChange('administration') : toast.info(t('loadingCitizens'))
     },
     { 
       title: t('monthlyRevenue'), 
@@ -129,7 +132,7 @@ const EmployeeDashboard = () => {
       change: getMetricByName('monthlyRevenue')?.metric_change,
       icon: DollarSign, 
       color: 'text-purple-600',
-      onClick: () => toast.info(t('loadingFinancial'))
+      onClick: () => onTabChange ? onTabChange('analytics') : toast.info(t('loadingFinancial'))
     },
   ];
 
@@ -288,7 +291,7 @@ const EmployeeDashboard = () => {
         </Card>
 
         {/* Enhanced Quick Actions */}
-        <QuickActions />
+        <QuickActions onTabChange={onTabChange} />
       </div>
     </div>
   );

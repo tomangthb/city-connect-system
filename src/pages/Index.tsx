@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Layout/Header';
@@ -159,7 +158,11 @@ const Index = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return userType === 'employee' ? <EmployeeDashboard /> : <ResidentDashboard />;
+        return userType === 'employee' ? (
+          <EmployeeDashboard onTabChange={setActiveTab} />
+        ) : (
+          <ResidentDashboard />
+        );
       case 'services':
         return <ServicesModule userType={userType} />;
       case 'appeals':
@@ -179,7 +182,11 @@ const Index = () => {
       case 'payments':
         return <PaymentsModule />;
       default:
-        return userType === 'employee' ? <EmployeeDashboard /> : <ResidentDashboard />;
+        return userType === 'employee' ? (
+          <EmployeeDashboard onTabChange={setActiveTab} />
+        ) : (
+          <ResidentDashboard />
+        );
     }
   };
 

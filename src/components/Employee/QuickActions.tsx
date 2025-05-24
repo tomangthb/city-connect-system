@@ -8,7 +8,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
-const QuickActions = () => {
+interface QuickActionsProps {
+  onTabChange?: (tab: string) => void;
+}
+
+const QuickActions = ({ onTabChange }: QuickActionsProps) => {
   const { t } = useLanguage();
   const { user } = useAuth();
 
@@ -33,7 +37,7 @@ const QuickActions = () => {
 
       if (error) throw error;
       
-      toast.success('Report generated successfully!');
+      toast.success(t('reportGenerated'));
     } catch (error) {
       console.error('Error generating report:', error);
       toast.error('Failed to generate report');
@@ -41,18 +45,30 @@ const QuickActions = () => {
   };
 
   const handleReviewAppeals = () => {
-    toast.info('Redirecting to appeals management...');
-    // In a real app, this would navigate to the appeals module
+    if (onTabChange) {
+      onTabChange('appeals');
+      toast.success(t('appealsRedirect'));
+    } else {
+      toast.info(t('appealsRedirect'));
+    }
   };
 
   const handleManageUsers = () => {
-    toast.info('Opening user management interface...');
-    // In a real app, this would navigate to user management
+    if (onTabChange) {
+      onTabChange('administration');
+      toast.success(t('usersManagement'));
+    } else {
+      toast.info(t('usersManagement'));
+    }
   };
 
   const handleViewAnalytics = () => {
-    toast.info('Loading advanced analytics dashboard...');
-    // In a real app, this would navigate to analytics module
+    if (onTabChange) {
+      onTabChange('analytics');
+      toast.success(t('analyticsLoading'));
+    } else {
+      toast.info(t('analyticsLoading'));
+    }
   };
 
   const handleCreateTask = async () => {
@@ -75,7 +91,7 @@ const QuickActions = () => {
 
       if (error) throw error;
       
-      toast.success('New task created successfully!');
+      toast.success(t('taskCreated'));
     } catch (error) {
       console.error('Error creating task:', error);
       toast.error('Failed to create task');
@@ -83,7 +99,8 @@ const QuickActions = () => {
   };
 
   const handleSystemSettings = () => {
-    toast.info('Opening system settings...');
+    toast.success(t('settingsOpened'));
+    // In a real app, this would open a settings modal or navigate to settings page
   };
 
   return (
@@ -134,7 +151,7 @@ const QuickActions = () => {
             onClick={handleCreateTask}
           >
             <Plus className="h-6 w-6 mb-1" />
-            <span className="text-xs text-center">Create Task</span>
+            <span className="text-xs text-center">{t('createTask')}</span>
           </Button>
           
           <Button 
@@ -143,7 +160,7 @@ const QuickActions = () => {
             onClick={handleSystemSettings}
           >
             <Settings className="h-6 w-6 mb-1" />
-            <span className="text-xs text-center">Settings</span>
+            <span className="text-xs text-center">{t('settings')}</span>
           </Button>
         </div>
       </CardContent>
