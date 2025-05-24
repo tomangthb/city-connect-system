@@ -97,14 +97,16 @@ const ProfileSettings = () => {
                     getUserInitials={getUserInitials}
                     isUploadingAvatar={isUploadingAvatar}
                   />
-                  <Button 
-                    onClick={handleUpdateProfile} 
-                    disabled={isUpdating}
-                    className="flex items-center"
-                  >
-                    <Save className="h-4 w-4 mr-2" />
-                    {isUpdating ? 'Збереження...' : (language === 'en' ? 'Save Changes' : 'Зберегти зміни')}
-                  </Button>
+                  <div className="flex justify-end pt-4 border-t">
+                    <Button 
+                      onClick={handleUpdateProfile} 
+                      disabled={isUpdating || isUploadingAvatar}
+                      className="flex items-center min-w-[150px]"
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      {isUpdating ? 'Збереження...' : (language === 'en' ? 'Save Changes' : 'Зберегти зміни')}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

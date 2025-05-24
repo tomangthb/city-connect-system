@@ -15,7 +15,6 @@ export const useProfileData = () => {
     phone: '',
     address: '',
     position: '',
-    bio: '',
     avatarUrl: ''
   });
 
@@ -43,7 +42,6 @@ export const useProfileData = () => {
             phone: data.phone || '',
             address: data.address || '',
             position: data.user_type === 'employee' ? 'Municipal Employee' : 'Resident',
-            bio: '',
             avatarUrl: data.avatar_url || ''
           });
         }
@@ -108,16 +106,22 @@ export const useProfileData = () => {
       return;
     }
 
+    // Validate required fields
+    if (!formData.firstName.trim() || !formData.lastName.trim()) {
+      toast.error('Будь ласка, заповніть ім\'я та прізвище');
+      return;
+    }
+
     setIsUpdating(true);
     
     try {
       console.log('Updating profile with data:', {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        patronymic: formData.patronymic,
+        first_name: formData.firstName.trim(),
+        last_name: formData.lastName.trim(),
+        patronymic: formData.patronymic.trim(),
         email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
+        phone: formData.phone.trim(),
+        address: formData.address.trim(),
         avatar_url: formData.avatarUrl
       });
 
@@ -125,13 +129,13 @@ export const useProfileData = () => {
         .from('profiles')
         .upsert({
           id: user.id,
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          patronymic: formData.patronymic,
+          first_name: formData.firstName.trim(),
+          last_name: formData.lastName.trim(),
+          patronymic: formData.patronymic.trim() || null,
           email: formData.email,
-          phone: formData.phone,
-          address: formData.address,
-          avatar_url: formData.avatarUrl,
+          phone: formData.phone.trim() || null,
+          address: formData.address.trim() || null,
+          avatar_url: formData.avatarUrl || null,
           updated_at: new Date().toISOString()
         });
 
@@ -144,7 +148,7 @@ export const useProfileData = () => {
       toast.success('Профіль успішно оновлено!');
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error('Помилка оновлення профілю');
+      toast.error('Помилка оновлення профілю. Спробуйте ще раз.');
     } finally {
       setIsUpdating(false);
     }
