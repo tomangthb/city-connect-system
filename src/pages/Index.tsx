@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
@@ -23,9 +23,18 @@ import { Globe } from 'lucide-react';
 const Index = () => {
   const { language, setLanguage, t } = useLanguage();
   const { user, userType: authUserType, signOut } = useAuth();
-  const [userType, setUserType] = useState<'employee' | 'resident' | null>(authUserType);
+  const [userType, setUserType] = useState<'employee' | 'resident' | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const navigate = useNavigate();
+
+  // Reset userType when user logs out
+  useEffect(() => {
+    if (!user) {
+      setUserType(null);
+    } else if (authUserType) {
+      setUserType(authUserType);
+    }
+  }, [user, authUserType]);
 
   // Toggle language
   const toggleLanguage = () => {
@@ -38,7 +47,7 @@ const Index = () => {
   };
 
   // Login selection screen - show only if not authenticated or if user wants to switch portals
-  if (!userType) {
+  if (!userType || !user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <div className="max-w-4xl w-full">
@@ -132,8 +141,8 @@ const Index = () => {
               <Button 
                 variant="link" 
                 className="mt-4 text-red-600" 
-                onClick={() => {
-                  signOut();
+                onClick={async () => {
+                  await signOut();
                   setUserType(null);
                 }}
               >

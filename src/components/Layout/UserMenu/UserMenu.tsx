@@ -27,9 +27,11 @@ const UserMenu = ({ userName }: UserMenuProps) => {
   // Handle logout
   const handleLogout = async () => {
     try {
+      console.log('Logout button clicked');
       await signOut();
+      
       // Force navigation to root and reset any state
-      navigate('/', { replace: true });
+      window.location.href = '/';
       console.log('User logged out successfully');
     } catch (error) {
       console.error('Error during logout:', error);

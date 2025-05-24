@@ -25,20 +25,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
+        console.log('Auth state changed:', event, currentSession);
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
+        
+        // Handle logout event specifically
+        if (event === 'SIGNED_OUT') {
+          setUserType(null);
+          setSession(null);
+          setUser(null);
+          console.log('User signed out, cleared state');
+          return;
+        }
         
         // Fetch user type from profile when session changes
         if (currentSession?.user) {
           setTimeout(async () => {
-            const { data, error } = await supabase
-              .from('profiles')
-              .select('user_type')
-              .eq('id', currentSession.user.id)
-              .single();
-            
-            if (data && !error) {
-              setUserType(data.user_type as 'employee' | 'resident');
+            try {
+              const { data, error } = await supabase
+                .from('profiles')
+                .select('user_type')
+                .eq('id', currentSession.user.id)
+                .single();
+              
+              if (data && !error) {
+                setUserType(data.user_type as 'employee' | 'resident');
+              }
+            } catch (error) {
+              console.error('Error fetching user type:', error);
             }
           }, 0);
         } else {
@@ -49,23 +63,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // THEN check for existing session
     const initializeAuth = async () => {
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      setSession(initialSession);
-      setUser(initialSession?.user ?? null);
-      
-      if (initialSession?.user) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('user_type')
-          .eq('id', initialSession.user.id)
-          .single();
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
         
-        if (data) {
-          setUserType(data.user_type as 'employee' | 'resident');
+        if (initialSession?.user) {
+          const { data } = await supabase
+            .from('profiles')
+            .select('user_type')
+            .eq('id', initialSession.user.id)
+            .single();
+          
+          if (data) {
+            setUserType(data.user_type as 'employee' | 'resident');
+          }
         }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
 
     initializeAuth();
@@ -103,7 +121,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      console.log('Signing out user...');
+      // Clear state immediately
+      setSession(null);
+      setUser(null);
+      setUserType(null);
+      
+      // Then sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error signing out:', error);
+      } else {
+        console.log('Successfully signed out');
+      }
+    } catch (error) {
+      console.error('Error during sign out:', error);
+    }
   };
 
   return (

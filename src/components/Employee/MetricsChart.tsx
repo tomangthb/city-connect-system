@@ -25,36 +25,38 @@ const chartConfig = {
 
 const MetricsChart = ({ title, data, type = 'line', color = '#3b82f6' }: MetricsChartProps) => {
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="h-64">
+      <CardContent className="p-4">
+        <ChartContainer config={chartConfig} className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
             {type === 'line' ? (
-              <LineChart data={data}>
+              <LineChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                 <XAxis 
                   dataKey="date" 
                   tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  fontSize={12}
                 />
-                <YAxis />
+                <YAxis fontSize={12} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Line 
                   type="monotone" 
                   dataKey="value" 
                   stroke={color} 
                   strokeWidth={2}
-                  dot={{ fill: color, strokeWidth: 2 }}
+                  dot={{ fill: color, strokeWidth: 2, r: 3 }}
                 />
               </LineChart>
             ) : (
-              <BarChart data={data}>
+              <BarChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                 <XAxis 
                   dataKey="date" 
                   tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  fontSize={12}
                 />
-                <YAxis />
+                <YAxis fontSize={12} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar dataKey="value" fill={color} />
               </BarChart>
