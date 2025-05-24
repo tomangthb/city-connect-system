@@ -100,7 +100,7 @@ const Header = ({ userType, userName }: HeaderProps) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <h1 className="text-xl font-semibold text-gray-900">
-            {userType === 'employee' ? t('employeePortal') : t('residentPortal')}
+            {t('appTitle')}
           </h1>
         </div>
         
