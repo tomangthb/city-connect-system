@@ -5,26 +5,24 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, FileText, Download } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
+import { addActivity } from '@/utils/activityUtils';
 
 interface GenerateReportDialogProps {
   children: React.ReactNode;
 }
 
 const GenerateReportDialog = ({ children }: GenerateReportDialogProps) => {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [reportType, setReportType] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [format, setFormat] = useState('pdf');
+  const [dateRange, setDateRange] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleGenerateReport = async () => {
-    if (!reportType || !startDate || !endDate) {
-      toast.error(language === 'en' ? 'Please fill in all required fields' : 'Будь ласка, заповніть всі обов\'язкові поля');
+  const handleGenerate = async () => {
+    if (!reportType || !dateRange) {
+      toast.error(t('fillAllFields') || 'Please fill all fields');
       return;
     }
 
@@ -34,16 +32,21 @@ const GenerateReportDialog = ({ children }: GenerateReportDialogProps) => {
       // Simulate report generation
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      toast.success(language === 'en' ? 'Report generated successfully!' : 'Звіт успішно згенеровано!');
+      // Add activity
+      await addActivity({
+        title: `${t('reportGenerated')}: ${reportType}`,
+        description: `Generated ${reportType} report for ${dateRange}`,
+        type: 'report',
+        priority: 'medium',
+        status: 'completed'
+      });
+
+      toast.success(t('reportGenerated'));
       setOpen(false);
-      
-      // Reset form
       setReportType('');
-      setStartDate('');
-      setEndDate('');
-      setFormat('pdf');
+      setDateRange('');
     } catch (error) {
-      toast.error(language === 'en' ? 'Failed to generate report' : 'Помилка генерації звіту');
+      toast.error(t('errorGeneratingReport') || 'Error generating report');
     } finally {
       setIsGenerating(false);
     }
@@ -54,90 +57,47 @@ const GenerateReportDialog = ({ children }: GenerateReportDialogProps) => {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            {language === 'en' ? 'Generate Report' : 'Згенерувати звіт'}
-          </DialogTitle>
+          <DialogTitle>{t('generateReport')}</DialogTitle>
         </DialogHeader>
-        
         <div className="space-y-4">
           <div>
-            <Label htmlFor="reportType">
-              {language === 'en' ? 'Report Type' : 'Тип звіту'}
-            </Label>
+            <Label htmlFor="reportType">{t('reportType')}</Label>
             <Select value={reportType} onValueChange={setReportType}>
               <SelectTrigger>
-                <SelectValue placeholder={language === 'en' ? 'Select report type' : 'Оберіть тип звіту'} />
+                <SelectValue placeholder={t('selectReportType') || 'Select report type'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="monthly">{language === 'en' ? 'Monthly Report' : 'Місячний звіт'}</SelectItem>
-                <SelectItem value="quarterly">{language === 'en' ? 'Quarterly Report' : 'Квартальний звіт'}</SelectItem>
-                <SelectItem value="annual">{language === 'en' ? 'Annual Report' : 'Річний звіт'}</SelectItem>
-                <SelectItem value="appeals">{language === 'en' ? 'Appeals Report' : 'Звіт по зверненнях'}</SelectItem>
-                <SelectItem value="services">{language === 'en' ? 'Services Report' : 'Звіт по послугах'}</SelectItem>
+                <SelectItem value="financial">{t('financialReport') || 'Financial Report'}</SelectItem>
+                <SelectItem value="appeals">{t('appealsReport') || 'Appeals Report'}</SelectItem>
+                <SelectItem value="services">{t('servicesReport') || 'Services Report'}</SelectItem>
+                <SelectItem value="analytics">{t('analyticsReport') || 'Analytics Report'}</SelectItem>
               </SelectContent>
             </Select>
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="startDate">
-                {language === 'en' ? 'Start Date' : 'Дата початку'}
-              </Label>
-              <Input
-                id="startDate"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="endDate">
-                {language === 'en' ? 'End Date' : 'Дата закінчення'}
-              </Label>
-              <Input
-                id="endDate"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </div>
-          </div>
-
+          
           <div>
-            <Label htmlFor="format">
-              {language === 'en' ? 'Format' : 'Формат'}
-            </Label>
-            <Select value={format} onValueChange={setFormat}>
+            <Label htmlFor="dateRange">{t('dateRange') || 'Date Range'}</Label>
+            <Select value={dateRange} onValueChange={setDateRange}>
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue placeholder={t('selectDateRange') || 'Select date range'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="pdf">PDF</SelectItem>
-                <SelectItem value="excel">Excel</SelectItem>
-                <SelectItem value="csv">CSV</SelectItem>
+                <SelectItem value="last7days">{t('last7Days') || 'Last 7 days'}</SelectItem>
+                <SelectItem value="last30days">{t('last30Days') || 'Last 30 days'}</SelectItem>
+                <SelectItem value="last3months">{t('last3Months') || 'Last 3 months'}</SelectItem>
+                <SelectItem value="lastyear">{t('lastYear') || 'Last year'}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
+          <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={() => setOpen(false)}>
-              {language === 'en' ? 'Cancel' : 'Скасувати'}
+              {t('cancel')}
             </Button>
-            <Button onClick={handleGenerateReport} disabled={isGenerating}>
-              {isGenerating ? (
-                <>
-                  <Calendar className="h-4 w-4 mr-2 animate-spin" />
-                  {language === 'en' ? 'Generating...' : 'Генерація...'}
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4 mr-2" />
-                  {language === 'en' ? 'Generate' : 'Згенерувати'}
-                </>
-              )}
+            <Button onClick={handleGenerate} disabled={isGenerating}>
+              {isGenerating ? t('generating') || 'Generating...' : t('generate') || 'Generate'}
             </Button>
           </div>
         </div>

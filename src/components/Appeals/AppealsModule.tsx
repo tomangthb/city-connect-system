@@ -10,9 +10,14 @@ import {
   Plus,
   Clock,
   User,
-  AlertCircle
+  Eye
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { addActivity } from '@/utils/activityUtils';
+import AppealReviewDialog from './AppealReviewDialog';
 
 interface AppealsModuleProps {
   userType: 'employee' | 'resident';
@@ -21,39 +26,73 @@ interface AppealsModuleProps {
 const AppealsModule = ({ userType }: AppealsModuleProps) => {
   const { t } = useLanguage();
   const [showForm, setShowForm] = useState(false);
+  const [selectedAppeal, setSelectedAppeal] = useState<any>(null);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [newAppeal, setNewAppeal] = useState({
+    title: '',
+    category: '',
+    content: ''
+  });
 
-  const appeals = [
-    {
-      id: 'APP-001',
-      title: 'Street Light Not Working',
-      category: 'Infrastructure',
-      status: 'In Progress',
-      priority: 'Medium',
-      submittedBy: 'John Smith',
-      date: '2024-05-20',
-      description: 'The street light on Main Street is not working...'
-    },
-    {
-      id: 'APP-002',
-      title: 'Noise Complaint',
-      category: 'Public Order',
-      status: 'Under Review',
-      priority: 'High',
-      submittedBy: 'Mary Johnson',
-      date: '2024-05-19',
-      description: 'Loud music from nearby construction site...'
-    },
-    {
-      id: 'APP-003',
-      title: 'Pothole on Oak Avenue',
-      category: 'Roads',
-      status: 'Completed',
-      priority: 'Low',
-      submittedBy: 'David Brown',
-      date: '2024-05-18',
-      description: 'Large pothole causing traffic issues...'
+  const { data: appeals, isLoading, refetch } = useQuery({
+    queryKey: ['appeals'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('appeals')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching appeals:', error);
+        return [];
+      }
+      return data || [];
     }
-  ];
+  });
+
+  const handleSubmitAppeal = async () => {
+    if (!newAppeal.title.trim() || !newAppeal.category || !newAppeal.content.trim()) {
+      toast.error(t('fillAllFields') || 'Please fill all fields');
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from('appeals')
+        .insert([{
+          ...newAppeal,
+          user_id: user?.id,
+          submitted_by: user?.email || 'Unknown User',
+          status: 'Under Review',
+          priority: 'Medium'
+        }]);
+
+      if (error) throw error;
+
+      await addActivity({
+        title: `New appeal submitted: ${newAppeal.title}`,
+        description: `Appeal "${newAppeal.title}" has been submitted for review`,
+        type: 'appeal',
+        priority: 'medium',
+        status: 'pending'
+      });
+
+      toast.success(t('appealSubmitted') || 'Appeal submitted successfully');
+      setShowForm(false);
+      setNewAppeal({ title: '', category: '', content: '' });
+      refetch();
+    } catch (error) {
+      console.error('Error submitting appeal:', error);
+      toast.error(t('errorSubmittingAppeal') || 'Error submitting appeal');
+    }
+  };
+
+  const handleReviewAppeal = (appeal: any) => {
+    setSelectedAppeal(appeal);
+    setReviewDialogOpen(true);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -73,48 +112,29 @@ const AppealsModule = ({ userType }: AppealsModuleProps) => {
     }
   };
 
-  const getStatusTranslation = (status: string) => {
-    switch (status) {
-      case 'Completed': return t('completed');
-      case 'In Progress': return t('pending');
-      case 'Under Review': return t('scheduled');
-      default: return status;
-    }
-  };
-
-  const getCategoryTranslation = (category: string) => {
-    switch (category) {
-      case 'Infrastructure': return t('infrastructure');
-      case 'Public Order': return t('publicOrder');
-      case 'Roads': return t('roads');
-      default: return category;
-    }
-  };
-
-  const getPriorityTranslation = (priority: string) => {
-    switch (priority) {
-      case 'High': return t('high');
-      case 'Medium': return t('medium');
-      case 'Low': return t('low');
-      default: return priority;
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="p-6 flex justify-center">
+        <div>{t('loading') || 'Loading...'}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">{t('citizensAppeals')}</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{t('citizensAppeals') || 'Citizens Appeals'}</h2>
           <p className="text-gray-600">
             {userType === 'employee' 
-              ? t('manageRespond')
-              : t('submitTrack')}
+              ? (t('manageRespond') || 'Manage and respond to citizen appeals')
+              : (t('submitTrack') || 'Submit and track your appeals')}
           </p>
         </div>
         {userType === 'resident' && (
           <Button onClick={() => setShowForm(!showForm)}>
             <Plus className="h-4 w-4 mr-2" />
-            {t('submitAppeal')}
+            {t('submitAppeal') || 'Submit Appeal'}
           </Button>
         )}
       </div>
@@ -123,26 +143,35 @@ const AppealsModule = ({ userType }: AppealsModuleProps) => {
       {userType === 'resident' && showForm && (
         <Card>
           <CardHeader>
-            <CardTitle>{t('submitAppealTitle')}</CardTitle>
+            <CardTitle>{t('submitAppealTitle') || 'Submit New Appeal'}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('subject')}
+                {t('subject') || 'Subject'}
               </label>
-              <Input placeholder={t('subject')} />
+              <Input 
+                placeholder={t('subject') || 'Subject'}
+                value={newAppeal.title}
+                onChange={(e) => setNewAppeal(prev => ({ ...prev, title: e.target.value }))}
+              />
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('category')}
               </label>
-              <select className="w-full p-2 border border-gray-300 rounded-md">
-                <option>{t('infrastructure')}</option>
-                <option>{t('publicOrder')}</option>
-                <option>{t('roads')}</option>
-                <option>{t('environment')}</option>
-                <option>{t('other')}</option>
+              <select 
+                className="w-full p-2 border border-gray-300 rounded-md"
+                value={newAppeal.category}
+                onChange={(e) => setNewAppeal(prev => ({ ...prev, category: e.target.value }))}
+              >
+                <option value="">{t('selectCategory') || 'Select category'}</option>
+                <option value="Infrastructure">{t('infrastructure') || 'Infrastructure'}</option>
+                <option value="Public Order">{t('publicOrder') || 'Public Order'}</option>
+                <option value="Roads">{t('roads') || 'Roads'}</option>
+                <option value="Environment">{t('environment') || 'Environment'}</option>
+                <option value="Other">{t('other') || 'Other'}</option>
               </select>
             </div>
 
@@ -153,11 +182,15 @@ const AppealsModule = ({ userType }: AppealsModuleProps) => {
               <Textarea 
                 placeholder={t('description')}
                 rows={4}
+                value={newAppeal.content}
+                onChange={(e) => setNewAppeal(prev => ({ ...prev, content: e.target.value }))}
               />
             </div>
 
             <div className="flex space-x-3">
-              <Button>{t('submitAppealButton')}</Button>
+              <Button onClick={handleSubmitAppeal}>
+                {t('submitAppealButton') || 'Submit Appeal'}
+              </Button>
               <Button variant="outline" onClick={() => setShowForm(false)}>
                 {t('cancel')}
               </Button>
@@ -168,50 +201,69 @@ const AppealsModule = ({ userType }: AppealsModuleProps) => {
 
       {/* Appeals List */}
       <div className="space-y-4">
-        {appeals.map((appeal) => (
-          <Card key={appeal.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900">{appeal.title}</h3>
-                  <p className="text-sm text-gray-600">ID: {appeal.id}</p>
-                </div>
-                <div className="flex space-x-2">
-                  <Badge className={getStatusColor(appeal.status)}>
-                    {getStatusTranslation(appeal.status)}
-                  </Badge>
-                  <Badge className={getPriorityColor(appeal.priority)}>
-                    {getPriorityTranslation(appeal.priority)}
-                  </Badge>
-                </div>
-              </div>
-
-              <p className="text-gray-700 mb-4">{appeal.description}</p>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4 text-sm text-gray-600">
-                  <div className="flex items-center">
-                    <User className="h-4 w-4 mr-1" />
-                    {appeal.submittedBy}
+        {appeals && appeals.length > 0 ? (
+          appeals.map((appeal) => (
+            <Card key={appeal.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{appeal.title}</h3>
+                    <p className="text-sm text-gray-600">ID: {appeal.id}</p>
                   </div>
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-1" />
-                    {appeal.date}
-                  </div>
-                  <div className="flex items-center">
-                    <MessageSquare className="h-4 w-4 mr-1" />
-                    {getCategoryTranslation(appeal.category)}
+                  <div className="flex space-x-2">
+                    <Badge className={getStatusColor(appeal.status)}>
+                      {appeal.status}
+                    </Badge>
+                    <Badge className={getPriorityColor(appeal.priority)}>
+                      {appeal.priority}
+                    </Badge>
                   </div>
                 </div>
 
-                <Button variant="outline" size="sm">
-                  {userType === 'employee' ? t('review') : t('viewDetails')}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                <p className="text-gray-700 mb-4">{appeal.content}</p>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4 text-sm text-gray-600">
+                    <div className="flex items-center">
+                      <User className="h-4 w-4 mr-1" />
+                      {appeal.submitted_by}
+                    </div>
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-1" />
+                      {new Date(appeal.created_at).toLocaleDateString()}
+                    </div>
+                    <div className="flex items-center">
+                      <MessageSquare className="h-4 w-4 mr-1" />
+                      {appeal.category}
+                    </div>
+                  </div>
+
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleReviewAppeal(appeal)}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    {userType === 'employee' ? (t('review') || 'Review') : (t('viewDetails') || 'View Details')}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-500">{t('noAppealsFound') || 'No appeals found'}</p>
+          </div>
+        )}
       </div>
+
+      {/* Review Dialog */}
+      <AppealReviewDialog
+        appeal={selectedAppeal}
+        open={reviewDialogOpen}
+        onOpenChange={setReviewDialogOpen}
+        onAppealUpdated={refetch}
+      />
     </div>
   );
 };

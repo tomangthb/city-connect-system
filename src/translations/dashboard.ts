@@ -1,4 +1,3 @@
-
 import { TranslationRecord } from './types';
 
 export const dashboardTranslations: Record<string, TranslationRecord> = {
@@ -144,5 +143,127 @@ export const dashboardTranslations: Record<string, TranslationRecord> = {
   status: {
     en: 'Status',
     uk: 'Статус'
+  },
+
+  // Activity logging messages
+  appealsReviewStarted: {
+    en: 'Started reviewing appeals',
+    uk: 'Розпочато розгляд звернень'
+  },
+  userManagementAccessed: {
+    en: 'Accessed user management',
+    uk: 'Відкрито управління користувачами'
+  },
+  analyticsAccessed: {
+    en: 'Accessed analytics dashboard',
+    uk: 'Відкрито панель аналітики'
+  },
+  settingsOpened: {
+    en: 'Opened profile settings',
+    uk: 'Відкрито налаштування профілю'
+  },
+
+  // Form fields
+  fillAllFields: {
+    en: 'Please fill all fields',
+    uk: 'Будь ласка, заповніть всі поля'
+  },
+  fillRequiredFields: {
+    en: 'Please fill required fields',
+    uk: 'Будь ласка, заповніть обов\'язкові поля'
+  },
+  titleRequired: {
+    en: 'Title is required',
+    uk: 'Назва обов\'язкова'
+  },
+  responseRequired: {
+    en: 'Response is required',
+    uk: 'Відповідь обов\'язкова'
+  },
+
+  // Report generation
+  reportType: {
+    en: 'Report Type',
+    uk: 'Тип звіту'
+  },
+  selectReportType: {
+    en: 'Select report type',
+    uk: 'Оберіть тип звіту'
+  },
+  financialReport: {
+    en: 'Financial Report',
+    uk: 'Фінансовий звіт'
+  },
+  appealsReport: {
+    en: 'Appeals Report',
+    uk: 'Звіт про звернення'
+  },
+  servicesReport: {
+    en: 'Services Report',
+    uk: 'Звіт про послуги'
+  },
+  analyticsReport: {
+    en: 'Analytics Report',
+    uk: 'Аналітичний звіт'
+  },
+  dateRange: {
+    en: 'Date Range',
+    uk: 'Діапазон дат'
+  },
+  selectDateRange: {
+    en: 'Select date range',
+    uk: 'Оберіть діапазон дат'
+  },
+  last7Days: {
+    en: 'Last 7 days',
+    uk: 'Останні 7 днів'
+  },
+  last30Days: {
+    en: 'Last 30 days',
+    uk: 'Останні 30 днів'
+  },
+  last3Months: {
+    en: 'Last 3 months',
+    uk: 'Останні 3 місяці'
+  },
+  lastYear: {
+    en: 'Last year',
+    uk: 'Останній рік'
+  },
+  generating: {
+    en: 'Generating...',
+    uk: 'Генерація...'
+  },
+  generate: {
+    en: 'Generate',
+    uk: 'Згенерувати'
+  },
+  creating: {
+    en: 'Creating...',
+    uk: 'Створення...'
+  },
+  create: {
+    en: 'Create',
+    uk: 'Створити'
+  },
+
+  // Task creation
+  title: {
+    en: 'Title',
+    uk: 'Назва'
+  },
+  enterTaskTitle: {
+    en: 'Enter task title',
+    uk: 'Введіть назву завдання'
+  },
+  enterTaskDescription: {
+    en: 'Enter task description',
+    uk: 'Введіть опис завдання'
+  },
+
+  // Loading states
+  loading: {
+    en: 'Loading...',
+    uk: 'Завантаження...'
   }
 };

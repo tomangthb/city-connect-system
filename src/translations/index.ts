@@ -8,6 +8,7 @@ import { dashboardTranslations } from './dashboard';
 import { appealsTranslations } from './appeals';
 import { servicesTranslations } from './services';
 import { messageTranslations } from './messages';
+import { documentsTranslations } from './documents';
 
 export type { Language };
 
@@ -19,5 +20,6 @@ export const translations: Translations = {
   ...dashboardTranslations,
   ...appealsTranslations,
   ...servicesTranslations,
-  ...messageTranslations
+  ...messageTranslations,
+  ...documentsTranslations
 };

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { FileText, MessageSquare, Users, TrendingUp, Plus, Settings } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
+import { addActivity } from '@/utils/activityUtils';
 import GenerateReportDialog from './Dialogs/GenerateReportDialog';
 import CreateTaskDialog from './Dialogs/CreateTaskDialog';
 
@@ -16,38 +17,98 @@ interface QuickActionsProps {
 const QuickActions = ({ onTabChange, onOpenSettings }: QuickActionsProps) => {
   const { t } = useLanguage();
 
-  const handleReviewAppeals = () => {
-    if (onTabChange) {
-      onTabChange('appeals');
-      toast.success(t('appealsRedirect'));
-    } else {
-      toast.info(t('appealsRedirect'));
+  const handleReviewAppeals = async () => {
+    try {
+      await addActivity({
+        title: t('appealsReviewStarted') || 'Started reviewing appeals',
+        description: 'Opened appeals management section',
+        type: 'appeal',
+        priority: 'medium',
+        status: 'pending'
+      });
+
+      if (onTabChange) {
+        onTabChange('appeals');
+        toast.success(t('appealsRedirect'));
+      } else {
+        toast.info(t('appealsRedirect'));
+      }
+    } catch (error) {
+      console.error('Error logging activity:', error);
+      if (onTabChange) {
+        onTabChange('appeals');
+      }
     }
   };
 
-  const handleManageUsers = () => {
-    if (onTabChange) {
-      onTabChange('administration');
-      toast.success(t('usersManagement'));
-    } else {
-      toast.info(t('usersManagement'));
+  const handleManageUsers = async () => {
+    try {
+      await addActivity({
+        title: t('userManagementAccessed') || 'Accessed user management',
+        description: 'Opened user administration panel',
+        type: 'event',
+        priority: 'medium',
+        status: 'pending'
+      });
+
+      if (onTabChange) {
+        onTabChange('administration');
+        toast.success(t('usersManagement'));
+      } else {
+        toast.info(t('usersManagement'));
+      }
+    } catch (error) {
+      console.error('Error logging activity:', error);
+      if (onTabChange) {
+        onTabChange('administration');
+      }
     }
   };
 
-  const handleViewAnalytics = () => {
-    if (onTabChange) {
-      onTabChange('analytics');
-      toast.success(t('analyticsLoading'));
-    } else {
-      toast.info(t('analyticsLoading'));
+  const handleViewAnalytics = async () => {
+    try {
+      await addActivity({
+        title: t('analyticsAccessed') || 'Accessed analytics dashboard',
+        description: 'Opened analytics and reporting section',
+        type: 'report',
+        priority: 'low',
+        status: 'completed'
+      });
+
+      if (onTabChange) {
+        onTabChange('analytics');
+        toast.success(t('analyticsLoading'));
+      } else {
+        toast.info(t('analyticsLoading'));
+      }
+    } catch (error) {
+      console.error('Error logging activity:', error);
+      if (onTabChange) {
+        onTabChange('analytics');
+      }
     }
   };
 
-  const handleSettings = () => {
-    if (onOpenSettings) {
-      onOpenSettings();
-    } else {
-      toast.success(t('settingsOpened') || 'Settings opened');
+  const handleSettings = async () => {
+    try {
+      await addActivity({
+        title: t('settingsOpened') || 'Opened profile settings',
+        description: 'Accessed user profile settings',
+        type: 'event',
+        priority: 'low',
+        status: 'completed'
+      });
+
+      if (onOpenSettings) {
+        onOpenSettings();
+      } else {
+        toast.success(t('settingsOpened') || 'Settings opened');
+      }
+    } catch (error) {
+      console.error('Error logging activity:', error);
+      if (onOpenSettings) {
+        onOpenSettings();
+      }
     }
   };
 
