@@ -9,6 +9,63 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activities: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          priority: string | null
+          status: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          priority?: string | null
+          status?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          priority?: string | null
+          status?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      analytics_data: {
+        Row: {
+          category: string
+          created_at: string | null
+          date: string
+          id: string
+          value: number
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          date: string
+          id?: string
+          value: number
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          date?: string
+          id?: string
+          value?: number
+        }
+        Relationships: []
+      }
       appeals: {
         Row: {
           category: string
@@ -45,6 +102,36 @@ export type Database = {
           title?: string
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      metrics: {
+        Row: {
+          created_at: string | null
+          id: string
+          metric_change: number | null
+          metric_name: string
+          metric_target: number | null
+          metric_value: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metric_change?: number | null
+          metric_name: string
+          metric_target?: number | null
+          metric_value: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metric_change?: number | null
+          metric_name?: string
+          metric_target?: number | null
+          metric_value?: number
+          updated_at?: string | null
         }
         Relationships: []
       }
