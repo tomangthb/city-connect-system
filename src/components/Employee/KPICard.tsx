@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface KPICardProps {
   title: string;
@@ -15,6 +16,7 @@ interface KPICardProps {
 }
 
 const KPICard = ({ title, value, target, change, icon: Icon, color, onClick }: KPICardProps) => {
+  const { t } = useLanguage();
   const isPositiveChange = change && change > 0;
   const changePercent = target && typeof value === 'number' ? ((value / target) * 100).toFixed(1) : null;
 
@@ -29,7 +31,7 @@ const KPICard = ({ title, value, target, change, icon: Icon, color, onClick }: K
             <p className="text-sm text-gray-600 mb-1">{title}</p>
             <p className="text-2xl font-bold text-gray-900">{value}</p>
             {target && (
-              <p className="text-xs text-gray-500">Target: {target}</p>
+              <p className="text-xs text-gray-500">{t('target')}: {target}</p>
             )}
             {change && (
               <div className="flex items-center mt-1">

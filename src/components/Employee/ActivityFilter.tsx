@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface ActivityFilterProps {
   selectedType: string;
@@ -22,47 +23,49 @@ const ActivityFilter = ({
   onStatusChange,
   onClearFilters
 }: ActivityFilterProps) => {
+  const { t } = useLanguage();
+
   return (
     <div className="flex flex-wrap gap-2 mb-4">
       <Select value={selectedType} onValueChange={onTypeChange}>
         <SelectTrigger className="w-32">
-          <SelectValue placeholder="Type" />
+          <SelectValue placeholder={t('type')} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Types</SelectItem>
-          <SelectItem value="appeal">Appeal</SelectItem>
-          <SelectItem value="service">Service</SelectItem>
-          <SelectItem value="report">Report</SelectItem>
-          <SelectItem value="event">Event</SelectItem>
+          <SelectItem value="all">{t('allTypes')}</SelectItem>
+          <SelectItem value="appeal">{t('appeal')}</SelectItem>
+          <SelectItem value="service">{t('service')}</SelectItem>
+          <SelectItem value="report">{t('report')}</SelectItem>
+          <SelectItem value="event">{t('event')}</SelectItem>
         </SelectContent>
       </Select>
 
       <Select value={selectedPriority} onValueChange={onPriorityChange}>
         <SelectTrigger className="w-32">
-          <SelectValue placeholder="Priority" />
+          <SelectValue placeholder={t('priority')} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Priorities</SelectItem>
-          <SelectItem value="high">High</SelectItem>
-          <SelectItem value="medium">Medium</SelectItem>
-          <SelectItem value="low">Low</SelectItem>
+          <SelectItem value="all">{t('allPriorities')}</SelectItem>
+          <SelectItem value="high">{t('high')}</SelectItem>
+          <SelectItem value="medium">{t('medium')}</SelectItem>
+          <SelectItem value="low">{t('low')}</SelectItem>
         </SelectContent>
       </Select>
 
       <Select value={selectedStatus} onValueChange={onStatusChange}>
         <SelectTrigger className="w-32">
-          <SelectValue placeholder="Status" />
+          <SelectValue placeholder={t('status')} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Status</SelectItem>
-          <SelectItem value="pending">Pending</SelectItem>
-          <SelectItem value="completed">Completed</SelectItem>
-          <SelectItem value="scheduled">Scheduled</SelectItem>
+          <SelectItem value="all">{t('allStatus')}</SelectItem>
+          <SelectItem value="pending">{t('pending')}</SelectItem>
+          <SelectItem value="completed">{t('completed')}</SelectItem>
+          <SelectItem value="scheduled">{t('scheduled')}</SelectItem>
         </SelectContent>
       </Select>
 
       <Button variant="outline" onClick={onClearFilters} className="text-sm">
-        Clear Filters
+        {t('clearFilters')}
       </Button>
     </div>
   );

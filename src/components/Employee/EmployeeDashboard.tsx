@@ -102,7 +102,7 @@ const EmployeeDashboard = () => {
       change: getMetricByName('pendingAppeals')?.metric_change,
       icon: MessageSquare, 
       color: 'text-orange-600',
-      onClick: () => toast.info('Loading appeals dashboard...')
+      onClick: () => toast.info(t('loadingAppeals'))
     },
     { 
       title: t('activeServices'), 
@@ -111,7 +111,7 @@ const EmployeeDashboard = () => {
       change: getMetricByName('activeServices')?.metric_change,
       icon: FileText, 
       color: 'text-blue-600',
-      onClick: () => toast.info('Loading services management...')
+      onClick: () => toast.info(t('loadingServices'))
     },
     { 
       title: t('registeredCitizens'), 
@@ -120,7 +120,7 @@ const EmployeeDashboard = () => {
       change: getMetricByName('registeredCitizens')?.metric_change,
       icon: Users, 
       color: 'text-green-600',
-      onClick: () => toast.info('Loading citizen registry...')
+      onClick: () => toast.info(t('loadingCitizens'))
     },
     { 
       title: t('monthlyRevenue'), 
@@ -129,7 +129,7 @@ const EmployeeDashboard = () => {
       change: getMetricByName('monthlyRevenue')?.metric_change,
       icon: DollarSign, 
       color: 'text-purple-600',
-      onClick: () => toast.info('Loading financial dashboard...')
+      onClick: () => toast.info(t('loadingFinancial'))
     },
   ];
 
@@ -179,10 +179,19 @@ const EmployeeDashboard = () => {
     const activityDate = new Date(date);
     const diffInHours = Math.floor((now.getTime() - activityDate.getTime()) / (1000 * 60 * 60));
     
-    if (diffInHours < 1) return language === 'en' ? 'Just now' : 'Щойно';
-    if (diffInHours < 24) return language === 'en' ? `${diffInHours}h ago` : `${diffInHours}г тому`;
+    if (diffInHours < 1) return t('justNow');
+    if (diffInHours < 24) return `${diffInHours}${t('hoursAgo')}`;
     const diffInDays = Math.floor(diffInHours / 24);
-    return language === 'en' ? `${diffInDays}d ago` : `${diffInDays}д тому`;
+    return `${diffInDays}${t('daysAgo')}`;
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'completed': return t('completed');
+      case 'pending': return t('pending');
+      case 'scheduled': return t('scheduled');
+      default: return status;
+    }
   };
 
   return (
@@ -206,19 +215,19 @@ const EmployeeDashboard = () => {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         <MetricsChart 
-          title="Appeals Trend"
+          title={language === 'en' ? 'Appeals Trend' : 'Тренд звернень'}
           data={appealsChartData}
           type="line"
           color="#f59e0b"
         />
         <MetricsChart 
-          title="Revenue Growth"
+          title={language === 'en' ? 'Revenue Growth' : 'Зростання доходу'}
           data={revenueChartData}
           type="bar"
           color="#10b981"
         />
         <MetricsChart 
-          title="Active Services"
+          title={language === 'en' ? 'Active Services' : 'Активні послуги'}
           data={servicesChartData}
           type="line"
           color="#3b82f6"
@@ -262,7 +271,7 @@ const EmployeeDashboard = () => {
                           activity.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                           'bg-blue-100 text-blue-800'
                         }`}>
-                          {activity.status}
+                          {getStatusText(activity.status)}
                         </span>
                         <span className="text-xs text-gray-500">
                           {formatTimeAgo(activity.created_at)}
@@ -272,7 +281,7 @@ const EmployeeDashboard = () => {
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500 text-center py-4">No activities found</p>
+                <p className="text-gray-500 text-center py-4">{t('noActivitiesFound')}</p>
               )}
             </div>
           </CardContent>
