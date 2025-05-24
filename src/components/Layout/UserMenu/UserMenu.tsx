@@ -40,13 +40,12 @@ const UserMenu = ({ userName, onOpenSettings }: UserMenuProps) => {
     }
   };
   
-  // Handle settings
+  // Handle settings - use the same onOpenSettings callback
   const handleSettings = () => {
     if (onOpenSettings) {
       onOpenSettings();
     } else {
       toast.success(t('settingsOpened') || 'Settings opened');
-      // For now just show a toast, we can implement the settings page later
     }
   };
   
@@ -65,11 +64,10 @@ const UserMenu = ({ userName, onOpenSettings }: UserMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+        <Button variant="ghost" size="sm" className="h-10 w-10 rounded-full p-0">
           <Avatar className="h-8 w-8">
             <AvatarFallback>{getUserInitials()}</AvatarFallback>
           </Avatar>
-          <span className="hidden md:inline">{userName}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-md z-50">
