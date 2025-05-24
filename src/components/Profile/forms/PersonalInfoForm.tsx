@@ -16,7 +16,6 @@ interface PersonalInfoFormProps {
     phone: string;
     address: string;
     position: string;
-    bio: string;
     avatarUrl: string;
   };
   onInputChange: (field: string, value: string) => void;
@@ -69,7 +68,7 @@ const PersonalInfoForm = ({
         </div>
       </div>
 
-      {/* Personal Information - Optimized layout */}
+      {/* Personal Information - Two columns layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left column */}
         <div className="space-y-4">
