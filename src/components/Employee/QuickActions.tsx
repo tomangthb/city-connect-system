@@ -7,13 +7,13 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import GenerateReportDialog from './Dialogs/GenerateReportDialog';
 import CreateTaskDialog from './Dialogs/CreateTaskDialog';
+import SettingsDialog from './Dialogs/SettingsDialog';
 
 interface QuickActionsProps {
   onTabChange?: (tab: string) => void;
-  onOpenSettings?: () => void;
 }
 
-const QuickActions = ({ onTabChange, onOpenSettings }: QuickActionsProps) => {
+const QuickActions = ({ onTabChange }: QuickActionsProps) => {
   const { t } = useLanguage();
 
   const handleReviewAppeals = () => {
@@ -40,14 +40,6 @@ const QuickActions = ({ onTabChange, onOpenSettings }: QuickActionsProps) => {
       toast.success(t('analyticsLoading'));
     } else {
       toast.info(t('analyticsLoading'));
-    }
-  };
-
-  const handleSettingsClick = () => {
-    if (onOpenSettings) {
-      onOpenSettings();
-    } else {
-      toast.info(t('settings'));
     }
   };
 
@@ -102,14 +94,15 @@ const QuickActions = ({ onTabChange, onOpenSettings }: QuickActionsProps) => {
             </Button>
           </CreateTaskDialog>
           
-          <Button 
-            variant="outline" 
-            className="h-24 flex flex-col hover:bg-gray-50 transition-colors w-full p-2"
-            onClick={handleSettingsClick}
-          >
-            <Settings className="h-6 w-6 mb-2" />
-            <span className="text-xs text-center leading-tight">{t('settings')}</span>
-          </Button>
+          <SettingsDialog>
+            <Button 
+              variant="outline" 
+              className="h-24 flex flex-col hover:bg-gray-50 transition-colors w-full p-2"
+            >
+              <Settings className="h-6 w-6 mb-2" />
+              <span className="text-xs text-center leading-tight">{t('settings')}</span>
+            </Button>
+          </SettingsDialog>
         </div>
       </CardContent>
     </Card>

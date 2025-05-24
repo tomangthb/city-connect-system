@@ -189,7 +189,7 @@ const Index = () => {
     switch (activeTab) {
       case 'dashboard':
         return userType === 'employee' ? (
-          <EmployeeDashboard onTabChange={setActiveTab} onOpenSettings={handleOpenSettings} />
+          <EmployeeDashboard onTabChange={setActiveTab} />
         ) : (
           <ResidentDashboard />
         );
@@ -213,7 +213,7 @@ const Index = () => {
         return <PaymentsModule />;
       default:
         return userType === 'employee' ? (
-          <EmployeeDashboard onTabChange={setActiveTab} onOpenSettings={handleOpenSettings} />
+          <EmployeeDashboard onTabChange={setActiveTab} />
         ) : (
           <ResidentDashboard />
         );
