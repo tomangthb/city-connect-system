@@ -32,8 +32,8 @@ export const translations: Record<string, Record<Language, string>> = {
 
   // Portal selection
   selectUserType: {
-    en: 'Choose the portal you want to access',
-    uk: 'Оберіть портал, до якого хочете отримати доступ'
+    en: 'Select your user type to access the portal',
+    uk: 'Виберіть свій тип користувача для доступу до порталу'
   },
   accessEmployeePortal: {
     en: 'Access Employee Portal',
