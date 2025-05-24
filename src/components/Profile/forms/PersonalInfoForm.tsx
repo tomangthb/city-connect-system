@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { User, Mail, Camera } from 'lucide-react';
+import { User, Mail, Camera, Phone, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PersonalInfoFormProps {
@@ -70,8 +70,8 @@ const PersonalInfoForm = ({
         </div>
       </div>
 
-      {/* Personal Information */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Personal Information - All fields at same level */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="firstName" className="flex items-center">
             <User className="h-4 w-4 mr-2" />
@@ -84,6 +84,7 @@ const PersonalInfoForm = ({
             placeholder={language === 'en' ? 'Enter your first name' : 'Введіть ваше ім\'я'}
           />
         </div>
+        
         <div className="space-y-2">
           <Label htmlFor="lastName">
             {t('lastName')}
@@ -95,6 +96,7 @@ const PersonalInfoForm = ({
             placeholder={language === 'en' ? 'Enter your last name' : 'Введіть ваше прізвище'}
           />
         </div>
+        
         <div className="space-y-2">
           <Label htmlFor="patronymic">
             {t('patronymic')}
@@ -106,21 +108,7 @@ const PersonalInfoForm = ({
             placeholder={language === 'en' ? 'Enter your patronymic' : 'Введіть ваше по-батькові'}
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="position">
-            {t('position')}
-          </Label>
-          <Input 
-            id="position" 
-            value={formData.position}
-            disabled
-            className="bg-gray-100"
-          />
-        </div>
-      </div>
-
-      {/* Contact Information */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
         <div className="space-y-2">
           <Label htmlFor="email" className="flex items-center">
             <Mail className="h-4 w-4 mr-2" />
@@ -134,8 +122,10 @@ const PersonalInfoForm = ({
             className="bg-gray-100"
           />
         </div>
+        
         <div className="space-y-2">
-          <Label htmlFor="phone">
+          <Label htmlFor="phone" className="flex items-center">
+            <Phone className="h-4 w-4 mr-2" />
             {t('phoneNumber')}
           </Label>
           <Input 
@@ -145,10 +135,24 @@ const PersonalInfoForm = ({
             placeholder={language === 'en' ? 'Enter your phone number' : 'Введіть ваш номер телефону'}
           />
         </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="position">
+            {t('position')}
+          </Label>
+          <Input 
+            id="position" 
+            value={formData.position}
+            disabled
+            className="bg-gray-100"
+          />
+        </div>
       </div>
 
+      {/* Address - Full width */}
       <div className="space-y-2">
-        <Label htmlFor="address">
+        <Label htmlFor="address" className="flex items-center">
+          <MapPin className="h-4 w-4 mr-2" />
           {t('address')}
         </Label>
         <Input 
@@ -159,6 +163,7 @@ const PersonalInfoForm = ({
         />
       </div>
 
+      {/* Bio - Full width */}
       <div className="space-y-2">
         <Label htmlFor="bio">
           Біографія

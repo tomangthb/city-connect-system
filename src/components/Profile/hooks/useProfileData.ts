@@ -111,6 +111,16 @@ export const useProfileData = () => {
     setIsUpdating(true);
     
     try {
+      console.log('Updating profile with data:', {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        patronymic: formData.patronymic,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        avatar_url: formData.avatarUrl
+      });
+
       const { error } = await supabase
         .from('profiles')
         .upsert({
@@ -126,9 +136,11 @@ export const useProfileData = () => {
         });
 
       if (error) {
+        console.error('Database update error:', error);
         throw error;
       }
       
+      console.log('Profile updated successfully');
       toast.success('Профіль успішно оновлено!');
     } catch (error) {
       console.error('Error updating profile:', error);

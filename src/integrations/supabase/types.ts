@@ -210,7 +210,6 @@ export type Database = {
           last_name: string | null
           patronymic: string | null
           phone: string | null
-          type: string
           updated_at: string | null
           user_type: string | null
         }
@@ -225,7 +224,6 @@ export type Database = {
           last_name?: string | null
           patronymic?: string | null
           phone?: string | null
-          type?: string
           updated_at?: string | null
           user_type?: string | null
         }
@@ -240,7 +238,6 @@ export type Database = {
           last_name?: string | null
           patronymic?: string | null
           phone?: string | null
-          type?: string
           updated_at?: string | null
           user_type?: string | null
         }
