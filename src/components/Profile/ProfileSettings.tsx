@@ -10,11 +10,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   User, 
   Mail, 
-  Phone, 
-  MapPin, 
-  Bell, 
-  Shield, 
-  Globe,
   Camera,
   Save,
   Lock
@@ -38,7 +33,8 @@ const ProfileSettings = () => {
     phone: '',
     address: '',
     position: '',
-    bio: ''
+    bio: '',
+    avatarUrl: ''
   });
 
   // Settings state
@@ -58,6 +54,7 @@ const ProfileSettings = () => {
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   // Load user profile data on component mount
   useEffect(() => {
@@ -79,8 +76,9 @@ const ProfileSettings = () => {
             email: data.email || user.email || '',
             phone: data.phone || '',
             address: data.address || '',
-            position: data.user_type === 'employee' ? 'Municipal Employee' : 'Citizen',
-            bio: ''
+            position: data.user_type === 'employee' ? 'Municipal Employee' : 'Resident',
+            bio: '',
+            avatarUrl: data.avatar_url || ''
           });
         }
       } catch (error) {
@@ -115,6 +113,50 @@ const ProfileSettings = () => {
     toast.success(t('language') + ' оновлено');
   };
 
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user?.id) return;
+
+    setIsUploadingAvatar(true);
+    try {
+      // Upload file to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update profile with avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setFormData(prev => ({ ...prev, avatarUrl: publicUrl }));
+      toast.success('Фото профілю успішно оновлено!');
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast.error('Помилка завантаження фото');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   const handleUpdateProfile = async () => {
     if (!user?.id) {
       toast.error('Користувач не авторизований');
@@ -141,7 +183,7 @@ const ProfileSettings = () => {
         throw error;
       }
       
-      toast.success(t('saveChanges') + ' - профіль успішно оновлено!');
+      toast.success('Профіль успішно оновлено!');
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.error('Помилка оновлення профілю');
@@ -215,15 +257,13 @@ const ProfileSettings = () => {
                 {t('profile')}
               </TabsTrigger>
               <TabsTrigger value="security" className="flex items-center gap-2">
-                <Shield className="h-4 w-4" />
+                <Lock className="h-4 w-4" />
                 {t('security')}
               </TabsTrigger>
               <TabsTrigger value="notifications" className="flex items-center gap-2">
-                <Bell className="h-4 w-4" />
                 {t('notifications')}
               </TabsTrigger>
               <TabsTrigger value="preferences" className="flex items-center gap-2">
-                <Globe className="h-4 w-4" />
                 {t('preferences')}
               </TabsTrigger>
             </TabsList>
@@ -243,15 +283,28 @@ const ProfileSettings = () => {
                   <div className="flex items-center space-x-4">
                     <div className="relative">
                       <Avatar className="h-20 w-20">
-                        <AvatarImage src="" />
+                        <AvatarImage src={formData.avatarUrl} />
                         <AvatarFallback className="text-lg">{getUserInitials()}</AvatarFallback>
                       </Avatar>
-                      <Button 
-                        size="sm" 
-                        className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
-                      >
-                        <Camera className="h-4 w-4" />
-                      </Button>
+                      <label htmlFor="avatar-upload">
+                        <Button 
+                          size="sm" 
+                          className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
+                          disabled={isUploadingAvatar}
+                          asChild
+                        >
+                          <div>
+                            <Camera className="h-4 w-4" />
+                            <input
+                              id="avatar-upload"
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={handleAvatarUpload}
+                            />
+                          </div>
+                        </Button>
+                      </label>
                     </div>
                     <div>
                       <h3 className="font-medium">Фото профілю</h3>
@@ -324,8 +377,7 @@ const ProfileSettings = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="phone" className="flex items-center">
-                        <Phone className="h-4 w-4 mr-2" />
+                      <Label htmlFor="phone">
                         {t('phoneNumber')}
                       </Label>
                       <Input 
@@ -338,8 +390,7 @@ const ProfileSettings = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="address" className="flex items-center">
-                      <MapPin className="h-4 w-4 mr-2" />
+                    <Label htmlFor="address">
                       {t('address')}
                     </Label>
                     <Input 
@@ -477,7 +528,6 @@ const ProfileSettings = () => {
                 <CardContent className="space-y-6">
                   <div>
                     <Label className="flex items-center mb-3">
-                      <Globe className="h-4 w-4 mr-2" />
                       {t('language')}
                     </Label>
                     <div className="flex gap-2">

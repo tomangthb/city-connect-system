@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Mail, Phone, MapPin, User, Calendar } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Mail, Camera, Calendar } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -15,6 +15,7 @@ interface ProfileInfoCardProps {
     phone: string;
     address: string;
     position: string;
+    avatarUrl?: string;
   };
 }
 
@@ -37,10 +38,6 @@ const ProfileInfoCard = ({ profileData }: ProfileInfoCardProps) => {
     return parts.length > 0 ? parts.join(' ') : 'Користувач';
   };
 
-  const getUserType = () => {
-    return language === 'en' ? 'Citizen' : 'Громадянин';
-  };
-
   const getRegistrationDate = () => {
     return new Date().toLocaleDateString(language === 'en' ? 'en-US' : 'uk-UA');
   };
@@ -61,6 +58,7 @@ const ProfileInfoCard = ({ profileData }: ProfileInfoCardProps) => {
         {/* Avatar and basic info */}
         <div className="flex flex-col items-center space-y-4">
           <Avatar className="h-24 w-24">
+            <AvatarImage src={profileData.avatarUrl} />
             <AvatarFallback className="text-2xl bg-blue-600 text-white">
               {getUserInitials()}
             </AvatarFallback>
@@ -69,7 +67,6 @@ const ProfileInfoCard = ({ profileData }: ProfileInfoCardProps) => {
             <h3 className="text-xl font-semibold text-gray-900">
               {getFullName()}
             </h3>
-            <p className="text-gray-600">{getUserType()}</p>
           </div>
         </div>
 
@@ -84,22 +81,14 @@ const ProfileInfoCard = ({ profileData }: ProfileInfoCardProps) => {
           
           {profileData.phone && (
             <div className="flex items-center space-x-3">
-              <Phone className="h-4 w-4 text-gray-500" />
+              <Camera className="h-4 w-4 text-gray-500" />
               <span className="text-sm">{profileData.phone}</span>
             </div>
           )}
           
           {profileData.address && (
             <div className="flex items-center space-x-3">
-              <MapPin className="h-4 w-4 text-gray-500" />
               <span className="text-sm">{profileData.address}</span>
-            </div>
-          )}
-          
-          {profileData.position && (
-            <div className="flex items-center space-x-3">
-              <User className="h-4 w-4 text-gray-500" />
-              <span className="text-sm">{profileData.position}</span>
             </div>
           )}
           
