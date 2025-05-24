@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Settings, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -11,9 +11,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import { toast } from 'sonner';
+import SettingsDialog from '@/components/Employee/Dialogs/SettingsDialog';
 
 interface UserMenuProps {
   userName: string;
@@ -22,7 +22,6 @@ interface UserMenuProps {
 
 const UserMenu = ({ userName, onOpenSettings }: UserMenuProps) => {
   const { signOut, user } = useAuth();
-  const navigate = useNavigate();
   const { t } = useLanguage();
   
   // Handle logout
@@ -37,15 +36,6 @@ const UserMenu = ({ userName, onOpenSettings }: UserMenuProps) => {
     } catch (error) {
       console.error('Error during logout:', error);
       toast.error(t('logoutError') || 'Error during logout');
-    }
-  };
-  
-  // Handle settings - use the same onOpenSettings callback
-  const handleSettings = () => {
-    if (onOpenSettings) {
-      onOpenSettings();
-    } else {
-      toast.success(t('settingsOpened') || 'Settings opened');
     }
   };
   
@@ -71,10 +61,11 @@ const UserMenu = ({ userName, onOpenSettings }: UserMenuProps) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-md z-50">
-        <DropdownMenuItem onClick={handleSettings}>
-          <Settings className="h-4 w-4 mr-2" />
-          {t('settings')}
-        </DropdownMenuItem>
+        <SettingsDialog>
+          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+            {t('settings')}
+          </DropdownMenuItem>
+        </SettingsDialog>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="h-4 w-4 mr-2" />
