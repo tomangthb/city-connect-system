@@ -51,56 +51,56 @@ const QuickActions = ({ onTabChange }: QuickActionsProps) => {
       <CardContent>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           <GenerateReportDialog>
-            <Button className="h-20 flex flex-col hover:bg-blue-600 transition-colors w-full">
-              <FileText className="h-6 w-6 mb-1" />
-              <span className="text-xs text-center">{t('generateReport')}</span>
+            <Button className="h-24 flex flex-col hover:bg-blue-600 transition-colors w-full p-2">
+              <FileText className="h-6 w-6 mb-2" />
+              <span className="text-xs text-center leading-tight">{t('generateReport')}</span>
             </Button>
           </GenerateReportDialog>
           
           <Button 
             variant="outline" 
-            className="h-20 flex flex-col hover:bg-gray-50 transition-colors"
+            className="h-24 flex flex-col hover:bg-gray-50 transition-colors p-2"
             onClick={handleReviewAppeals}
           >
-            <MessageSquare className="h-6 w-6 mb-1" />
-            <span className="text-xs text-center">{t('reviewAppeals')}</span>
+            <MessageSquare className="h-6 w-6 mb-2" />
+            <span className="text-xs text-center leading-tight">{t('reviewAppeals')}</span>
           </Button>
           
           <Button 
             variant="outline" 
-            className="h-20 flex flex-col hover:bg-gray-50 transition-colors"
+            className="h-24 flex flex-col hover:bg-gray-50 transition-colors p-2"
             onClick={handleManageUsers}
           >
-            <Users className="h-6 w-6 mb-1" />
-            <span className="text-xs text-center">{t('manageUsers')}</span>
+            <Users className="h-6 w-6 mb-2" />
+            <span className="text-xs text-center leading-tight">{t('manageUsers')}</span>
           </Button>
           
           <Button 
             variant="outline" 
-            className="h-20 flex flex-col hover:bg-gray-50 transition-colors"
+            className="h-24 flex flex-col hover:bg-gray-50 transition-colors p-2"
             onClick={handleViewAnalytics}
           >
-            <TrendingUp className="h-6 w-6 mb-1" />
-            <span className="text-xs text-center">{t('viewAnalytics')}</span>
+            <TrendingUp className="h-6 w-6 mb-2" />
+            <span className="text-xs text-center leading-tight">{t('viewAnalytics')}</span>
           </Button>
           
           <CreateTaskDialog>
             <Button 
               variant="outline" 
-              className="h-20 flex flex-col hover:bg-green-50 border-green-200 text-green-700 hover:text-green-800 transition-colors w-full"
+              className="h-24 flex flex-col hover:bg-green-50 border-green-200 text-green-700 hover:text-green-800 transition-colors w-full p-2"
             >
-              <Plus className="h-6 w-6 mb-1" />
-              <span className="text-xs text-center">{t('createTask')}</span>
+              <Plus className="h-6 w-6 mb-2" />
+              <span className="text-xs text-center leading-tight">{t('createTask')}</span>
             </Button>
           </CreateTaskDialog>
           
           <SettingsDialog>
             <Button 
               variant="outline" 
-              className="h-20 flex flex-col hover:bg-gray-50 transition-colors w-full"
+              className="h-24 flex flex-col hover:bg-gray-50 transition-colors w-full p-2"
             >
-              <Settings className="h-6 w-6 mb-1" />
-              <span className="text-xs text-center">{t('settings')}</span>
+              <Settings className="h-6 w-6 mb-2" />
+              <span className="text-xs text-center leading-tight">{t('settings')}</span>
             </Button>
           </SettingsDialog>
         </div>

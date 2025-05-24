@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Layout/Header';
@@ -13,6 +14,7 @@ import AnalyticsModule from '@/components/Analytics/AnalyticsModule';
 import AdminModule from '@/components/Admin/AdminModule';
 import UserAccountModule from '@/components/User/UserAccountModule';
 import PaymentsModule from '@/components/Payments/PaymentsModule';
+import ProfileSettings from '@/components/Profile/ProfileSettings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -24,6 +26,7 @@ const Index = () => {
   const { user, userType: authUserType, signOut } = useAuth();
   const [userType, setUserType] = useState<'employee' | 'resident' | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [showProfileSettings, setShowProfileSettings] = useState(false);
   const navigate = useNavigate();
 
   // Reset userType when user logs out
@@ -154,8 +157,11 @@ const Index = () => {
     );
   }
 
-  // Content rendering
   const renderContent = () => {
+    if (showProfileSettings) {
+      return <ProfileSettings />;
+    }
+
     switch (activeTab) {
       case 'dashboard':
         return userType === 'employee' ? (
@@ -190,14 +196,29 @@ const Index = () => {
     }
   };
 
+  const handleOpenSettings = () => {
+    setShowProfileSettings(true);
+    setActiveTab('');
+  };
+
+  const handleTabChange = (tab: string) => {
+    setShowProfileSettings(false);
+    setActiveTab(tab);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header 
         userType={userType} 
-        userName={user ? `${user.email}` : (userType === 'employee' ? 'Admin User' : 'John Doe')} 
+        userName={user ? `${user.email}` : (userType === 'employee' ? 'Admin User' : 'John Doe')}
+        onOpenSettings={handleOpenSettings}
       />
       <div className="flex flex-1">
-        <Sidebar userType={userType} activeTab={activeTab} onTabChange={setActiveTab} />
+        <Sidebar 
+          userType={userType} 
+          activeTab={showProfileSettings ? 'settings' : activeTab} 
+          onTabChange={handleTabChange} 
+        />
         <div className="flex-1 overflow-auto">
           {renderContent()}
         </div>

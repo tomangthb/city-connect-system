@@ -17,9 +17,10 @@ import { toast } from 'sonner';
 
 interface UserMenuProps {
   userName: string;
+  onOpenSettings?: () => void;
 }
 
-const UserMenu = ({ userName }: UserMenuProps) => {
+const UserMenu = ({ userName, onOpenSettings }: UserMenuProps) => {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const { t } = useLanguage();
@@ -41,8 +42,12 @@ const UserMenu = ({ userName }: UserMenuProps) => {
   
   // Handle settings
   const handleSettings = () => {
-    toast.success(t('settingsOpened') || 'Settings opened');
-    // For now just show a toast, we can implement the settings page later
+    if (onOpenSettings) {
+      onOpenSettings();
+    } else {
+      toast.success(t('settingsOpened') || 'Settings opened');
+      // For now just show a toast, we can implement the settings page later
+    }
   };
   
   // Get user initials for avatar
@@ -67,7 +72,7 @@ const UserMenu = ({ userName }: UserMenuProps) => {
           <span className="hidden md:inline">{userName}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-md">
+      <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-md z-50">
         <DropdownMenuItem onClick={handleSettings}>
           <Settings className="h-4 w-4 mr-2" />
           {t('settings')}

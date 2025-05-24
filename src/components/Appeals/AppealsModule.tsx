@@ -12,12 +12,14 @@ import {
   User,
   AlertCircle
 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface AppealsModuleProps {
   userType: 'employee' | 'resident';
 }
 
 const AppealsModule = ({ userType }: AppealsModuleProps) => {
+  const { t } = useLanguage();
   const [showForm, setShowForm] = useState(false);
 
   const appeals = [
@@ -71,21 +73,48 @@ const AppealsModule = ({ userType }: AppealsModuleProps) => {
     }
   };
 
+  const getStatusTranslation = (status: string) => {
+    switch (status) {
+      case 'Completed': return t('completed');
+      case 'In Progress': return t('pending');
+      case 'Under Review': return t('scheduled');
+      default: return status;
+    }
+  };
+
+  const getCategoryTranslation = (category: string) => {
+    switch (category) {
+      case 'Infrastructure': return t('infrastructure');
+      case 'Public Order': return t('publicOrder');
+      case 'Roads': return t('roads');
+      default: return category;
+    }
+  };
+
+  const getPriorityTranslation = (priority: string) => {
+    switch (priority) {
+      case 'High': return t('high');
+      case 'Medium': return t('medium');
+      case 'Low': return t('low');
+      default: return priority;
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Citizens Appeals</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{t('citizensAppeals')}</h2>
           <p className="text-gray-600">
             {userType === 'employee' 
-              ? 'Manage and respond to citizen appeals' 
-              : 'Submit and track your appeals'}
+              ? t('manageRespond')
+              : t('submitTrack')}
           </p>
         </div>
         {userType === 'resident' && (
           <Button onClick={() => setShowForm(!showForm)}>
             <Plus className="h-4 w-4 mr-2" />
-            Submit Appeal
+            {t('submitAppeal')}
           </Button>
         )}
       </div>
@@ -94,43 +123,43 @@ const AppealsModule = ({ userType }: AppealsModuleProps) => {
       {userType === 'resident' && showForm && (
         <Card>
           <CardHeader>
-            <CardTitle>Submit New Appeal</CardTitle>
+            <CardTitle>{t('submitAppealTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Subject
+                {t('subject')}
               </label>
-              <Input placeholder="Brief description of your concern" />
+              <Input placeholder={t('subject')} />
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category
+                {t('category')}
               </label>
               <select className="w-full p-2 border border-gray-300 rounded-md">
-                <option>Infrastructure</option>
-                <option>Public Order</option>
-                <option>Roads</option>
-                <option>Environment</option>
-                <option>Other</option>
+                <option>{t('infrastructure')}</option>
+                <option>{t('publicOrder')}</option>
+                <option>{t('roads')}</option>
+                <option>{t('environment')}</option>
+                <option>{t('other')}</option>
               </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
+                {t('description')}
               </label>
               <Textarea 
-                placeholder="Please provide detailed information about your concern..."
+                placeholder={t('description')}
                 rows={4}
               />
             </div>
 
             <div className="flex space-x-3">
-              <Button>Submit Appeal</Button>
+              <Button>{t('submitAppealButton')}</Button>
               <Button variant="outline" onClick={() => setShowForm(false)}>
-                Cancel
+                {t('cancel')}
               </Button>
             </div>
           </CardContent>
@@ -149,10 +178,10 @@ const AppealsModule = ({ userType }: AppealsModuleProps) => {
                 </div>
                 <div className="flex space-x-2">
                   <Badge className={getStatusColor(appeal.status)}>
-                    {appeal.status}
+                    {getStatusTranslation(appeal.status)}
                   </Badge>
                   <Badge className={getPriorityColor(appeal.priority)}>
-                    {appeal.priority}
+                    {getPriorityTranslation(appeal.priority)}
                   </Badge>
                 </div>
               </div>
@@ -171,12 +200,12 @@ const AppealsModule = ({ userType }: AppealsModuleProps) => {
                   </div>
                   <div className="flex items-center">
                     <MessageSquare className="h-4 w-4 mr-1" />
-                    {appeal.category}
+                    {getCategoryTranslation(appeal.category)}
                   </div>
                 </div>
 
                 <Button variant="outline" size="sm">
-                  {userType === 'employee' ? 'Review' : 'View Details'}
+                  {userType === 'employee' ? t('review') : t('viewDetails')}
                 </Button>
               </div>
             </CardContent>

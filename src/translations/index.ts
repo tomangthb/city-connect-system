@@ -29,6 +29,50 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'Register',
     uk: 'Зареєструватися'
   },
+  email: {
+    en: 'Email',
+    uk: 'Електронна пошта'
+  },
+  password: {
+    en: 'Password',
+    uk: 'Пароль'
+  },
+  confirmPassword: {
+    en: 'Confirm Password',
+    uk: 'Підтвердити пароль'
+  },
+  firstName: {
+    en: 'First Name',
+    uk: 'Ім\'я'
+  },
+  lastName: {
+    en: 'Last Name',
+    uk: 'Прізвище'
+  },
+  patronymic: {
+    en: 'Patronymic',
+    uk: 'По батькові'
+  },
+  address: {
+    en: 'Address',
+    uk: 'Адреса'
+  },
+  alreadyHaveAccount: {
+    en: 'Already have an account?',
+    uk: 'Вже маєте обліковий запис?'
+  },
+  dontHaveAccount: {
+    en: 'Don\'t have an account?',
+    uk: 'Не маєте облікового запису?'
+  },
+  signInHere: {
+    en: 'Sign in here',
+    uk: 'Увійдіть тут'
+  },
+  signUpHere: {
+    en: 'Sign up here',
+    uk: 'Зареєструйтесь тут'
+  },
 
   // Portal selection
   selectUserType: {
@@ -358,5 +402,207 @@ export const translations: Record<string, Record<Language, string>> = {
   status: {
     en: 'Status',
     uk: 'Статус'
+  },
+
+  // Appeals Module
+  submitAppealTitle: {
+    en: 'Submit New Appeal',
+    uk: 'Подати нове звернення'
+  },
+  subject: {
+    en: 'Subject',
+    uk: 'Тема'
+  },
+  category: {
+    en: 'Category',
+    uk: 'Категорія'
+  },
+  description: {
+    en: 'Description',
+    uk: 'Опис'
+  },
+  submitAppealButton: {
+    en: 'Submit Appeal',
+    uk: 'Подати звернення'
+  },
+  cancel: {
+    en: 'Cancel',
+    uk: 'Скасувати'
+  },
+  infrastructure: {
+    en: 'Infrastructure',
+    uk: 'Інфраструктура'
+  },
+  publicOrder: {
+    en: 'Public Order',
+    uk: 'Громадський порядок'
+  },
+  roads: {
+    en: 'Roads',
+    uk: 'Дороги'
+  },
+  environment: {
+    en: 'Environment',
+    uk: 'Довкілля'
+  },
+  other: {
+    en: 'Other',
+    uk: 'Інше'
+  },
+  review: {
+    en: 'Review',
+    uk: 'Розглянути'
+  },
+  viewDetails: {
+    en: 'View Details',
+    uk: 'Переглянути деталі'
+  },
+  manageRespond: {
+    en: 'Manage and respond to citizen appeals',
+    uk: 'Управління та відповіді на звернення громадян'
+  },
+  submitTrack: {
+    en: 'Submit and track your appeals',
+    uk: 'Подання та відстеження ваших звернень'
+  },
+
+  // Services Module
+  requestService: {
+    en: 'Request Service',
+    uk: 'Запросити послугу'
+  },
+  manageProvide: {
+    en: 'Manage and provide city services',
+    uk: 'Управління та надання міських послуг'
+  },
+  accessRequest: {
+    en: 'Access and request city services',
+    uk: 'Доступ та запит міських послуг'
+  },
+  activate: {
+    en: 'Activate',
+    uk: 'Активувати'
+  },
+  deactivate: {
+    en: 'Deactivate',
+    uk: 'Деактивувати'
+  },
+  viewService: {
+    en: 'View Service',
+    uk: 'Переглянути послугу'
+  },
+  requestServiceButton: {
+    en: 'Request Service',
+    uk: 'Запросити послугу'
+  },
+
+  // Profile settings
+  profileInformation: {
+    en: 'Profile Information',
+    uk: 'Інформація профілю'
+  },
+  accountSettings: {
+    en: 'Account Settings',
+    uk: 'Налаштування облікового запису'
+  },
+  fullName: {
+    en: 'Full Name',
+    uk: 'Повне ім\'я'
+  },
+  emailAddress: {
+    en: 'Email Address',
+    uk: 'Електронна пошта'
+  },
+  phoneNumber: {
+    en: 'Phone Number',
+    uk: 'Номер телефону'
+  },
+  saveChanges: {
+    en: 'Save Changes',
+    uk: 'Зберегти зміни'
+  },
+  emailNotifications: {
+    en: 'Email Notifications',
+    uk: 'Email сповіщення'
+  },
+  receiveEmailNotifications: {
+    en: 'Receive notifications via email',
+    uk: 'Отримувати сповіщення на email'
+  },
+  twoFactorAuth: {
+    en: 'Two-Factor Authentication',
+    uk: 'Двофакторна автентифікація'
+  },
+  extraSecurityLayer: {
+    en: 'Add an extra layer of security',
+    uk: 'Додайте додатковий рівень безпеки'
+  },
+  changePassword: {
+    en: 'Change Password',
+    uk: 'Змінити пароль'
+  },
+  currentPassword: {
+    en: 'Current Password',
+    uk: 'Поточний пароль'
+  },
+  newPassword: {
+    en: 'New Password',
+    uk: 'Новий пароль'
+  },
+  confirmNewPassword: {
+    en: 'Confirm New Password',
+    uk: 'Підтвердіть новий пароль'
+  },
+  profile: {
+    en: 'Profile',
+    uk: 'Профіль'
+  },
+  security: {
+    en: 'Security',
+    uk: 'Безпека'
+  },
+  preferences: {
+    en: 'Preferences',
+    uk: 'Налаштування'
+  },
+  language: {
+    en: 'Language',
+    uk: 'Мова'
+  },
+  darkMode: {
+    en: 'Dark Mode',
+    uk: 'Темна тема'
+  },
+  switchDarkTheme: {
+    en: 'Switch to dark theme',
+    uk: 'Перемкнути на темну тему'
+  },
+  updateProfile: {
+    en: 'Update Profile',
+    uk: 'Оновити профіль'
+  },
+  enterFullName: {
+    en: 'Enter your full name',
+    uk: 'Введіть ваше повне ім\'я'
+  },
+  enterPosition: {
+    en: 'Enter your position',
+    uk: 'Введіть вашу посаду'
+  },
+  position: {
+    en: 'Position',
+    uk: 'Посада'
+  },
+  enable2FA: {
+    en: 'Enable 2FA',
+    uk: 'Увімкнути 2FA'
+  },
+  pushNotifications: {
+    en: 'Push Notifications',
+    uk: 'Push сповіщення'
+  },
+  receivePushNotifications: {
+    en: 'Receive push notifications in browser',
+    uk: 'Отримувати push сповіщення в браузері'
   }
 };
