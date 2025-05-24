@@ -121,8 +121,8 @@ const ProfileSettings = () => {
     try {
       // Upload file to Supabase Storage
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const filePath = fileName;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
@@ -176,6 +176,7 @@ const ProfileSettings = () => {
           email: formData.email,
           phone: formData.phone,
           address: formData.address,
+          avatar_url: formData.avatarUrl,
           updated_at: new Date().toISOString()
         });
 
@@ -286,7 +287,7 @@ const ProfileSettings = () => {
                         <AvatarImage src={formData.avatarUrl} />
                         <AvatarFallback className="text-lg">{getUserInitials()}</AvatarFallback>
                       </Avatar>
-                      <label htmlFor="avatar-upload">
+                      <label htmlFor="avatar-upload" className="cursor-pointer">
                         <Button 
                           size="sm" 
                           className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
@@ -295,15 +296,15 @@ const ProfileSettings = () => {
                         >
                           <div>
                             <Camera className="h-4 w-4" />
-                            <input
-                              id="avatar-upload"
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={handleAvatarUpload}
-                            />
                           </div>
                         </Button>
+                        <input
+                          id="avatar-upload"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleAvatarUpload}
+                        />
                       </label>
                     </div>
                     <div>

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Mail, Camera, Calendar } from 'lucide-react';
+import { Mail, Phone, MapPin, Calendar } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -81,13 +81,14 @@ const ProfileInfoCard = ({ profileData }: ProfileInfoCardProps) => {
           
           {profileData.phone && (
             <div className="flex items-center space-x-3">
-              <Camera className="h-4 w-4 text-gray-500" />
+              <Phone className="h-4 w-4 text-gray-500" />
               <span className="text-sm">{profileData.phone}</span>
             </div>
           )}
           
           {profileData.address && (
             <div className="flex items-center space-x-3">
+              <MapPin className="h-4 w-4 text-gray-500" />
               <span className="text-sm">{profileData.address}</span>
             </div>
           )}
