@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Layout/Header';
-import Sidebar from '@/components/Layout/Sidebar';
+import AppSidebar from '@/components/Layout/AppSidebar';
 import EmployeeDashboard from '@/components/Employee/EmployeeDashboard';
 import ResidentDashboard from '@/components/Resident/ResidentDashboard';
 import ServicesModule from '@/components/Services/ServicesModule';
@@ -17,6 +17,7 @@ import PaymentsModule from '@/components/Payments/PaymentsModule';
 import ProfileSettings from '@/components/Profile/ProfileSettings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Globe } from 'lucide-react';
@@ -189,7 +190,7 @@ const Index = () => {
     switch (activeTab) {
       case 'dashboard':
         return userType === 'employee' ? (
-          <EmployeeDashboard onTabChange={setActiveTab} />
+          <EmployeeDashboard onTabChange={setActiveTab} onOpenSettings={handleOpenSettings} />
         ) : (
           <ResidentDashboard />
         );
@@ -213,7 +214,7 @@ const Index = () => {
         return <PaymentsModule />;
       default:
         return userType === 'employee' ? (
-          <EmployeeDashboard onTabChange={setActiveTab} />
+          <EmployeeDashboard onTabChange={setActiveTab} onOpenSettings={handleOpenSettings} />
         ) : (
           <ResidentDashboard />
         );
@@ -231,25 +232,27 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header 
-        userType={userType} 
-        userName={user ? `${user.email}` : (userType === 'employee' ? 'Admin User' : 'John Doe')}
-        notifications={notifications}
-        setNotifications={setNotifications}
-        onOpenSettings={handleOpenSettings}
-      />
-      <div className="flex flex-1">
-        <Sidebar 
+    <SidebarProvider>
+      <div className="min-h-screen bg-gray-50 flex w-full">
+        <AppSidebar 
           userType={userType} 
           activeTab={showProfileSettings ? 'settings' : activeTab} 
           onTabChange={handleTabChange} 
         />
-        <div className="flex-1 overflow-auto">
-          {renderContent()}
-        </div>
+        <SidebarInset className="flex flex-col">
+          <Header 
+            userType={userType} 
+            userName={user ? `${user.email}` : (userType === 'employee' ? 'Admin User' : 'John Doe')}
+            notifications={notifications}
+            setNotifications={setNotifications}
+            onOpenSettings={handleOpenSettings}
+          />
+          <div className="flex-1 overflow-auto">
+            {renderContent()}
+          </div>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
@@ -20,9 +21,10 @@ import { toast } from 'sonner';
 
 interface EmployeeDashboardProps {
   onTabChange?: (tab: string) => void;
+  onOpenSettings?: () => void;
 }
 
-const EmployeeDashboard = ({ onTabChange }: EmployeeDashboardProps) => {
+const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardProps) => {
   const { language, t } = useLanguage();
   const [typeFilter, setTypeFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
@@ -291,7 +293,7 @@ const EmployeeDashboard = ({ onTabChange }: EmployeeDashboardProps) => {
         </Card>
 
         {/* Enhanced Quick Actions */}
-        <QuickActions onTabChange={onTabChange} />
+        <QuickActions onTabChange={onTabChange} onOpenSettings={onOpenSettings} />
       </div>
     </div>
   );
