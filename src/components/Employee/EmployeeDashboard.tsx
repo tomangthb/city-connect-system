@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import KPICard from './KPICard';
 import MetricsChart from './MetricsChart';
 import ActivityFilter from './ActivityFilter';
 import QuickActions from './QuickActions';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { FileText, MessageSquare, Clock, ThumbsUp } from 'lucide-react';
 
 interface EmployeeDashboardProps {
   onTabChange?: (tab: string) => void;
@@ -15,12 +16,52 @@ interface EmployeeDashboardProps {
 const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardProps) => {
   const { t } = useLanguage();
 
-  // Sample KPI data
+  // Activity filter state
+  const [selectedType, setSelectedType] = useState('all');
+  const [selectedPriority, setSelectedPriority] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+
+  // Sample KPI data with required icon and color props
   const kpiData = [
-    { title: t('totalAppeals'), value: '1,234', change: '+12%', trend: 'up' as const },
-    { title: t('resolvedAppeals'), value: '987', change: '+8%', trend: 'up' as const },
-    { title: t('avgResponseTime'), value: '2.4h', change: '-15%', trend: 'down' as const },
-    { title: t('citizenSatisfaction'), value: '94%', change: '+3%', trend: 'up' as const },
+    { 
+      title: t('totalAppeals'), 
+      value: '1,234', 
+      change: 12, 
+      icon: FileText, 
+      color: 'text-blue-600' 
+    },
+    { 
+      title: t('resolvedAppeals'), 
+      value: '987', 
+      change: 8, 
+      icon: MessageSquare, 
+      color: 'text-green-600' 
+    },
+    { 
+      title: t('avgResponseTime'), 
+      value: '2.4h', 
+      change: -15, 
+      icon: Clock, 
+      color: 'text-orange-600' 
+    },
+    { 
+      title: t('citizenSatisfaction'), 
+      value: '94%', 
+      change: 3, 
+      icon: ThumbsUp, 
+      color: 'text-purple-600' 
+    },
+  ];
+
+  // Sample chart data
+  const chartData = [
+    { date: '2024-01-01', value: 100 },
+    { date: '2024-01-02', value: 120 },
+    { date: '2024-01-03', value: 90 },
+    { date: '2024-01-04', value: 140 },
+    { date: '2024-01-05', value: 160 },
+    { date: '2024-01-06', value: 130 },
+    { date: '2024-01-07', value: 180 },
   ];
 
   // Sample recent activity data
@@ -30,6 +71,12 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
     { id: 3, action: t('documentProcessed'), user: 'System', time: '1 hour ago', status: 'completed' },
     { id: 4, action: t('userRegistered'), user: 'Oleksandr Shevchenko', time: '2 hours ago', status: 'new' },
   ];
+
+  const handleClearFilters = () => {
+    setSelectedType('all');
+    setSelectedPriority('all');
+    setSelectedStatus('all');
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -49,7 +96,12 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
       {/* Charts and Quick Actions Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <MetricsChart />
+          <MetricsChart 
+            title={t('weeklyActivity') || 'Weekly Activity'} 
+            data={chartData} 
+            type="line"
+            color="#3b82f6"
+          />
         </div>
         <QuickActions onTabChange={onTabChange} onOpenSettings={onOpenSettings} />
       </div>
@@ -82,7 +134,24 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
             </CardContent>
           </Card>
         </div>
-        <ActivityFilter />
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('filters') || 'Filters'}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ActivityFilter
+                selectedType={selectedType}
+                selectedPriority={selectedPriority}
+                selectedStatus={selectedStatus}
+                onTypeChange={setSelectedType}
+                onPriorityChange={setSelectedPriority}
+                onStatusChange={setSelectedStatus}
+                onClearFilters={handleClearFilters}
+              />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
