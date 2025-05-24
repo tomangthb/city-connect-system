@@ -4,18 +4,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, MessageSquare, Users, TrendingUp, Plus, Settings } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 const QuickActions = () => {
   const { t } = useLanguage();
+  const { user } = useAuth();
 
   const handleGenerateReport = async () => {
+    if (!user) {
+      toast.error('You must be logged in to perform this action');
+      return;
+    }
+
     try {
       // Create a new activity for report generation
       const { error } = await supabase
         .from('activities')
         .insert({
+          user_id: user.id,
           title: 'Monthly Report Generated',
           description: 'Generated comprehensive monthly report for city operations',
           type: 'report',
@@ -48,10 +56,16 @@ const QuickActions = () => {
   };
 
   const handleCreateTask = async () => {
+    if (!user) {
+      toast.error('You must be logged in to perform this action');
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('activities')
         .insert({
+          user_id: user.id,
           title: 'New Task Created',
           description: 'Created new administrative task',
           type: 'event',
