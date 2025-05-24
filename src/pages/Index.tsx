@@ -21,12 +21,36 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Globe } from 'lucide-react';
 
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  timestamp: Date;
+}
+
 const Index = () => {
   const { language, setLanguage, t } = useLanguage();
   const { user, userType: authUserType, signOut } = useAuth();
   const [userType, setUserType] = useState<'employee' | 'resident' | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showProfileSettings, setShowProfileSettings] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([
+    {
+      id: '1',
+      title: 'New Appeal Submitted',
+      message: 'A new citizen appeal has been submitted for review.',
+      isRead: false,
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
+    },
+    {
+      id: '2',
+      title: 'System Maintenance',
+      message: 'Scheduled maintenance will begin at 2:00 AM tonight.',
+      isRead: false,
+      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000) // 4 hours ago
+    }
+  ]);
   const navigate = useNavigate();
 
   // Reset userType when user logs out
@@ -211,6 +235,8 @@ const Index = () => {
       <Header 
         userType={userType} 
         userName={user ? `${user.email}` : (userType === 'employee' ? 'Admin User' : 'John Doe')}
+        notifications={notifications}
+        setNotifications={setNotifications}
         onOpenSettings={handleOpenSettings}
       />
       <div className="flex flex-1">
