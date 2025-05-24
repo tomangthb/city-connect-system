@@ -6,6 +6,7 @@ import EmployeeDashboard from '@/components/Employee/EmployeeDashboard';
 import ResidentDashboard from '@/components/Resident/ResidentDashboard';
 import ServicesModule from '@/components/Services/ServicesModule';
 import AppealsModule from '@/components/Appeals/AppealsModule';
+import ComprehensiveAppealsModule from '@/components/Appeals/ComprehensiveAppealsModule';
 import ResourcesModule from '@/components/Resources/ResourcesModule';
 import ResourcesManagement from '@/components/Resources/ResourcesManagement';
 import NewsModule from '@/components/News/NewsModule';
@@ -44,7 +45,11 @@ const MainApp = ({ userType }: MainAppProps) => {
       case 'services':
         return <ServicesModule userType={userType} />;
       case 'appeals':
-        return <AppealsModule userType={userType} />;
+        return userType === 'employee' ? (
+          <ComprehensiveAppealsModule />
+        ) : (
+          <AppealsModule userType={userType} />
+        );
       case 'resources':
         return userType === 'employee' ? <ResourcesManagement /> : <ResourcesModule userType={userType} />;
       case 'documents':
