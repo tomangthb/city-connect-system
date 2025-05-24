@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Layout/Header';
@@ -8,6 +7,7 @@ import ResidentDashboard from '@/components/Resident/ResidentDashboard';
 import ServicesModule from '@/components/Services/ServicesModule';
 import AppealsModule from '@/components/Appeals/AppealsModule';
 import ResourcesModule from '@/components/Resources/ResourcesModule';
+import ResourcesManagement from '@/components/Resources/ResourcesManagement';
 import NewsModule from '@/components/News/NewsModule';
 import DocumentsModule from '@/components/Documents/DocumentsModule';
 import AnalyticsModule from '@/components/Analytics/AnalyticsModule';
@@ -199,7 +199,7 @@ const Index = () => {
       case 'appeals':
         return <AppealsModule userType={userType} />;
       case 'resources':
-        return <ResourcesModule userType={userType} />;
+        return userType === 'employee' ? <ResourcesManagement /> : <ResourcesModule userType={userType} />;
       case 'documents':
         return <DocumentsModule />;
       case 'analytics':
