@@ -1,297 +1,88 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Users, 
-  FileText, 
-  MessageSquare, 
-  TrendingUp,
-  AlertCircle,
-  CheckCircle,
-  DollarSign
-} from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import KPICard from './KPICard';
-import ActivityFilter from './ActivityFilter';
 import MetricsChart from './MetricsChart';
+import ActivityFilter from './ActivityFilter';
 import QuickActions from './QuickActions';
-import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface EmployeeDashboardProps {
   onTabChange?: (tab: string) => void;
+  onOpenSettings?: () => void;
 }
 
-const EmployeeDashboard = ({ onTabChange }: EmployeeDashboardProps) => {
-  const { language, t } = useLanguage();
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [priorityFilter, setPriorityFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardProps) => {
+  const { t } = useLanguage();
 
-  // Fetch metrics data
-  const { data: metricsData } = useQuery({
-    queryKey: ['metrics'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('metrics')
-        .select('*')
-        .order('updated_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error fetching metrics:', error);
-        return [];
-      }
-      return data || [];
-    }
-  });
-
-  // Fetch activities with filtering
-  const { data: activitiesData, refetch: refetchActivities } = useQuery({
-    queryKey: ['activities', typeFilter, priorityFilter, statusFilter],
-    queryFn: async () => {
-      let query = supabase
-        .from('activities')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (typeFilter !== 'all') {
-        query = query.eq('type', typeFilter);
-      }
-      if (priorityFilter !== 'all') {
-        query = query.eq('priority', priorityFilter);
-      }
-      if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
-      }
-      
-      const { data, error } = await query;
-      
-      if (error) {
-        console.error('Error fetching activities:', error);
-        return [];
-      }
-      return data || [];
-    }
-  });
-
-  // Fetch analytics data for charts
-  const { data: analyticsData } = useQuery({
-    queryKey: ['analytics'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('analytics_data')
-        .select('*')
-        .order('date', { ascending: true });
-      
-      if (error) {
-        console.error('Error fetching analytics:', error);
-        return [];
-      }
-      return data || [];
-    }
-  });
-
-  // Process metrics data for KPI cards
-  const getMetricByName = (name: string) => {
-    return metricsData?.find(m => m.metric_name === name);
-  };
-
+  // Sample KPI data
   const kpiData = [
-    { 
-      title: t('pendingAppeals'), 
-      value: getMetricByName('pendingAppeals')?.metric_value || 0,
-      target: getMetricByName('pendingAppeals')?.metric_target,
-      change: getMetricByName('pendingAppeals')?.metric_change,
-      icon: MessageSquare, 
-      color: 'text-orange-600',
-      onClick: () => onTabChange ? onTabChange('appeals') : toast.info(t('loadingAppeals'))
-    },
-    { 
-      title: t('activeServices'), 
-      value: getMetricByName('activeServices')?.metric_value || 0,
-      target: getMetricByName('activeServices')?.metric_target,
-      change: getMetricByName('activeServices')?.metric_change,
-      icon: FileText, 
-      color: 'text-blue-600',
-      onClick: () => onTabChange ? onTabChange('services') : toast.info(t('loadingServices'))
-    },
-    { 
-      title: t('registeredCitizens'), 
-      value: getMetricByName('registeredCitizens')?.metric_value?.toLocaleString() || '0',
-      target: getMetricByName('registeredCitizens')?.metric_target,
-      change: getMetricByName('registeredCitizens')?.metric_change,
-      icon: Users, 
-      color: 'text-green-600',
-      onClick: () => onTabChange ? onTabChange('administration') : toast.info(t('loadingCitizens'))
-    },
-    { 
-      title: t('monthlyRevenue'), 
-      value: `$${getMetricByName('monthlyRevenue')?.metric_value?.toLocaleString() || '0'}`,
-      target: getMetricByName('monthlyRevenue')?.metric_target,
-      change: getMetricByName('monthlyRevenue')?.metric_change,
-      icon: DollarSign, 
-      color: 'text-purple-600',
-      onClick: () => onTabChange ? onTabChange('analytics') : toast.info(t('loadingFinancial'))
-    },
+    { title: t('totalAppeals'), value: '1,234', change: '+12%', trend: 'up' as const },
+    { title: t('resolvedAppeals'), value: '987', change: '+8%', trend: 'up' as const },
+    { title: t('avgResponseTime'), value: '2.4h', change: '-15%', trend: 'down' as const },
+    { title: t('citizenSatisfaction'), value: '94%', change: '+3%', trend: 'up' as const },
   ];
 
-  // Process analytics data for charts
-  const appealsChartData = analyticsData?.filter(d => d.category === 'appeals').map(d => ({
-    date: d.date,
-    value: d.value
-  })) || [];
-
-  const revenueChartData = analyticsData?.filter(d => d.category === 'revenue').map(d => ({
-    date: d.date,
-    value: d.value
-  })) || [];
-
-  const servicesChartData = analyticsData?.filter(d => d.category === 'services').map(d => ({
-    date: d.date,
-    value: d.value
-  })) || [];
-
-  const clearFilters = () => {
-    setTypeFilter('all');
-    setPriorityFilter('all');
-    setStatusFilter('all');
-  };
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'appeal': return <MessageSquare className="h-5 w-5 text-orange-600" />;
-      case 'service': return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case 'report': return <FileText className="h-5 w-5 text-blue-600" />;
-      case 'event': return <AlertCircle className="h-5 w-5 text-purple-600" />;
-      default: return <AlertCircle className="h-5 w-5 text-gray-600" />;
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'border-l-red-500 bg-red-50';
-      case 'medium': return 'border-l-yellow-500 bg-yellow-50';
-      case 'low': return 'border-l-green-500 bg-green-50';
-      default: return 'border-l-gray-500 bg-gray-50';
-    }
-  };
-
-  const formatTimeAgo = (date: string) => {
-    const now = new Date();
-    const activityDate = new Date(date);
-    const diffInHours = Math.floor((now.getTime() - activityDate.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return t('justNow');
-    if (diffInHours < 24) return `${diffInHours}${t('hoursAgo')}`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}${t('daysAgo')}`;
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'completed': return t('completed');
-      case 'pending': return t('pending');
-      case 'scheduled': return t('scheduled');
-      default: return status;
-    }
-  };
+  // Sample recent activity data
+  const recentActivities = [
+    { id: 1, action: t('newAppealSubmitted'), user: 'Ivan Petrov', time: '5 min ago', status: 'new' },
+    { id: 2, action: t('appealStatusUpdated'), user: 'Maria Kovalenko', time: '15 min ago', status: 'updated' },
+    { id: 3, action: t('documentProcessed'), user: 'System', time: '1 hour ago', status: 'completed' },
+    { id: 4, action: t('userRegistered'), user: 'Oleksandr Shevchenko', time: '2 hours ago', status: 'new' },
+  ];
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('dashboard')}</h2>
-        <p className="text-gray-600">
-          {language === 'en' 
-            ? 'Welcome back! Here\'s what\'s happening in your city today.' 
-            : 'Ласкаво просимо! Ось що відбувається у вашому місті сьогодні.'}
-        </p>
+        <h1 className="text-3xl font-bold text-gray-900">{t('employeeDashboard')}</h1>
+        <p className="text-gray-600">{t('dashboardDescription')}</p>
       </div>
 
-      {/* Interactive KPI Cards */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {kpiData.map((kpi, index) => (
           <KPICard key={index} {...kpi} />
         ))}
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        <MetricsChart 
-          title={language === 'en' ? 'Appeals Trend' : 'Тренд звернень'}
-          data={appealsChartData}
-          type="line"
-          color="#f59e0b"
-        />
-        <MetricsChart 
-          title={language === 'en' ? 'Revenue Growth' : 'Зростання доходу'}
-          data={revenueChartData}
-          type="bar"
-          color="#10b981"
-        />
-        <MetricsChart 
-          title={language === 'en' ? 'Active Services' : 'Активні послуги'}
-          data={servicesChartData}
-          type="line"
-          color="#3b82f6"
-        />
+      {/* Charts and Quick Actions Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <MetricsChart />
+        </div>
+        <QuickActions onTabChange={onTabChange} onOpenSettings={onOpenSettings} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activities with Filtering */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('recentActivities')}</CardTitle>
-            <ActivityFilter
-              selectedType={typeFilter}
-              selectedPriority={priorityFilter}
-              selectedStatus={statusFilter}
-              onTypeChange={setTypeFilter}
-              onPriorityChange={setPriorityFilter}
-              onStatusChange={setStatusFilter}
-              onClearFilters={clearFilters}
-            />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {activitiesData && activitiesData.length > 0 ? (
-                activitiesData.map((activity) => (
-                  <div 
-                    key={activity.id} 
-                    className={`flex items-center space-x-3 p-3 rounded-lg border-l-4 ${getPriorityColor(activity.priority)} transition-colors hover:shadow-sm`}
-                  >
-                    <div className="flex-shrink-0">
-                      {getActivityIcon(activity.type)}
+      {/* Recent Activities and Filters */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('recentActivities')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentActivities.map((activity) => (
+                  <div key={activity.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="font-medium text-gray-900">{activity.action}</p>
+                      <p className="text-sm text-gray-600">{activity.user} • {activity.time}</p>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                      {activity.description && (
-                        <p className="text-xs text-gray-600 mt-1">{activity.description}</p>
-                      )}
-                      <div className="flex items-center justify-between mt-2">
-                        <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                          activity.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          activity.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-blue-100 text-blue-800'
-                        }`}>
-                          {getStatusText(activity.status)}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {formatTimeAgo(activity.created_at)}
-                        </span>
-                      </div>
-                    </div>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      activity.status === 'new' ? 'bg-blue-100 text-blue-800' :
+                      activity.status === 'updated' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-green-100 text-green-800'
+                    }`}>
+                      {activity.status}
+                    </span>
                   </div>
-                ))
-              ) : (
-                <p className="text-gray-500 text-center py-4">{t('noActivitiesFound')}</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Enhanced Quick Actions */}
-        <QuickActions onTabChange={onTabChange} />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        <ActivityFilter />
       </div>
     </div>
   );
