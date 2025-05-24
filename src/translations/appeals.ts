@@ -1,3 +1,4 @@
+
 import { TranslationRecord } from './types';
 
 export const appealsTranslations: Record<string, TranslationRecord> = {
@@ -151,5 +152,110 @@ export const appealsTranslations: Record<string, TranslationRecord> = {
   viewDetails: {
     en: 'View Details',
     uk: 'Переглянути деталі'
+  },
+  // Additional translations for comprehensive appeals
+  filtersAndSearch: {
+    en: 'Filters and Search',
+    uk: 'Фільтри та пошук'
+  },
+  clearFilters: {
+    en: 'Clear',
+    uk: 'Очистити'
+  },
+  searchByNameIdAddress: {
+    en: 'Search by name, ID, address, topic...',
+    uk: 'Пошук за ім\'ям, ID, адресою, темою...'
+  },
+  allStatuses: {
+    en: 'All statuses',
+    uk: 'Всі статуси'
+  },
+  new: {
+    en: 'New',
+    uk: 'Нове'
+  },
+  completed: {
+    en: 'Completed',
+    uk: 'Вирішено'
+  },
+  allCategories: {
+    en: 'All categories',
+    uk: 'Всі категорії'
+  },
+  technical: {
+    en: 'Technical',
+    uk: 'Технічне'
+  },
+  administrative: {
+    en: 'Administrative',
+    uk: 'Адміністративне'
+  },
+  complaint: {
+    en: 'Complaint',
+    uk: 'Скарга'
+  },
+  suggestion: {
+    en: 'Suggestion',
+    uk: 'Пропозиція'
+  },
+  allTime: {
+    en: 'All time',
+    uk: 'Весь час'
+  },
+  today: {
+    en: 'Today',
+    uk: 'Сьогодні'
+  },
+  thisWeek: {
+    en: 'This week',
+    uk: 'Цей тиждень'
+  },
+  thisMonth: {
+    en: 'This month',
+    uk: 'Цей місяць'
+  },
+  thisQuarter: {
+    en: 'This quarter',
+    uk: 'Цей квартал'
+  },
+  submissionDate: {
+    en: 'Submission Date',
+    uk: 'Дата подання'
+  },
+  applicant: {
+    en: 'Applicant',
+    uk: 'Заявник'
+  },
+  appealTopic: {
+    en: 'Appeal Topic',
+    uk: 'Тема звернення'
+  },
+  actions: {
+    en: 'Actions',
+    uk: 'Дії'
+  },
+  taskName: {
+    en: 'Task Name',
+    uk: 'Назва завдання'
+  },
+  assignee: {
+    en: 'Assignee',
+    uk: 'Виконавець'
+  },
+  assignTo: {
+    en: 'Assign to...',
+    uk: 'Призначити...'
+  },
+  deadline: {
+    en: 'Deadline',
+    uk: 'Термін виконання'
+  },
+  createTask: {
+    en: 'Create Task',
+    uk: 'Створити завдання'
+  },
+  planning: {
+    en: 'Planning',
+    uk: 'Планування'
   }
 };

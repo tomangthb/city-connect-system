@@ -20,6 +20,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import AddServiceDialog from './AddServiceDialog';
+import EditServiceDialog from './EditServiceDialog';
+import ManageServiceDialog from './ManageServiceDialog';
 import { addActivity } from '@/utils/activityUtils';
 
 interface ServicesModuleProps {
@@ -211,15 +213,16 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
                 <div className="flex space-x-2">
                   {userType === 'employee' ? (
                     <>
-                      <Button 
-                        className="flex-1" 
-                        onClick={() => handleManageService(service)}
-                      >
-                        {t('manage') || 'Manage'}
-                      </Button>
-                      <Button variant="outline" size="icon">
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                      <ManageServiceDialog service={service} onServiceUpdated={refetch}>
+                        <Button className="flex-1">
+                          {t('manage') || 'Manage'}
+                        </Button>
+                      </ManageServiceDialog>
+                      <EditServiceDialog service={service} onServiceUpdated={refetch}>
+                        <Button variant="outline" size="icon">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </EditServiceDialog>
                       <Button 
                         variant="outline" 
                         size="icon" 

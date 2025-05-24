@@ -17,14 +17,17 @@ interface CreateTaskDialogProps {
 const CreateTaskDialog = ({ children }: CreateTaskDialogProps) => {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState('');
+  const [taskName, setTaskName] = useState('');
   const [description, setDescription] = useState('');
+  const [assignee, setAssignee] = useState('');
+  const [category, setCategory] = useState('');
+  const [deadline, setDeadline] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [isCreating, setIsCreating] = useState(false);
 
   const handleCreate = async () => {
-    if (!title.trim()) {
-      toast.error(t('titleRequired') || 'Title is required');
+    if (!taskName.trim()) {
+      toast.error(t('titleRequired') || 'Task name is required');
       return;
     }
 
@@ -32,8 +35,8 @@ const CreateTaskDialog = ({ children }: CreateTaskDialogProps) => {
     
     try {
       await addActivity({
-        title: `${t('taskCreated')}: ${title}`,
-        description: description || `New task: ${title}`,
+        title: `${t('taskCreated')}: ${taskName}`,
+        description: description || `New task: ${taskName}`,
         type: 'event',
         priority,
         status: 'pending'
@@ -41,8 +44,11 @@ const CreateTaskDialog = ({ children }: CreateTaskDialogProps) => {
 
       toast.success(t('taskCreated'));
       setOpen(false);
-      setTitle('');
+      setTaskName('');
       setDescription('');
+      setAssignee('');
+      setCategory('');
+      setDeadline('');
       setPriority('medium');
     } catch (error) {
       toast.error(t('errorCreatingTask') || 'Error creating task');
@@ -56,52 +62,91 @@ const CreateTaskDialog = ({ children }: CreateTaskDialogProps) => {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{t('createTask')}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <Label htmlFor="title">{t('title') || 'Title'}</Label>
+            <Label htmlFor="taskName">{t('taskName') || 'Task Name'} *</Label>
             <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={t('enterTaskTitle') || 'Enter task title'}
+              id="taskName"
+              value={taskName}
+              onChange={(e) => setTaskName(e.target.value)}
+              placeholder={t('enterTaskTitle') || 'Enter task name'}
             />
           </div>
           
           <div>
-            <Label htmlFor="description">{t('description')}</Label>
+            <Label htmlFor="description">{t('description')} *</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder={t('enterTaskDescription') || 'Enter task description'}
-              rows={3}
+              placeholder={t('enterTaskDescription') || 'Describe the task details'}
+              rows={4}
             />
           </div>
 
-          <div>
-            <Label htmlFor="priority">{t('priority')}</Label>
-            <Select value={priority} onValueChange={(value: 'low' | 'medium' | 'high') => setPriority(value)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">{t('low')}</SelectItem>
-                <SelectItem value="medium">{t('medium')}</SelectItem>
-                <SelectItem value="high">{t('high')}</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="assignee">{t('assignee') || 'Assignee'}</Label>
+              <Input
+                id="assignee"
+                value={assignee}
+                onChange={(e) => setAssignee(e.target.value)}
+                placeholder={t('assignTo') || 'Assign to...'}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="category">{t('category')}</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t('selectCategory') || 'Select category'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="administrative">{t('administrative') || 'Administrative'}</SelectItem>
+                  <SelectItem value="technical">{t('technical') || 'Technical'}</SelectItem>
+                  <SelectItem value="maintenance">{t('maintenance') || 'Maintenance'}</SelectItem>
+                  <SelectItem value="planning">{t('planning') || 'Planning'}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="flex justify-end space-x-2">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="deadline">{t('deadline') || 'Deadline'} *</Label>
+              <Input
+                id="deadline"
+                type="datetime-local"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="priority">{t('priority')}</Label>
+              <Select value={priority} onValueChange={(value: 'low' | 'medium' | 'high') => setPriority(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">{t('low')}</SelectItem>
+                  <SelectItem value="medium">{t('medium')}</SelectItem>
+                  <SelectItem value="high">{t('high')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
             <Button variant="outline" onClick={() => setOpen(false)}>
               {t('cancel')}
             </Button>
             <Button onClick={handleCreate} disabled={isCreating}>
-              {isCreating ? t('creating') || 'Creating...' : t('create') || 'Create'}
+              {isCreating ? t('creating') || 'Creating...' : t('createTask') || 'Create Task'}
             </Button>
           </div>
         </div>

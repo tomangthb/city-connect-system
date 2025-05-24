@@ -57,7 +57,7 @@ const MainApp = ({ userType }: MainAppProps) => {
       case 'analytics':
         return <AnalyticsModule />;
       case 'administration':
-        return <AdminModule />;
+        return <AdminModule onOpenSettings={handleOpenSettings} />;
       case 'news':
         return <NewsModule />;
       case 'account':

@@ -4,8 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/useLanguage';
 import { UserCog, Shield, Settings, Users, Key } from 'lucide-react';
+import UserManagementDialog from './UserManagementDialog';
+import SystemStatusDialog from './SystemStatusDialog';
 
-const AdminModule = () => {
+interface AdminModuleProps {
+  onOpenSettings?: () => void;
+}
+
+const AdminModule = ({ onOpenSettings }: AdminModuleProps) => {
   const { language, t } = useLanguage();
   
   const adminSections = [
@@ -15,7 +21,8 @@ const AdminModule = () => {
       icon: Users,
       description: language === 'en' 
         ? 'Create, edit and delete user accounts. Manage user roles and permissions.' 
-        : 'Створюйте, редагуйте та видаляйте облікові записи користувачів. Керуйте ролями та дозволами.'
+        : 'Створюйте, редагуйте та видаляйте облікові записи користувачів. Керуйте ролями та дозволами.',
+      component: 'user-management'
     },
     { 
       id: 'access-control', 
@@ -31,7 +38,8 @@ const AdminModule = () => {
       icon: Settings,
       description: language === 'en' 
         ? 'Configure system-wide settings and preferences.' 
-        : 'Налаштуйте загальносистемні параметри та налаштування.'
+        : 'Налаштуйте загальносистемні параметри та налаштування.',
+      component: 'system-settings'
     },
     { 
       id: 'api-keys', 
@@ -42,6 +50,12 @@ const AdminModule = () => {
         : 'Керуйте ключами API та інтеграціями сторонніх сервісів.'
     }
   ];
+
+  const handleSectionClick = (section: any) => {
+    if (section.component === 'system-settings' && onOpenSettings) {
+      onOpenSettings();
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -54,10 +68,12 @@ const AdminModule = () => {
               : 'Адміністрування та налаштування системи'}
           </p>
         </div>
-        <Button className="flex items-center">
-          <UserCog className="h-4 w-4 mr-2" />
-          {language === 'en' ? 'System Status' : 'Статус системи'}
-        </Button>
+        <SystemStatusDialog>
+          <Button className="flex items-center">
+            <UserCog className="h-4 w-4 mr-2" />
+            {language === 'en' ? 'System Status' : 'Статус системи'}
+          </Button>
+        </SystemStatusDialog>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -75,9 +91,21 @@ const AdminModule = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">{section.description}</p>
-                <Button variant="outline" className="w-full">
-                  {language === 'en' ? 'Manage' : 'Керувати'}
-                </Button>
+                {section.component === 'user-management' ? (
+                  <UserManagementDialog>
+                    <Button variant="outline" className="w-full">
+                      {language === 'en' ? 'Manage' : 'Керувати'}
+                    </Button>
+                  </UserManagementDialog>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => handleSectionClick(section)}
+                  >
+                    {language === 'en' ? 'Manage' : 'Керувати'}
+                  </Button>
+                )}
               </CardContent>
             </Card>
           );

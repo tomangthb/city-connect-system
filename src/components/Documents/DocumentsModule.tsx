@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { addActivity } from '@/utils/activityUtils';
+import CreateFolderDialog from './CreateFolderDialog';
+import UploadDocumentDialog from './UploadDocumentDialog';
 
 const DocumentsModule = () => {
   const { language, t } = useLanguage();
@@ -48,26 +49,6 @@ const DocumentsModule = () => {
     doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     doc.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleUploadDocument = async () => {
-    try {
-      // Simulate file upload
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      await addActivity({
-        title: language === 'en' ? 'Document uploaded' : 'Документ завантажено',
-        description: 'New document has been uploaded to the system',
-        type: 'event',
-        priority: 'low',
-        status: 'completed'
-      });
-
-      toast.success(t('documentUploaded') || 'Document uploaded successfully');
-    } catch (error) {
-      console.error('Error uploading document:', error);
-      toast.error(t('errorUploadingDocument') || 'Error uploading document');
-    }
-  };
 
   const handleDownloadDocument = async (doc: any) => {
     try {
@@ -125,14 +106,18 @@ const DocumentsModule = () => {
           </p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline">
-            <Plus className="h-4 w-4 mr-2" />
-            {language === 'en' ? 'New Folder' : 'Нова папка'}
-          </Button>
-          <Button className="flex items-center" onClick={handleUploadDocument}>
-            <Upload className="h-4 w-4 mr-2" />
-            {language === 'en' ? 'Upload Document' : 'Завантажити документ'}
-          </Button>
+          <CreateFolderDialog>
+            <Button variant="outline">
+              <Plus className="h-4 w-4 mr-2" />
+              {language === 'en' ? 'New Folder' : 'Нова папка'}
+            </Button>
+          </CreateFolderDialog>
+          <UploadDocumentDialog>
+            <Button className="flex items-center">
+              <Plus className="h-4 w-4 mr-2" />
+              {language === 'en' ? 'Upload Document' : 'Завантажити документ'}
+            </Button>
+          </UploadDocumentDialog>
         </div>
       </div>
 
