@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -92,10 +93,13 @@ const InfrastructureModule = () => {
 
       if (error) throw error;
       
-      // Transform the data to include type and ensure compatibility
+      // Transform the data to include type and ensure compatibility with any existing records
       const transformedData = (data || []).map(item => ({
         ...item,
-        type: (item.type as 'asset' | 'infrastructure') || 'asset'
+        type: (item as any).type || 'asset' as 'asset' | 'infrastructure',
+        value: (item as any).value || undefined,
+        acquisition_date: (item as any).acquisition_date || undefined,
+        maintenance_schedule: (item as any).maintenance_schedule || undefined
       })) as Asset[];
       
       setAssets(transformedData);
