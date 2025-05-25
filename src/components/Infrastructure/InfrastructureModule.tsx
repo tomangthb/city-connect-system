@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,10 +8,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Search, Edit, Trash2, MapPin, Calendar, Filter, Building, Car, Zap, Wrench } from 'lucide-react';
+import { Plus, Search, Filter, Building, Zap, BarChart3, Calendar, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import AssetCard from './AssetCard';
+import MaintenanceRequestDialog from './MaintenanceRequestDialog';
+import MaintenanceScheduleDialog from './MaintenanceScheduleDialog';
+import AssetDetailsDialog from './AssetDetailsDialog';
 
 interface Asset {
   id: string;
@@ -30,6 +33,28 @@ interface Asset {
   maintenance_schedule?: string;
   created_at: string;
   updated_at: string;
+  asset_id?: string;
+  subcategory?: string;
+  subcategory_uk?: string;
+  gps_coordinates?: string;
+  technical_specs?: any;
+  model?: string;
+  serial_number?: string;
+  commissioning_date?: string;
+  service_life_years?: number;
+  book_value?: number;
+  residual_value?: number;
+  responsible_department?: string;
+  responsible_person?: string;
+  legal_status?: string;
+  condition_status?: string;
+  utilization_rate?: number;
+  last_inspection_date?: string;
+  next_maintenance_date?: string;
+  warranty_expiry_date?: string;
+  supplier?: string;
+  images?: string[];
+  documents?: string[];
 }
 
 const InfrastructureModule = () => {
@@ -42,6 +67,10 @@ const InfrastructureModule = () => {
   const [typeFilter, setTypeFilter] = useState('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [isMaintenanceRequestOpen, setIsMaintenanceRequestOpen] = useState(false);
+  const [isMaintenanceScheduleOpen, setIsMaintenanceScheduleOpen] = useState(false);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -55,7 +84,23 @@ const InfrastructureModule = () => {
     status: 'Active',
     value: '',
     acquisition_date: '',
-    maintenance_schedule: ''
+    maintenance_schedule: '',
+    asset_id: '',
+    subcategory: '',
+    subcategory_uk: '',
+    gps_coordinates: '',
+    model: '',
+    serial_number: '',
+    commissioning_date: '',
+    service_life_years: '',
+    book_value: '',
+    residual_value: '',
+    responsible_department: '',
+    responsible_person: '',
+    legal_status: 'owned',
+    condition_status: 'good',
+    utilization_rate: '',
+    supplier: ''
   });
 
   const statusOptions = [
@@ -69,7 +114,8 @@ const InfrastructureModule = () => {
     { value: 'Buildings', value_uk: 'Будівлі' },
     { value: 'Vehicles', value_uk: 'Транспортні засоби' },
     { value: 'Equipment', value_uk: 'Обладнання' },
-    { value: 'IT Assets', value_uk: 'ІТ активи' }
+    { value: 'IT Assets', value_uk: 'ІТ активи' },
+    { value: 'Landscaping', value_uk: 'Благоустрій' }
   ];
 
   const infrastructureCategories = [
@@ -78,6 +124,19 @@ const InfrastructureModule = () => {
     { value: 'Energy Grid', value_uk: 'Енергосистема' },
     { value: 'Telecommunications', value_uk: 'Телекомунікації' },
     { value: 'Waste Management', value_uk: 'Управління відходами' }
+  ];
+
+  const conditionOptions = [
+    { value: 'excellent', label: language === 'en' ? 'Excellent' : 'Відмінний' },
+    { value: 'good', label: language === 'en' ? 'Good' : 'Добрий' },
+    { value: 'fair', label: language === 'en' ? 'Fair' : 'Задовільний' },
+    { value: 'poor', label: language === 'en' ? 'Poor' : 'Поганий' }
+  ];
+
+  const legalStatusOptions = [
+    { value: 'owned', label: language === 'en' ? 'Owned' : 'Власність' },
+    { value: 'leased', label: language === 'en' ? 'Leased' : 'Оренда' },
+    { value: 'rented', label: language === 'en' ? 'Rented' : 'Найм' }
   ];
 
   useEffect(() => {
@@ -93,7 +152,6 @@ const InfrastructureModule = () => {
 
       if (error) throw error;
       
-      // Transform the data to include type and ensure compatibility with any existing records
       const transformedData = (data || []).map(item => ({
         ...item,
         type: (item as any).type || 'asset' as 'asset' | 'infrastructure',
@@ -122,7 +180,7 @@ const InfrastructureModule = () => {
     try {
       const assetData = {
         name: formData.name,
-        name_uk: formData.name_uk,
+        name_uk: formData.name_uk || formData.name,
         category: formData.category,
         category_uk: formData.category_uk,
         type: formData.type,
@@ -132,7 +190,23 @@ const InfrastructureModule = () => {
         status: formData.status,
         value: formData.value ? parseFloat(formData.value) : null,
         acquisition_date: formData.acquisition_date || null,
-        maintenance_schedule: formData.maintenance_schedule || null
+        maintenance_schedule: formData.maintenance_schedule || null,
+        asset_id: formData.asset_id || null,
+        subcategory: formData.subcategory || null,
+        subcategory_uk: formData.subcategory_uk || null,
+        gps_coordinates: formData.gps_coordinates || null,
+        model: formData.model || null,
+        serial_number: formData.serial_number || null,
+        commissioning_date: formData.commissioning_date || null,
+        service_life_years: formData.service_life_years ? parseInt(formData.service_life_years) : null,
+        book_value: formData.book_value ? parseFloat(formData.book_value) : null,
+        residual_value: formData.residual_value ? parseFloat(formData.residual_value) : null,
+        responsible_department: formData.responsible_department || null,
+        responsible_person: formData.responsible_person || null,
+        legal_status: formData.legal_status,
+        condition_status: formData.condition_status,
+        utilization_rate: formData.utilization_rate ? parseFloat(formData.utilization_rate) : null,
+        supplier: formData.supplier || null
       };
 
       if (editingAsset) {
@@ -193,7 +267,23 @@ const InfrastructureModule = () => {
       status: 'Active',
       value: '',
       acquisition_date: '',
-      maintenance_schedule: ''
+      maintenance_schedule: '',
+      asset_id: '',
+      subcategory: '',
+      subcategory_uk: '',
+      gps_coordinates: '',
+      model: '',
+      serial_number: '',
+      commissioning_date: '',
+      service_life_years: '',
+      book_value: '',
+      residual_value: '',
+      responsible_department: '',
+      responsible_person: '',
+      legal_status: 'owned',
+      condition_status: 'good',
+      utilization_rate: '',
+      supplier: ''
     });
     setEditingAsset(null);
     setIsCreateDialogOpen(false);
@@ -212,27 +302,41 @@ const InfrastructureModule = () => {
       status: asset.status,
       value: asset.value?.toString() || '',
       acquisition_date: asset.acquisition_date || '',
-      maintenance_schedule: asset.maintenance_schedule || ''
+      maintenance_schedule: asset.maintenance_schedule || '',
+      asset_id: asset.asset_id || '',
+      subcategory: asset.subcategory || '',
+      subcategory_uk: asset.subcategory_uk || '',
+      gps_coordinates: asset.gps_coordinates || '',
+      model: asset.model || '',
+      serial_number: asset.serial_number || '',
+      commissioning_date: asset.commissioning_date || '',
+      service_life_years: asset.service_life_years?.toString() || '',
+      book_value: asset.book_value?.toString() || '',
+      residual_value: asset.residual_value?.toString() || '',
+      responsible_department: asset.responsible_department || '',
+      responsible_person: asset.responsible_person || '',
+      legal_status: asset.legal_status || 'owned',
+      condition_status: asset.condition_status || 'good',
+      utilization_rate: asset.utilization_rate?.toString() || '',
+      supplier: asset.supplier || ''
     });
     setEditingAsset(asset);
     setIsCreateDialogOpen(true);
   };
 
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'Active': return 'bg-green-100 text-green-800';
-      case 'Under Maintenance': return 'bg-yellow-100 text-yellow-800';
-      case 'Decommissioned': return 'bg-red-100 text-red-800';
-      case 'Planned': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const handleScheduleMaintenance = (asset: Asset) => {
+    setSelectedAsset(asset);
+    setIsMaintenanceScheduleOpen(true);
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'infrastructure': return <Zap className="h-5 w-5" />;
-      default: return <Building className="h-5 w-5" />;
-    }
+  const handleCreateRequest = (asset: Asset) => {
+    setSelectedAsset(asset);
+    setIsMaintenanceRequestOpen(true);
+  };
+
+  const handleViewDetails = (asset: Asset) => {
+    setSelectedAsset(asset);
+    setIsDetailsDialogOpen(true);
   };
 
   const filteredAssets = assets.filter(asset => {
@@ -246,6 +350,17 @@ const InfrastructureModule = () => {
     return nameMatch && statusMatch && categoryMatch && typeMatch;
   });
 
+  const getStats = () => {
+    const total = assets.length;
+    const active = assets.filter(a => a.status === 'Active').length;
+    const maintenance = assets.filter(a => a.status === 'Under Maintenance').length;
+    const totalValue = assets.reduce((sum, a) => sum + (a.value || 0), 0);
+    
+    return { total, active, maintenance, totalValue };
+  };
+
+  const stats = getStats();
+
   if (loading) {
     return (
       <div className="p-6 space-y-6">
@@ -258,15 +373,76 @@ const InfrastructureModule = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header with Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Building className="h-8 w-8 text-blue-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">
+                  {language === 'en' ? 'Total Assets' : 'Всього активів'}
+                </p>
+                <p className="text-2xl font-bold">{stats.total}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Zap className="h-8 w-8 text-green-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">
+                  {language === 'en' ? 'Active' : 'Активні'}
+                </p>
+                <p className="text-2xl font-bold">{stats.active}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <AlertTriangle className="h-8 w-8 text-yellow-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">
+                  {language === 'en' ? 'Maintenance' : 'На ТО'}
+                </p>
+                <p className="text-2xl font-bold">{stats.maintenance}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <BarChart3 className="h-8 w-8 text-purple-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">
+                  {language === 'en' ? 'Total Value' : 'Загальна вартість'}
+                </p>
+                <p className="text-2xl font-bold">
+                  {stats.totalValue.toLocaleString()} {language === 'en' ? 'UAH' : 'грн'}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
-            {language === 'en' ? 'Assets & Infrastructure' : 'Активи та інфраструктура'}
+            {language === 'en' ? 'Assets & Infrastructure Management' : 'Управління активами та інфраструктурою'}
           </h2>
           <p className="text-gray-600">
             {language === 'en' 
-              ? 'Manage municipal assets and infrastructure systems' 
-              : 'Керування муніципальними активами та інфраструктурними системами'}
+              ? 'Comprehensive asset management, maintenance scheduling, and infrastructure monitoring' 
+              : 'Комплексне управління активами, планування обслуговування та моніторинг інфраструктури'}
           </p>
         </div>
         
@@ -278,7 +454,7 @@ const InfrastructureModule = () => {
             </Button>
           </DialogTrigger>
           
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingAsset 
@@ -288,183 +464,406 @@ const InfrastructureModule = () => {
               </DialogTitle>
             </DialogHeader>
             
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">
-                    {language === 'en' ? 'Name (English)' : 'Назва (англійською)'} *
-                  </Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="name_uk">
-                    {language === 'en' ? 'Name (Ukrainian)' : 'Назва (українською)'} *
-                  </Label>
-                  <Input
-                    id="name_uk"
-                    value={formData.name_uk}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name_uk: e.target.value }))}
-                    required
-                  />
-                </div>
-              </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <Tabs defaultValue="basic" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="basic">{language === 'en' ? 'Basic' : 'Основне'}</TabsTrigger>
+                  <TabsTrigger value="financial">{language === 'en' ? 'Financial' : 'Фінанси'}</TabsTrigger>
+                  <TabsTrigger value="technical">{language === 'en' ? 'Technical' : 'Технічне'}</TabsTrigger>
+                  <TabsTrigger value="maintenance">{language === 'en' ? 'Maintenance' : 'Обслуговування'}</TabsTrigger>
+                </TabsList>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="type">
-                    {language === 'en' ? 'Type' : 'Тип'} *
-                  </Label>
-                  <Select
-                    value={formData.type}
-                    onValueChange={(value: 'asset' | 'infrastructure') => setFormData(prev => ({ ...prev, type: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="asset">
-                        {language === 'en' ? 'Asset' : 'Актив'}
-                      </SelectItem>
-                      <SelectItem value="infrastructure">
-                        {language === 'en' ? 'Infrastructure' : 'Інфраструктура'}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <TabsContent value="basic" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">
+                        {language === 'en' ? 'Name (English)' : 'Назва (англійською)'} *
+                      </Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="name_uk">
+                        {language === 'en' ? 'Name (Ukrainian)' : 'Назва (українською)'}
+                      </Label>
+                      <Input
+                        id="name_uk"
+                        value={formData.name_uk}
+                        onChange={(e) => setFormData(prev => ({ ...prev, name_uk: e.target.value }))}
+                      />
+                    </div>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="category">
-                    {language === 'en' ? 'Category' : 'Категорія'} *
-                  </Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) => {
-                      const categories = formData.type === 'asset' ? assetCategories : infrastructureCategories;
-                      const category = categories.find(cat => cat.value === value);
-                      setFormData(prev => ({ 
-                        ...prev, 
-                        category: value,
-                        category_uk: category?.value_uk || value
-                      }));
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={language === 'en' ? 'Select category' : 'Оберіть категорію'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(formData.type === 'asset' ? assetCategories : infrastructureCategories).map((category) => (
-                        <SelectItem key={category.value} value={category.value}>
-                          {language === 'en' ? category.value : category.value_uk}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="type">
+                        {language === 'en' ? 'Type' : 'Тип'} *
+                      </Label>
+                      <Select
+                        value={formData.type}
+                        onValueChange={(value: 'asset' | 'infrastructure') => setFormData(prev => ({ ...prev, type: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="asset">
+                            {language === 'en' ? 'Asset' : 'Актив'}
+                          </SelectItem>
+                          <SelectItem value="infrastructure">
+                            {language === 'en' ? 'Infrastructure' : 'Інфраструктура'}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="status">
-                    {language === 'en' ? 'Status' : 'Статус'}
-                  </Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {statusOptions.map((status) => (
-                        <SelectItem key={status.value} value={status.value}>
-                          {status.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="category">
+                        {language === 'en' ? 'Category' : 'Категорія'} *
+                      </Label>
+                      <Select
+                        value={formData.category}
+                        onValueChange={(value) => {
+                          const categories = formData.type === 'asset' ? assetCategories : infrastructureCategories;
+                          const category = categories.find(cat => cat.value === value);
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            category: value,
+                            category_uk: category?.value_uk || value
+                          }));
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={language === 'en' ? 'Select category' : 'Оберіть категорію'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(formData.type === 'asset' ? assetCategories : infrastructureCategories).map((category) => (
+                            <SelectItem key={category.value} value={category.value}>
+                              {language === 'en' ? category.value : category.value_uk}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="value">
-                    {language === 'en' ? 'Value (UAH)' : 'Вартість (грн)'}
-                  </Label>
-                  <Input
-                    id="value"
-                    type="number"
-                    value={formData.value}
-                    onChange={(e) => setFormData(prev => ({ ...prev, value: e.target.value }))}
-                    placeholder="0"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="acquisition_date">
-                    {language === 'en' ? 'Acquisition Date' : 'Дата придбання'}
-                  </Label>
-                  <Input
-                    id="acquisition_date"
-                    type="date"
-                    value={formData.acquisition_date}
-                    onChange={(e) => setFormData(prev => ({ ...prev, acquisition_date: e.target.value }))}
-                  />
-                </div>
-              </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="status">
+                        {language === 'en' ? 'Status' : 'Статус'}
+                      </Label>
+                      <Select
+                        value={formData.status}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {statusOptions.map((status) => (
+                            <SelectItem key={status.value} value={status.value}>
+                              {status.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="location">
-                  {language === 'en' ? 'Location' : 'Розташування'}
-                </Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                  placeholder={language === 'en' ? 'Enter location' : 'Введіть розташування'}
-                />
-              </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="location">
+                        {language === 'en' ? 'Location' : 'Розташування'}
+                      </Label>
+                      <Input
+                        id="location"
+                        value={formData.location}
+                        onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                        placeholder={language === 'en' ? 'Enter location' : 'Введіть розташування'}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="gps_coordinates">
+                        {language === 'en' ? 'GPS Coordinates' : 'GPS координати'}
+                      </Label>
+                      <Input
+                        id="gps_coordinates"
+                        value={formData.gps_coordinates}
+                        onChange={(e) => setFormData(prev => ({ ...prev, gps_coordinates: e.target.value }))}
+                        placeholder="50.4501, 30.5234"
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
 
-              <div className="space-y-2">
-                <Label htmlFor="maintenance_schedule">
-                  {language === 'en' ? 'Maintenance Schedule' : 'Графік обслуговування'}
-                </Label>
-                <Input
-                  id="maintenance_schedule"
-                  value={formData.maintenance_schedule}
-                  onChange={(e) => setFormData(prev => ({ ...prev, maintenance_schedule: e.target.value }))}
-                  placeholder={language === 'en' ? 'e.g., Monthly, Quarterly' : 'наприклад: Щомісяця, Щокварталу'}
-                />
-              </div>
+                <TabsContent value="financial" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="value">
+                        {language === 'en' ? 'Current Value (UAH)' : 'Поточна вартість (грн)'}
+                      </Label>
+                      <Input
+                        id="value"
+                        type="number"
+                        value={formData.value}
+                        onChange={(e) => setFormData(prev => ({ ...prev, value: e.target.value }))}
+                        placeholder="0"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="book_value">
+                        {language === 'en' ? 'Book Value (UAH)' : 'Балансова вартість (грн)'}
+                      </Label>
+                      <Input
+                        id="book_value"
+                        type="number"
+                        value={formData.book_value}
+                        onChange={(e) => setFormData(prev => ({ ...prev, book_value: e.target.value }))}
+                        placeholder="0"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="residual_value">
+                        {language === 'en' ? 'Residual Value (UAH)' : 'Залишкова вартість (грн)'}
+                      </Label>
+                      <Input
+                        id="residual_value"
+                        type="number"
+                        value={formData.residual_value}
+                        onChange={(e) => setFormData(prev => ({ ...prev, residual_value: e.target.value }))}
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="description">
-                    {language === 'en' ? 'Description (English)' : 'Опис (англійською)'}
-                  </Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    rows={3}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="description_uk">
-                    {language === 'en' ? 'Description (Ukrainian)' : 'Опис (українською)'}
-                  </Label>
-                  <Textarea
-                    id="description_uk"
-                    value={formData.description_uk}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description_uk: e.target.value }))}
-                    rows={3}
-                  />
-                </div>
-              </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="acquisition_date">
+                        {language === 'en' ? 'Acquisition Date' : 'Дата придбання'}
+                      </Label>
+                      <Input
+                        id="acquisition_date"
+                        type="date"
+                        value={formData.acquisition_date}
+                        onChange={(e) => setFormData(prev => ({ ...prev, acquisition_date: e.target.value }))}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="supplier">
+                        {language === 'en' ? 'Supplier' : 'Постачальник'}
+                      </Label>
+                      <Input
+                        id="supplier"
+                        value={formData.supplier}
+                        onChange={(e) => setFormData(prev => ({ ...prev, supplier: e.target.value }))}
+                        placeholder={language === 'en' ? 'Enter supplier name' : 'Введіть назву постачальника'}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="legal_status">
+                      {language === 'en' ? 'Legal Status' : 'Правовий статус'}
+                    </Label>
+                    <Select
+                      value={formData.legal_status}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, legal_status: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {legalStatusOptions.map((status) => (
+                          <SelectItem key={status.value} value={status.value}>
+                            {status.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="technical" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="asset_id">
+                        {language === 'en' ? 'Asset ID' : 'ID активу'}
+                      </Label>
+                      <Input
+                        id="asset_id"
+                        value={formData.asset_id}
+                        onChange={(e) => setFormData(prev => ({ ...prev, asset_id: e.target.value }))}
+                        placeholder="A-001"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="model">
+                        {language === 'en' ? 'Model' : 'Модель'}
+                      </Label>
+                      <Input
+                        id="model"
+                        value={formData.model}
+                        onChange={(e) => setFormData(prev => ({ ...prev, model: e.target.value }))}
+                        placeholder={language === 'en' ? 'Enter model' : 'Введіть модель'}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="serial_number">
+                        {language === 'en' ? 'Serial Number' : 'Серійний номер'}
+                      </Label>
+                      <Input
+                        id="serial_number"
+                        value={formData.serial_number}
+                        onChange={(e) => setFormData(prev => ({ ...prev, serial_number: e.target.value }))}
+                        placeholder="SN123456"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="service_life_years">
+                        {language === 'en' ? 'Service Life (years)' : 'Термін служби (років)'}
+                      </Label>
+                      <Input
+                        id="service_life_years"
+                        type="number"
+                        value={formData.service_life_years}
+                        onChange={(e) => setFormData(prev => ({ ...prev, service_life_years: e.target.value }))}
+                        placeholder="10"
+                        min="1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="commissioning_date">
+                        {language === 'en' ? 'Commissioning Date' : 'Дата введення в експлуатацію'}
+                      </Label>
+                      <Input
+                        id="commissioning_date"
+                        type="date"
+                        value={formData.commissioning_date}
+                        onChange={(e) => setFormData(prev => ({ ...prev, commissioning_date: e.target.value }))}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="condition_status">
+                        {language === 'en' ? 'Condition' : 'Стан'}
+                      </Label>
+                      <Select
+                        value={formData.condition_status}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, condition_status: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {conditionOptions.map((condition) => (
+                            <SelectItem key={condition.value} value={condition.value}>
+                              {condition.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="maintenance" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="responsible_department">
+                        {language === 'en' ? 'Responsible Department' : 'Відповідальний відділ'}
+                      </Label>
+                      <Input
+                        id="responsible_department"
+                        value={formData.responsible_department}
+                        onChange={(e) => setFormData(prev => ({ ...prev, responsible_department: e.target.value }))}
+                        placeholder={language === 'en' ? 'Enter department' : 'Введіть відділ'}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="responsible_person">
+                        {language === 'en' ? 'Responsible Person' : 'Відповідальна особа'}
+                      </Label>
+                      <Input
+                        id="responsible_person"
+                        value={formData.responsible_person}
+                        onChange={(e) => setFormData(prev => ({ ...prev, responsible_person: e.target.value }))}
+                        placeholder={language === 'en' ? 'Enter name' : 'Введіть ім\'я'}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="utilization_rate">
+                        {language === 'en' ? 'Utilization Rate (%)' : 'Коефіцієнт завантаженості (%)'}
+                      </Label>
+                      <Input
+                        id="utilization_rate"
+                        type="number"
+                        value={formData.utilization_rate}
+                        onChange={(e) => setFormData(prev => ({ ...prev, utilization_rate: e.target.value }))}
+                        placeholder="85"
+                        min="0"
+                        max="100"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="maintenance_schedule">
+                        {language === 'en' ? 'Maintenance Schedule' : 'Графік обслуговування'}
+                      </Label>
+                      <Input
+                        id="maintenance_schedule"
+                        value={formData.maintenance_schedule}
+                        onChange={(e) => setFormData(prev => ({ ...prev, maintenance_schedule: e.target.value }))}
+                        placeholder={language === 'en' ? 'e.g., Monthly, Quarterly' : 'наприклад: Щомісяця, Щокварталу'}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="description">
+                        {language === 'en' ? 'Description (English)' : 'Опис (англійською)'}
+                      </Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                        rows={3}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="description_uk">
+                        {language === 'en' ? 'Description (Ukrainian)' : 'Опис (українською)'}
+                      </Label>
+                      <Textarea
+                        id="description_uk"
+                        value={formData.description_uk}
+                        onChange={(e) => setFormData(prev => ({ ...prev, description_uk: e.target.value }))}
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
 
               <div className="flex justify-end space-x-2 pt-4">
                 <Button type="button" variant="outline" onClick={resetForm}>
@@ -536,238 +935,19 @@ const InfrastructureModule = () => {
       </Card>
 
       {/* Assets Grid */}
-      <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="all">
-            {language === 'en' ? 'All' : 'Всі'}
-          </TabsTrigger>
-          <TabsTrigger value="asset">
-            {language === 'en' ? 'Assets' : 'Активи'}
-          </TabsTrigger>
-          <TabsTrigger value="infrastructure">
-            {language === 'en' ? 'Infrastructure' : 'Інфраструктура'}
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAssets.map((asset) => (
-              <Card key={asset.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg flex items-center">
-                      {getTypeIcon(asset.type)}
-                      <span className="ml-2">
-                        {language === 'en' ? asset.name : asset.name_uk}
-                      </span>
-                    </CardTitle>
-                    <div className="flex space-x-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleEdit(asset)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDelete(asset.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Badge className={getStatusBadgeColor(asset.status)}>
-                      {statusOptions.find(s => s.value === asset.status)?.label || asset.status}
-                    </Badge>
-                    <span className="text-sm text-gray-500">
-                      {language === 'en' ? asset.category : asset.category_uk}
-                    </span>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="space-y-3">
-                  {(asset.description || asset.description_uk) && (
-                    <p className="text-sm text-gray-600">
-                      {language === 'en' ? asset.description : asset.description_uk}
-                    </p>
-                  )}
-                  
-                  {asset.location && (
-                    <div className="flex items-center text-sm text-gray-500">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {asset.location}
-                    </div>
-                  )}
-
-                  {asset.value && (
-                    <div className="flex items-center text-sm text-gray-500">
-                      <span className="font-medium">
-                        {language === 'en' ? 'Value: ' : 'Вартість: '}
-                        {asset.value.toLocaleString()} {language === 'en' ? 'UAH' : 'грн'}
-                      </span>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center text-xs text-gray-400">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {language === 'en' ? 'Updated: ' : 'Оновлено: '}
-                    {new Date(asset.updated_at).toLocaleDateString(language === 'en' ? 'en-US' : 'uk-UA')}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredAssets.map((asset) => (
+          <div key={asset.id} onClick={() => handleViewDetails(asset)} className="cursor-pointer">
+            <AssetCard
+              asset={asset}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onScheduleMaintenance={handleScheduleMaintenance}
+              onCreateRequest={handleCreateRequest}
+            />
           </div>
-        </TabsContent>
-
-        <TabsContent value="asset">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAssets.filter(asset => asset.type === 'asset').map((asset) => (
-              <Card key={asset.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg flex items-center">
-                      {getTypeIcon(asset.type)}
-                      <span className="ml-2">
-                        {language === 'en' ? asset.name : asset.name_uk}
-                      </span>
-                    </CardTitle>
-                    <div className="flex space-x-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleEdit(asset)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDelete(asset.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Badge className={getStatusBadgeColor(asset.status)}>
-                      {statusOptions.find(s => s.value === asset.status)?.label || asset.status}
-                    </Badge>
-                    <span className="text-sm text-gray-500">
-                      {language === 'en' ? asset.category : asset.category_uk}
-                    </span>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="space-y-3">
-                  {(asset.description || asset.description_uk) && (
-                    <p className="text-sm text-gray-600">
-                      {language === 'en' ? asset.description : asset.description_uk}
-                    </p>
-                  )}
-                  
-                  {asset.location && (
-                    <div className="flex items-center text-sm text-gray-500">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {asset.location}
-                    </div>
-                  )}
-
-                  {asset.value && (
-                    <div className="flex items-center text-sm text-gray-500">
-                      <span className="font-medium">
-                        {language === 'en' ? 'Value: ' : 'Вартість: '}
-                        {asset.value.toLocaleString()} {language === 'en' ? 'UAH' : 'грн'}
-                      </span>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center text-xs text-gray-400">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {language === 'en' ? 'Updated: ' : 'Оновлено: '}
-                    {new Date(asset.updated_at).toLocaleDateString(language === 'en' ? 'en-US' : 'uk-UA')}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="infrastructure">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAssets.filter(asset => asset.type === 'infrastructure').map((asset) => (
-              <Card key={asset.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg flex items-center">
-                      {getTypeIcon(asset.type)}
-                      <span className="ml-2">
-                        {language === 'en' ? asset.name : asset.name_uk}
-                      </span>
-                    </CardTitle>
-                    <div className="flex space-x-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleEdit(asset)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDelete(asset.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Badge className={getStatusBadgeColor(asset.status)}>
-                      {statusOptions.find(s => s.value === asset.status)?.label || asset.status}
-                    </Badge>
-                    <span className="text-sm text-gray-500">
-                      {language === 'en' ? asset.category : asset.category_uk}
-                    </span>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="space-y-3">
-                  {(asset.description || asset.description_uk) && (
-                    <p className="text-sm text-gray-600">
-                      {language === 'en' ? asset.description : asset.description_uk}
-                    </p>
-                  )}
-                  
-                  {asset.location && (
-                    <div className="flex items-center text-sm text-gray-500">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {asset.location}
-                    </div>
-                  )}
-
-                  {asset.value && (
-                    <div className="flex items-center text-sm text-gray-500">
-                      <span className="font-medium">
-                        {language === 'en' ? 'Value: ' : 'Вартість: '}
-                        {asset.value.toLocaleString()} {language === 'en' ? 'UAH' : 'грн'}
-                      </span>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center text-xs text-gray-400">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {language === 'en' ? 'Updated: ' : 'Оновлено: '}
-                    {new Date(asset.updated_at).toLocaleDateString(language === 'en' ? 'en-US' : 'uk-UA')}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
+        ))}
+      </div>
 
       {filteredAssets.length === 0 && (
         <Card>
@@ -778,6 +958,33 @@ const InfrastructureModule = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Dialogs */}
+      <MaintenanceRequestDialog
+        isOpen={isMaintenanceRequestOpen}
+        onClose={() => setIsMaintenanceRequestOpen(false)}
+        asset={selectedAsset}
+        onSuccess={() => {
+          loadAssets();
+          setIsMaintenanceRequestOpen(false);
+        }}
+      />
+
+      <MaintenanceScheduleDialog
+        isOpen={isMaintenanceScheduleOpen}
+        onClose={() => setIsMaintenanceScheduleOpen(false)}
+        asset={selectedAsset}
+        onSuccess={() => {
+          loadAssets();
+          setIsMaintenanceScheduleOpen(false);
+        }}
+      />
+
+      <AssetDetailsDialog
+        isOpen={isDetailsDialogOpen}
+        onClose={() => setIsDetailsDialogOpen(false)}
+        asset={selectedAsset}
+      />
     </div>
   );
 };

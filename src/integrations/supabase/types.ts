@@ -105,6 +105,255 @@ export type Database = {
         }
         Relationships: []
       }
+      asset_reservations: {
+        Row: {
+          approved_by: string | null
+          asset_id: string | null
+          created_at: string
+          end_date: string
+          id: string
+          notes: string | null
+          purpose: string
+          reserved_by: string | null
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          asset_id?: string | null
+          created_at?: string
+          end_date: string
+          id?: string
+          notes?: string | null
+          purpose: string
+          reserved_by?: string | null
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          asset_id?: string | null
+          created_at?: string
+          end_date?: string
+          id?: string
+          notes?: string | null
+          purpose?: string
+          reserved_by?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_reservations_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      infrastructure_projects: {
+        Row: {
+          actual_completion_date: string | null
+          actual_cost: number | null
+          affected_assets: string[] | null
+          budget: number | null
+          contractor: string | null
+          created_at: string
+          description: string | null
+          description_uk: string | null
+          documents: string[] | null
+          gps_coordinates: string | null
+          id: string
+          location: string | null
+          name: string
+          name_uk: string
+          planned_completion_date: string | null
+          progress_percentage: number | null
+          project_type: string
+          responsible_manager: string | null
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          actual_completion_date?: string | null
+          actual_cost?: number | null
+          affected_assets?: string[] | null
+          budget?: number | null
+          contractor?: string | null
+          created_at?: string
+          description?: string | null
+          description_uk?: string | null
+          documents?: string[] | null
+          gps_coordinates?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          name_uk: string
+          planned_completion_date?: string | null
+          progress_percentage?: number | null
+          project_type: string
+          responsible_manager?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          actual_completion_date?: string | null
+          actual_cost?: number | null
+          affected_assets?: string[] | null
+          budget?: number | null
+          contractor?: string | null
+          created_at?: string
+          description?: string | null
+          description_uk?: string | null
+          documents?: string[] | null
+          gps_coordinates?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          name_uk?: string
+          planned_completion_date?: string | null
+          progress_percentage?: number | null
+          project_type?: string
+          responsible_manager?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      maintenance_requests: {
+        Row: {
+          actual_cost: number | null
+          asset_id: string | null
+          assigned_to: string | null
+          completion_date: string | null
+          created_at: string
+          description: string | null
+          description_uk: string | null
+          estimated_cost: number | null
+          id: string
+          labor_hours: number | null
+          materials_used: Json | null
+          priority: string
+          request_type: string
+          requested_by: string | null
+          scheduled_date: string | null
+          status: string
+          title: string
+          title_uk: string
+          updated_at: string
+        }
+        Insert: {
+          actual_cost?: number | null
+          asset_id?: string | null
+          assigned_to?: string | null
+          completion_date?: string | null
+          created_at?: string
+          description?: string | null
+          description_uk?: string | null
+          estimated_cost?: number | null
+          id?: string
+          labor_hours?: number | null
+          materials_used?: Json | null
+          priority?: string
+          request_type: string
+          requested_by?: string | null
+          scheduled_date?: string | null
+          status?: string
+          title: string
+          title_uk: string
+          updated_at?: string
+        }
+        Update: {
+          actual_cost?: number | null
+          asset_id?: string | null
+          assigned_to?: string | null
+          completion_date?: string | null
+          created_at?: string
+          description?: string | null
+          description_uk?: string | null
+          estimated_cost?: number | null
+          id?: string
+          labor_hours?: number | null
+          materials_used?: Json | null
+          priority?: string
+          request_type?: string
+          requested_by?: string | null
+          scheduled_date?: string | null
+          status?: string
+          title?: string
+          title_uk?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_requests_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maintenance_schedules: {
+        Row: {
+          asset_id: string | null
+          checklist: Json | null
+          created_at: string
+          estimated_duration_hours: number | null
+          frequency_days: number
+          id: string
+          is_active: boolean | null
+          last_performed: string | null
+          maintenance_type: string
+          next_due: string
+          responsible_team: string | null
+          updated_at: string
+        }
+        Insert: {
+          asset_id?: string | null
+          checklist?: Json | null
+          created_at?: string
+          estimated_duration_hours?: number | null
+          frequency_days: number
+          id?: string
+          is_active?: boolean | null
+          last_performed?: string | null
+          maintenance_type: string
+          next_due: string
+          responsible_team?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string | null
+          checklist?: Json | null
+          created_at?: string
+          estimated_duration_hours?: number | null
+          frequency_days?: number
+          id?: string
+          is_active?: boolean | null
+          last_performed?: string | null
+          maintenance_type?: string
+          next_due?: string
+          responsible_team?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_schedules_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       metrics: {
         Row: {
           created_at: string | null
@@ -245,43 +494,121 @@ export type Database = {
       }
       resources: {
         Row: {
+          acquisition_date: string | null
+          asset_id: string | null
+          book_value: number | null
           category: string
           category_uk: string
+          commissioning_date: string | null
+          condition_status: string | null
           created_at: string | null
           description: string | null
           description_uk: string | null
+          documents: string[] | null
+          gps_coordinates: string | null
           id: string
+          images: string[] | null
+          last_inspection_date: string | null
+          legal_status: string | null
           location: string | null
+          maintenance_schedule: string | null
+          model: string | null
           name: string
           name_uk: string
+          next_maintenance_date: string | null
+          residual_value: number | null
+          responsible_department: string | null
+          responsible_person: string | null
+          serial_number: string | null
+          service_life_years: number | null
           status: string | null
+          subcategory: string | null
+          subcategory_uk: string | null
+          supplier: string | null
+          technical_specs: Json | null
+          type: string | null
           updated_at: string | null
+          utilization_rate: number | null
+          value: number | null
+          warranty_expiry_date: string | null
         }
         Insert: {
+          acquisition_date?: string | null
+          asset_id?: string | null
+          book_value?: number | null
           category: string
           category_uk: string
+          commissioning_date?: string | null
+          condition_status?: string | null
           created_at?: string | null
           description?: string | null
           description_uk?: string | null
+          documents?: string[] | null
+          gps_coordinates?: string | null
           id?: string
+          images?: string[] | null
+          last_inspection_date?: string | null
+          legal_status?: string | null
           location?: string | null
+          maintenance_schedule?: string | null
+          model?: string | null
           name: string
           name_uk: string
+          next_maintenance_date?: string | null
+          residual_value?: number | null
+          responsible_department?: string | null
+          responsible_person?: string | null
+          serial_number?: string | null
+          service_life_years?: number | null
           status?: string | null
+          subcategory?: string | null
+          subcategory_uk?: string | null
+          supplier?: string | null
+          technical_specs?: Json | null
+          type?: string | null
           updated_at?: string | null
+          utilization_rate?: number | null
+          value?: number | null
+          warranty_expiry_date?: string | null
         }
         Update: {
+          acquisition_date?: string | null
+          asset_id?: string | null
+          book_value?: number | null
           category?: string
           category_uk?: string
+          commissioning_date?: string | null
+          condition_status?: string | null
           created_at?: string | null
           description?: string | null
           description_uk?: string | null
+          documents?: string[] | null
+          gps_coordinates?: string | null
           id?: string
+          images?: string[] | null
+          last_inspection_date?: string | null
+          legal_status?: string | null
           location?: string | null
+          maintenance_schedule?: string | null
+          model?: string | null
           name?: string
           name_uk?: string
+          next_maintenance_date?: string | null
+          residual_value?: number | null
+          responsible_department?: string | null
+          responsible_person?: string | null
+          serial_number?: string | null
+          service_life_years?: number | null
           status?: string | null
+          subcategory?: string | null
+          subcategory_uk?: string | null
+          supplier?: string | null
+          technical_specs?: Json | null
+          type?: string | null
           updated_at?: string | null
+          utilization_rate?: number | null
+          value?: number | null
+          warranty_expiry_date?: string | null
         }
         Relationships: []
       }
@@ -347,6 +674,72 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      work_logs: {
+        Row: {
+          asset_id: string | null
+          cost: number | null
+          created_at: string
+          end_time: string | null
+          id: string
+          materials_used: Json | null
+          notes: string | null
+          performed_by: string | null
+          photos: string[] | null
+          request_id: string | null
+          start_time: string | null
+          work_description: string
+          work_description_uk: string
+          work_type: string
+        }
+        Insert: {
+          asset_id?: string | null
+          cost?: number | null
+          created_at?: string
+          end_time?: string | null
+          id?: string
+          materials_used?: Json | null
+          notes?: string | null
+          performed_by?: string | null
+          photos?: string[] | null
+          request_id?: string | null
+          start_time?: string | null
+          work_description: string
+          work_description_uk: string
+          work_type: string
+        }
+        Update: {
+          asset_id?: string | null
+          cost?: number | null
+          created_at?: string
+          end_time?: string | null
+          id?: string
+          materials_used?: Json | null
+          notes?: string | null
+          performed_by?: string | null
+          photos?: string[] | null
+          request_id?: string | null
+          start_time?: string | null
+          work_description?: string
+          work_description_uk?: string
+          work_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_logs_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_logs_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
