@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLanguage } from '@/hooks/useLanguage';
 import { toast } from 'sonner';
 import { addActivity } from '@/utils/activityUtils';
@@ -71,9 +71,9 @@ const SystemStatusDialog = ({ children }: SystemStatusDialogProps) => {
         .select('*')
         .in('type', ['system', 'database', 'network', 'security'])
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(15);
 
-      if (data) {
+      if (data && data.length > 0) {
         setRecentEvents(data);
       } else {
         // Generate mock technical events if no real data
@@ -82,29 +82,36 @@ const SystemStatusDialog = ({ children }: SystemStatusDialogProps) => {
             id: 1,
             title: language === 'en' ? 'Database backup completed' : 'Резервне копіювання БД завершено',
             type: 'database',
-            created_at: new Date(Date.now() - 1800000).toISOString(), // 30 min ago
+            created_at: new Date(Date.now() - 1800000).toISOString(),
             status: 'completed'
           },
           {
             id: 2,
             title: language === 'en' ? 'Network latency spike detected' : 'Виявлено сплеск затримки мережі',
             type: 'network',
-            created_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+            created_at: new Date(Date.now() - 3600000).toISOString(),
             status: 'resolved'
           },
           {
             id: 3,
             title: language === 'en' ? 'Security scan completed' : 'Сканування безпеки завершено',
             type: 'security',
-            created_at: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
+            created_at: new Date(Date.now() - 7200000).toISOString(),
             status: 'completed'
           },
           {
             id: 4,
             title: language === 'en' ? 'System maintenance completed' : 'Обслуговування системи завершено',
             type: 'system',
-            created_at: new Date(Date.now() - 28800000).toISOString(), // 8 hours ago
+            created_at: new Date(Date.now() - 28800000).toISOString(),
             status: 'completed'
+          },
+          {
+            id: 5,
+            title: language === 'en' ? 'Database optimization started' : 'Розпочато оптимізацію БД',
+            type: 'database',
+            created_at: new Date(Date.now() - 43200000).toISOString(),
+            status: 'pending'
           }
         ];
         setRecentEvents(mockEvents);
@@ -179,11 +186,11 @@ const SystemStatusDialog = ({ children }: SystemStatusDialogProps) => {
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
     
     if (diffInMinutes < 60) {
-      return `${diffInMinutes} хв тому`;
+      return `${diffInMinutes} ${language === 'en' ? 'min ago' : 'хв тому'}`;
     } else if (diffInMinutes < 1440) {
-      return `${Math.floor(diffInMinutes / 60)} год тому`;
+      return `${Math.floor(diffInMinutes / 60)} ${language === 'en' ? 'h ago' : 'год тому'}`;
     } else {
-      return `${Math.floor(diffInMinutes / 1440)} дн тому`;
+      return `${Math.floor(diffInMinutes / 1440)} ${language === 'en' ? 'd ago' : 'дн тому'}`;
     }
   };
 
@@ -260,26 +267,29 @@ const SystemStatusDialog = ({ children }: SystemStatusDialogProps) => {
             </CardContent>
           </Card>
 
-          {/* Recent Technical Events */}
+          {/* Recent Technical Events - Now Scrollable */}
           <Card>
             <CardHeader>
               <CardTitle>{language === 'en' ? 'Recent Technical Events' : 'Останні технічні події'}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {recentEvents.map((event, index) => (
-                  <div key={event.id || index} className="flex items-center justify-between p-3 border-l-4 border-l-blue-500 bg-gray-50">
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                      <span className="text-sm font-mono">{formatTimeAgo(event.created_at)}</span>
-                      <span className="ml-3">{event.title}</span>
+              <ScrollArea className="h-64">
+                <div className="space-y-3 pr-4">
+                  {recentEvents.map((event, index) => (
+                    <div key={event.id || index} className="flex items-center justify-between p-3 border-l-4 border-l-blue-500 bg-gray-50">
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-2 text-gray-500" />
+                        <span className="text-sm font-mono">{formatTimeAgo(event.created_at)}</span>
+                        <span className="ml-3">{event.title}</span>
+                      </div>
+                      {event.status === 'completed' && <CheckCircle className="h-4 w-4 text-green-500" />}
+                      {event.status === 'warning' && <AlertTriangle className="h-4 w-4 text-yellow-500" />}
+                      {event.status === 'resolved' && <CheckCircle className="h-4 w-4 text-blue-500" />}
+                      {event.status === 'pending' && <Clock className="h-4 w-4 text-gray-500" />}
                     </div>
-                    {event.status === 'completed' && <CheckCircle className="h-4 w-4 text-green-500" />}
-                    {event.status === 'warning' && <AlertTriangle className="h-4 w-4 text-yellow-500" />}
-                    {event.status === 'resolved' && <CheckCircle className="h-4 w-4 text-blue-500" />}
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </ScrollArea>
             </CardContent>
           </Card>
 

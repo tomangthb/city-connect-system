@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,9 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { toast } from 'sonner';
 import { addActivity } from '@/utils/activityUtils';
 import { Search, UserPlus, Edit, Trash2, Shield, Ban, CheckCircle } from 'lucide-react';
+import CreateUserDialog from './CreateUserDialog';
+import EditUserDialog from './EditUserDialog';
+import PermissionsDialog from './PermissionsDialog';
 
 interface UserManagementDialogProps {
   children: React.ReactNode;
@@ -185,10 +187,12 @@ const UserManagementDialog = ({ children }: UserManagementDialogProps) => {
                 className="pl-9"
               />
             </div>
-            <Button onClick={handleAddUser}>
-              <UserPlus className="h-4 w-4 mr-2" />
-              {language === 'en' ? 'Add User' : 'Додати користувача'}
-            </Button>
+            <CreateUserDialog onUserCreated={(newUser) => setUsers(prev => [...prev, { ...newUser, id: Date.now() }])}>
+              <Button onClick={handleAddUser}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                {language === 'en' ? 'Add User' : 'Додати користувача'}
+              </Button>
+            </CreateUserDialog>
           </div>
 
           {/* Users List */}
@@ -218,12 +222,16 @@ const UserManagementDialog = ({ children }: UserManagementDialogProps) => {
                       <span className="text-sm text-gray-500">
                         {language === 'en' ? 'Last login:' : 'Останній вхід:'} {user.lastLogin}
                       </span>
-                      <Button variant="ghost" size="sm" onClick={() => handleEditUser(user)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleManagePermissions(user)}>
-                        <Shield className="h-4 w-4" />
-                      </Button>
+                      <EditUserDialog user={user} onUserUpdated={(updatedUser) => setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u))}>
+                        <Button variant="ghost" size="sm" onClick={() => handleEditUser(user)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </EditUserDialog>
+                      <PermissionsDialog user={user} onPermissionsUpdated={(userId, newPermissions) => setUsers(prev => prev.map(u => u.id === userId ? { ...u, permissions: newPermissions } : u))}>
+                        <Button variant="ghost" size="sm" onClick={() => handleManagePermissions(user)}>
+                          <Shield className="h-4 w-4" />
+                        </Button>
+                      </PermissionsDialog>
                       <Button 
                         variant="ghost" 
                         size="sm" 
