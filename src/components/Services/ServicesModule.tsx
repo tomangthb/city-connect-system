@@ -1,31 +1,20 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
   Filter,
-  FileText,
-  Clock,
-  User,
-  CheckCircle,
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  Star
+  Plus
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import ServiceCard from './ServiceCard';
 import AddServiceDialog from './AddServiceDialog';
 import EditServiceDialog from './EditServiceDialog';
-import ManageServiceDialog from './ManageServiceDialog';
 import ServicesFilterDialog from './ServicesFilterDialog';
-import ServiceDetailDialog from './ServiceDetailDialog';
 import { addActivity } from '@/utils/activityUtils';
 
 interface ServicesModuleProps {
@@ -35,6 +24,7 @@ interface ServicesModuleProps {
 const ServicesModule = ({ userType }: ServicesModuleProps) => {
   const { language, t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingService, setEditingService] = useState<any>(null);
   const [filters, setFilters] = useState({
     category: 'all',
     status: 'all',
@@ -173,13 +163,16 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">{t('cityServices') || 'City Services'}</h2>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold text-gray-900">
+            {language === 'en' ? 'City Services Catalog' : 'Каталог міських послуг'}
+          </h1>
+          <p className="text-gray-600 mt-2">
             {userType === 'employee' 
-              ? (t('manageProvide') || 'Manage and provide city services')
-              : (t('accessRequest') || 'Access and request city services')}
+              ? (language === 'en' ? 'Comprehensive service management and administration' : 'Комплексне управління та адміністрування послуг')
+              : (language === 'en' ? 'Complete catalog of city services with detailed information and online booking' : 'Повний каталог міських послуг з детальною інформацією та онлайн записом')}
           </p>
         </div>
         {userType === 'employee' && (
@@ -192,146 +185,85 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
         )}
       </div>
 
-      {/* Search and Filter */}
-      <div className="flex space-x-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input 
-            placeholder={t('searchServices') || 'Search services, categories, life situations...'} 
-            className="pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+      {/* Search and Filters */}
+      <div className="bg-white rounded-lg border p-4 space-y-4">
+        <h3 className="font-semibold text-lg">
+          {language === 'en' ? 'Search & Filter Services' : 'Пошук та фільтрація послуг'}
+        </h3>
+        
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input 
+              placeholder={language === 'en' ? 
+                'Search by service name, category, life situation...' : 
+                'Пошук за назвою послуги, категорією, життєвою ситуацією...'
+              }
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <ServicesFilterDialog onFiltersApplied={setFilters}>
+            <Button variant="outline">
+              <Filter className="h-4 w-4 mr-2" />
+              {t('filter') || 'Filter'}
+            </Button>
+          </ServicesFilterDialog>
         </div>
-        <ServicesFilterDialog onFiltersApplied={setFilters}>
-          <Button variant="outline">
-            <Filter className="h-4 w-4 mr-2" />
-            {t('filter') || 'Filter'}
-          </Button>
-        </ServicesFilterDialog>
+
+        {/* Results info */}
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-gray-600">
+            {language === 'en' ? 
+              `Showing ${filteredServices.length} of ${services?.length || 0} services` :
+              `Показано ${filteredServices.length} з ${services?.length || 0} послуг`
+            }
+          </span>
+          {(filters.category !== 'all' || filters.status !== 'all' || filters.processingTime !== 'all' || filters.lifeSituation !== 'all') && (
+            <span className="text-blue-600 font-medium">
+              {language === 'en' ? 'Filters applied' : 'Застосовано фільтри'}
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Results info */}
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-gray-600">
-          {language === 'en' ? 
-            `Showing ${filteredServices.length} of ${services?.length || 0} services` :
-            `Показано ${filteredServices.length} з ${services?.length || 0} послуг`
-          }
-        </p>
-        {(filters.category !== 'all' || filters.status !== 'all' || filters.processingTime !== 'all' || filters.lifeSituation !== 'all') && (
-          <p className="text-sm text-blue-600">
-            {language === 'en' ? 'Filters applied' : 'Застосовано фільтри'}
-          </p>
+      {/* Services List */}
+      <div className="space-y-6">
+        {filteredServices.length > 0 ? (
+          filteredServices.map((service) => (
+            <ServiceCard
+              key={service.id}
+              service={service}
+              userType={userType}
+              onRequestService={handleRequestService}
+              onEdit={setEditingService}
+              onDelete={handleDeleteService}
+            />
+          ))
+        ) : (
+          <div className="text-center py-12 bg-white rounded-lg border">
+            <p className="text-gray-500 text-lg">
+              {language === 'en' ? 'No services found matching your criteria' : 'Не знайдено послуг за вашими критеріями'}
+            </p>
+            <p className="text-gray-400 text-sm mt-2">
+              {language === 'en' ? 'Try adjusting your search terms or filters' : 'Спробуйте змінити умови пошуку або фільтри'}
+            </p>
+          </div>
         )}
       </div>
 
-      {/* Services Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredServices.map((service) => {
-          const name = language === 'en' ? service.name : (service.name_uk || service.name);
-          const category = language === 'en' ? service.category : (service.category_uk || service.category);
-          const subcategory = language === 'en' ? service.subcategory : (service.subcategory_uk || service.subcategory);
-          const description = language === 'en' ? service.description : (service.description_uk || service.description);
-
-          return (
-            <Card key={service.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg line-clamp-2">{name}</CardTitle>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      <Badge variant="secondary">{category}</Badge>
-                      {subcategory && <Badge variant="outline" className="text-xs">{subcategory}</Badge>}
-                    </div>
-                  </div>
-                  {service.average_rating > 0 && (
-                    <div className="flex items-center gap-1 ml-2">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium">{service.average_rating.toFixed(1)}</span>
-                    </div>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{description}</p>
-                
-                <div className="space-y-2 mb-4">
-                  {service.processing_time && (
-                    <div className="flex items-center text-sm">
-                      <Clock className="h-4 w-4 mr-2 text-gray-400" />
-                      <span>{t('processing') || 'Processing'}: {service.processing_time}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center text-sm">
-                    <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                    <span>{t('status')}: {service.status}</span>
-                  </div>
-                  {userType === 'employee' && (
-                    <div className="flex items-center text-sm">
-                      <User className="h-4 w-4 mr-2 text-gray-400" />
-                      <span>{t('activeRequests') || 'Active requests'}: {service.requests || 0}</span>
-                    </div>
-                  )}
-                  {service.total_reviews > 0 && (
-                    <div className="flex items-center text-sm">
-                      <Star className="h-4 w-4 mr-2 text-gray-400" />
-                      <span>{service.total_reviews} {language === 'en' ? 'reviews' : 'відгуків'}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex space-x-2">
-                  {userType === 'employee' ? (
-                    <>
-                      <ManageServiceDialog service={service} onServiceUpdated={refetch}>
-                        <Button className="flex-1" size="sm">
-                          {t('manage') || 'Manage'}
-                        </Button>
-                      </ManageServiceDialog>
-                      <EditServiceDialog service={service} onServiceUpdated={refetch}>
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </EditServiceDialog>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="text-red-600 hover:text-red-700"
-                        onClick={() => handleDeleteService(service)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <ServiceDetailDialog service={service} userType={userType}>
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4 mr-1" />
-                          {language === 'en' ? 'Details' : 'Деталі'}
-                        </Button>
-                      </ServiceDetailDialog>
-                      <Button 
-                        className="flex-1" 
-                        size="sm"
-                        onClick={() => handleRequestService(service)}
-                        disabled={service.status !== 'Available'}
-                      >
-                        {t('requestServiceButton') || 'Request Service'}
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {filteredServices.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-gray-500">{t('noServicesFound') || 'No services found'}</p>
-        </div>
+      {/* Edit Service Dialog */}
+      {editingService && (
+        <EditServiceDialog 
+          service={editingService} 
+          onServiceUpdated={() => {
+            refetch();
+            setEditingService(null);
+          }}
+        >
+          <div />
+        </EditServiceDialog>
       )}
     </div>
   );
