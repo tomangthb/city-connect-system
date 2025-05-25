@@ -8,7 +8,7 @@ import ServicesModule from '@/components/Services/ServicesModule';
 import AppealsModule from '@/components/Appeals/AppealsModule';
 import ComprehensiveAppealsModule from '@/components/Appeals/ComprehensiveAppealsModule';
 import ResourcesModule from '@/components/Resources/ResourcesModule';
-import ResourcesManagement from '@/components/Resources/ResourcesManagement';
+import InfrastructureModule from '@/components/Infrastructure/InfrastructureModule';
 import NewsModule from '@/components/News/NewsModule';
 import DocumentsModule from '@/components/Documents/DocumentsModule';
 import AnalyticsModule from '@/components/Analytics/AnalyticsModule';
@@ -51,7 +51,7 @@ const MainApp = ({ userType }: MainAppProps) => {
           <AppealsModule userType={userType} />
         );
       case 'resources':
-        return userType === 'employee' ? <ResourcesManagement /> : <ResourcesModule userType={userType} />;
+        return userType === 'employee' ? <InfrastructureModule /> : <ResourcesModule userType={userType} />;
       case 'documents':
         return <DocumentsModule />;
       case 'analytics':

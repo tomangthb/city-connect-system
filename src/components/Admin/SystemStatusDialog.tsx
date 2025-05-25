@@ -208,97 +208,99 @@ const SystemStatusDialog = ({ children }: SystemStatusDialogProps) => {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>{language === 'en' ? 'System Status' : 'Статус системи'}</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
-          {/* Overall Status */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                {overallStatus === 'healthy' ? (
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                ) : (
-                  <AlertTriangle className="h-5 w-5 text-yellow-500 mr-2" />
-                )}
-                {language === 'en' ? 'Overall System Health' : 'Загальний стан системи'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={`text-2xl font-bold ${overallStatus === 'healthy' ? 'text-green-600' : 'text-yellow-600'}`}>
-                    {systemHealth.uptime}
-                  </p>
-                  <p className="text-sm text-gray-500">{language === 'en' ? 'System Uptime' : 'Час роботи системи'}</p>
+        <ScrollArea className="max-h-[calc(90vh-120px)]">
+          <div className="space-y-6 pr-4">
+            {/* Overall Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  {overallStatus === 'healthy' ? (
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                  ) : (
+                    <AlertTriangle className="h-5 w-5 text-yellow-500 mr-2" />
+                  )}
+                  {language === 'en' ? 'Overall System Health' : 'Загальний стан системи'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className={`text-2xl font-bold ${overallStatus === 'healthy' ? 'text-green-600' : 'text-yellow-600'}`}>
+                      {systemHealth.uptime}
+                    </p>
+                    <p className="text-sm text-gray-500">{language === 'en' ? 'System Uptime' : 'Час роботи системи'}</p>
+                  </div>
+                  <Button onClick={handleRefreshStatus}>
+                    {language === 'en' ? 'Refresh Status' : 'Оновити статус'}
+                  </Button>
                 </div>
-                <Button onClick={handleRefreshStatus}>
-                  {language === 'en' ? 'Refresh Status' : 'Оновити статус'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Service Status */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{language === 'en' ? 'Service Status' : 'Статус сервісів'}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                {systemServices.map((service, index) => {
-                  const Icon = service.icon;
-                  return (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center">
-                        <Icon className="h-5 w-5 mr-3 text-gray-600" />
-                        <div>
-                          <p className="font-medium">{service.name}</p>
-                          <p className="text-sm text-gray-500">{language === 'en' ? 'Uptime:' : 'Час роботи:'} {service.uptime}</p>
+            {/* Service Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{language === 'en' ? 'Service Status' : 'Статус сервісів'}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  {systemServices.map((service, index) => {
+                    const Icon = service.icon;
+                    return (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center">
+                          <Icon className="h-5 w-5 mr-3 text-gray-600" />
+                          <div>
+                            <p className="font-medium">{service.name}</p>
+                            <p className="text-sm text-gray-500">{language === 'en' ? 'Uptime:' : 'Час роботи:'} {service.uptime}</p>
+                          </div>
                         </div>
+                        {getStatusBadge(service.status)}
                       </div>
-                      {getStatusBadge(service.status)}
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Technical Events - Now Scrollable */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{language === 'en' ? 'Recent Technical Events' : 'Останні технічні події'}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-64">
-                <div className="space-y-3 pr-4">
-                  {recentEvents.map((event, index) => (
-                    <div key={event.id || index} className="flex items-center justify-between p-3 border-l-4 border-l-blue-500 bg-gray-50">
-                      <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                        <span className="text-sm font-mono">{formatTimeAgo(event.created_at)}</span>
-                        <span className="ml-3">{event.title}</span>
-                      </div>
-                      {event.status === 'completed' && <CheckCircle className="h-4 w-4 text-green-500" />}
-                      {event.status === 'warning' && <AlertTriangle className="h-4 w-4 text-yellow-500" />}
-                      {event.status === 'resolved' && <CheckCircle className="h-4 w-4 text-blue-500" />}
-                      {event.status === 'pending' && <Clock className="h-4 w-4 text-gray-500" />}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <div className="flex justify-end">
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              {language === 'en' ? 'Close' : 'Закрити'}
-            </Button>
+            {/* Recent Technical Events - Scrollable */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{language === 'en' ? 'Recent Technical Events' : 'Останні технічні події'}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-48">
+                  <div className="space-y-3 pr-4">
+                    {recentEvents.map((event, index) => (
+                      <div key={event.id || index} className="flex items-center justify-between p-3 border-l-4 border-l-blue-500 bg-gray-50">
+                        <div className="flex items-center">
+                          <Clock className="h-4 w-4 mr-2 text-gray-500" />
+                          <span className="text-sm font-mono">{formatTimeAgo(event.created_at)}</span>
+                          <span className="ml-3">{event.title}</span>
+                        </div>
+                        {event.status === 'completed' && <CheckCircle className="h-4 w-4 text-green-500" />}
+                        {event.status === 'warning' && <AlertTriangle className="h-4 w-4 text-yellow-500" />}
+                        {event.status === 'resolved' && <CheckCircle className="h-4 w-4 text-blue-500" />}
+                        {event.status === 'pending' && <Clock className="h-4 w-4 text-gray-500" />}
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                {language === 'en' ? 'Close' : 'Закрити'}
+              </Button>
+            </div>
           </div>
-        </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

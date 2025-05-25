@@ -40,20 +40,20 @@ export const navigationTranslations: Record<string, TranslationRecord> = {
     uk: 'Панель управління'
   },
   resourceManagement: {
-    en: 'Resource Management',
-    uk: 'Управління ресурсами'
+    en: 'Assets & Infrastructure',
+    uk: 'Активи та інфраструктура'
   },
   cityServices: {
-    en: 'City Services',
-    uk: 'Міські послуги'
+    en: 'Administrative Services',
+    uk: 'Адміністративні послуги'
   },
   citizensAppeals: {
     en: 'Citizens Appeals',
     uk: 'Звернення громадян'
   },
   documentManagement: {
-    en: 'Document Management',
-    uk: 'Управління документами'
+    en: 'Document Workflow',
+    uk: 'Документообіг'
   },
   analyticsReports: {
     en: 'Analytics & Reports',
