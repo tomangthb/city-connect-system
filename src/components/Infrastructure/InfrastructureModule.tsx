@@ -91,7 +91,14 @@ const InfrastructureModule = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setAssets(data || []);
+      
+      // Transform the data to include type and ensure compatibility
+      const transformedData = (data || []).map(item => ({
+        ...item,
+        type: (item.type as 'asset' | 'infrastructure') || 'asset'
+      })) as Asset[];
+      
+      setAssets(transformedData);
     } catch (error) {
       console.error('Error loading assets:', error);
       toast.error(language === 'en' ? 'Error loading assets' : 'Помилка завантаження активів');

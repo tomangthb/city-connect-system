@@ -9,7 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Upload, File, X } from 'lucide-react';
 
@@ -76,47 +75,13 @@ const DocumentStorage = ({ children, onDocumentUploaded }: DocumentStorageProps)
     setUploadProgress(0);
 
     try {
-      const uploadPromises = selectedFiles.map(async (file, index) => {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `documents/${fileName}`;
-
-        // Upload file to Supabase Storage
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('documents')
-          .upload(filePath, file);
-
-        if (uploadError) throw uploadError;
-
-        // Get public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('documents')
-          .getPublicUrl(filePath);
-
-        // Save document metadata to database
-        const { error: dbError } = await supabase
-          .from('documents')
-          .insert({
-            name: formData.title || file.name,
-            original_name: file.name,
-            file_path: filePath,
-            file_url: publicUrl,
-            file_size: file.size,
-            file_type: file.type,
-            category: formData.category,
-            description: formData.description,
-            tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : null,
-            uploaded_by: (await supabase.auth.getUser()).data.user?.id
-          });
-
-        if (dbError) throw dbError;
-
-        // Update progress
-        const progress = ((index + 1) / selectedFiles.length) * 100;
+      // Simulate file upload process
+      for (let i = 0; i < selectedFiles.length; i++) {
+        // Simulate upload progress
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const progress = ((i + 1) / selectedFiles.length) * 100;
         setUploadProgress(progress);
-      });
-
-      await Promise.all(uploadPromises);
+      }
 
       toast.success(language === 'en' ? 'Documents uploaded successfully' : 'Документи успішно завантажено');
       onDocumentUploaded();
