@@ -5,13 +5,15 @@ import { Input } from '@/components/ui/input';
 import { 
   Search, 
   Filter,
-  Plus
+  Plus,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import ServiceCard from './ServiceCard';
+import ServiceCategorySection from './ServiceCategorySection';
 import AddServiceDialog from './AddServiceDialog';
 import EditServiceDialog from './EditServiceDialog';
 import ServicesFilterDialog from './ServicesFilterDialog';
@@ -38,7 +40,7 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
       const { data, error } = await supabase
         .from('services')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('category', { ascending: true });
       
       if (error) {
         console.error('Error fetching services:', error);
@@ -66,39 +68,31 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
     
     if (!matchesSearch) return false;
 
-    // Category filter
-    if (filters.category !== 'all' && service.category !== filters.category) {
-      return false;
-    }
-
-    // Status filter
-    if (filters.status !== 'all' && service.status !== filters.status) {
-      return false;
-    }
-
-    // Processing time filter
+    // Apply filters
+    if (filters.category !== 'all' && service.category !== filters.category) return false;
+    if (filters.status !== 'all' && service.status !== filters.status) return false;
     if (filters.processingTime !== 'all') {
       const processingTime = service.processing_time || '';
-      if (filters.processingTime === 'fast' && !processingTime.includes('1-3')) {
-        return false;
-      }
-      if (filters.processingTime === 'medium' && !processingTime.includes('week')) {
-        return false;
-      }
-      if (filters.processingTime === 'slow' && !processingTime.includes('2+')) {
-        return false;
-      }
+      if (filters.processingTime === 'fast' && !processingTime.includes('1-3')) return false;
+      if (filters.processingTime === 'medium' && !processingTime.includes('week')) return false;
+      if (filters.processingTime === 'slow' && !processingTime.includes('2+')) return false;
     }
-
-    // Life situation filter
     if (filters.lifeSituation !== 'all') {
-      if (!lifeSituations || !lifeSituations.includes(filters.lifeSituation)) {
-        return false;
-      }
+      if (!lifeSituations || !lifeSituations.includes(filters.lifeSituation)) return false;
     }
 
     return true;
   }) || [];
+
+  // Group services by category
+  const servicesByCategory = filteredServices.reduce((acc, service) => {
+    const category = language === 'en' ? service.category : (service.category_uk || service.category);
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(service);
+    return acc;
+  }, {} as Record<string, any[]>);
 
   const handleRequestService = async (service: any) => {
     try {
@@ -110,7 +104,6 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
         status: 'pending'
       });
 
-      // Update request count
       await supabase
         .from('services')
         .update({ requests: (service.requests || 0) + 1 })
@@ -186,7 +179,7 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white rounded-lg border p-4 space-y-4">
+      <div className="bg-white rounded-lg border p-6 space-y-4">
         <h3 className="font-semibold text-lg">
           {language === 'en' ? 'Search & Filter Services' : 'Пошук та фільтрація послуг'}
         </h3>
@@ -207,7 +200,7 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
           <ServicesFilterDialog onFiltersApplied={setFilters}>
             <Button variant="outline">
               <Filter className="h-4 w-4 mr-2" />
-              {t('filter') || 'Filter'}
+              {t('filter') || 'Фільтр'}
             </Button>
           </ServicesFilterDialog>
         </div>
@@ -228,13 +221,14 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
         </div>
       </div>
 
-      {/* Services List */}
-      <div className="space-y-6">
-        {filteredServices.length > 0 ? (
-          filteredServices.map((service) => (
-            <ServiceCard
-              key={service.id}
-              service={service}
+      {/* Services Catalog by Categories */}
+      <div className="space-y-8">
+        {Object.keys(servicesByCategory).length > 0 ? (
+          Object.entries(servicesByCategory).map(([category, categoryServices]) => (
+            <ServiceCategorySection
+              key={category}
+              category={category}
+              services={categoryServices}
               userType={userType}
               onRequestService={handleRequestService}
               onEdit={setEditingService}
