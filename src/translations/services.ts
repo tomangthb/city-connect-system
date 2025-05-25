@@ -1,3 +1,4 @@
+
 import { TranslationRecord } from './types';
 
 export const servicesTranslations: Record<string, TranslationRecord> = {
@@ -29,6 +30,10 @@ export const servicesTranslations: Record<string, TranslationRecord> = {
   requestServiceButton: {
     en: 'Request Service',
     uk: 'Запросити послугу'
+  },
+  manage: {
+    en: 'Manage',
+    uk: 'Управляти'
   },
 
   // Services management
@@ -90,11 +95,11 @@ export const servicesTranslations: Record<string, TranslationRecord> = {
   },
   available: {
     en: 'Available',
-    uk: 'Доступно'
+    uk: 'Доступна'
   },
   unavailable: {
     en: 'Unavailable',
-    uk: 'Недоступно'
+    uk: 'Недоступна'
   },
   maintenance: {
     en: 'Maintenance',
@@ -119,5 +124,113 @@ export const servicesTranslations: Record<string, TranslationRecord> = {
   cityServices: {
     en: 'City Services',
     uk: 'Міські послуги'
+  },
+  serviceUpdated: {
+    en: 'Service updated successfully',
+    uk: 'Послугу успішно оновлено'
+  },
+  errorUpdatingService: {
+    en: 'Error updating service',
+    uk: 'Помилка оновлення послуги'
+  },
+  enterServiceName: {
+    en: 'Enter service name',
+    uk: 'Введіть назву послуги'
+  },
+  enterServiceNameUk: {
+    en: 'Enter service name in Ukrainian',
+    uk: 'Введіть назву послуги українською'
+  },
+  selectCategory: {
+    en: 'Select category',
+    uk: 'Оберіть категорію'
+  },
+  financial: {
+    en: 'Financial',
+    uk: 'Фінансові'
+  },
+  administrative: {
+    en: 'Administrative',
+    uk: 'Адміністративні'
+  },
+  technical: {
+    en: 'Technical',
+    uk: 'Технічні'
+  },
+  social: {
+    en: 'Social',
+    uk: 'Соціальні'
+  },
+  enterDescription: {
+    en: 'Enter service description',
+    uk: 'Введіть опис послуги'
+  },
+  enterDescriptionUk: {
+    en: 'Enter service description in Ukrainian',
+    uk: 'Введіть опис послуги українською'
+  },
+  enterProcessingTime: {
+    en: 'Enter processing time',
+    uk: 'Введіть час обробки'
+  },
+  selectStatus: {
+    en: 'Select status',
+    uk: 'Оберіть статус'
+  },
+  updating: {
+    en: 'Updating...',
+    uk: 'Оновлення...'
+  },
+  update: {
+    en: 'Update',
+    uk: 'Оновити'
+  },
+  editService: {
+    en: 'Edit Service',
+    uk: 'Редагувати послугу'
+  },
+  manageService: {
+    en: 'Manage Service',
+    uk: 'Управління послугою'
+  },
+  serviceDetails: {
+    en: 'Service Details',
+    uk: 'Деталі послуги'
+  },
+  serviceStatistics: {
+    en: 'Service Statistics',
+    uk: 'Статистика послуги'
+  },
+  totalRequests: {
+    en: 'Total Requests',
+    uk: 'Загальна кількість запитів'
+  },
+  completedRequests: {
+    en: 'Completed Requests',
+    uk: 'Виконані запити'
+  },
+  pendingRequests: {
+    en: 'Pending Requests',
+    uk: 'Запити на розгляді'
+  },
+  averageProcessingTime: {
+    en: 'Average Processing Time',
+    uk: 'Середній час обробки'
+  },
+  activateService: {
+    en: 'Activate Service',
+    uk: 'Активувати послугу'
+  },
+  deactivateService: {
+    en: 'Deactivate Service',
+    uk: 'Деактивувати послугу'
+  },
+  serviceActivated: {
+    en: 'Service activated successfully',
+    uk: 'Послугу успішно активовано'
+  },
+  serviceDeactivated: {
+    en: 'Service deactivated successfully',
+    uk: 'Послугу успішно деактивовано'
   }
 };

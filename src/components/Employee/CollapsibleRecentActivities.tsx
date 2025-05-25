@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp, MessageSquare, CheckCircle, FileText, AlertCircle } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { MessageSquare, CheckCircle, FileText, AlertCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,26 +10,19 @@ import ActivityFilter from './ActivityFilter';
 
 const CollapsibleRecentActivities = () => {
   const { t } = useLanguage();
-  const [isExpanded, setIsExpanded] = useState(false);
   const [typeFilter, setTypeFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
 
   // Fetch activities with filtering
   const { data: activitiesData } = useQuery({
-    queryKey: ['activities', typeFilter, priorityFilter, statusFilter, isExpanded],
+    queryKey: ['activities', typeFilter, priorityFilter, statusFilter],
     queryFn: async () => {
       let query = supabase
         .from('activities')
         .select('*')
-        .order('created_at', { ascending: false });
-
-      // Show only recent 3 activities when collapsed, all when expanded
-      if (!isExpanded) {
-        query = query.limit(3);
-      } else {
-        query = query.limit(20);
-      }
+        .order('created_at', { ascending: false })
+        .limit(50); // Load more activities for scrolling
 
       if (typeFilter !== 'all') {
         query = query.eq('type', typeFilter);
@@ -99,84 +92,54 @@ const CollapsibleRecentActivities = () => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>{t('recentActivities')}</CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2"
-          >
-            {isExpanded ? (
-              <>
-                Згорнути <ChevronUp className="h-4 w-4" />
-              </>
-            ) : (
-              <>
-                Розгорнути <ChevronDown className="h-4 w-4" />
-              </>
-            )}
-          </Button>
-        </div>
-        {isExpanded && (
-          <ActivityFilter
-            selectedType={typeFilter}
-            selectedPriority={priorityFilter}
-            selectedStatus={statusFilter}
-            onTypeChange={setTypeFilter}
-            onPriorityChange={setPriorityFilter}
-            onStatusChange={setStatusFilter}
-            onClearFilters={clearFilters}
-          />
-        )}
+        <CardTitle>{t('recentActivities')}</CardTitle>
+        <ActivityFilter
+          selectedType={typeFilter}
+          selectedPriority={priorityFilter}
+          selectedStatus={statusFilter}
+          onTypeChange={setTypeFilter}
+          onPriorityChange={setPriorityFilter}
+          onStatusChange={setStatusFilter}
+          onClearFilters={clearFilters}
+        />
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {activitiesData && activitiesData.length > 0 ? (
-            activitiesData.map((activity) => (
-              <div 
-                key={activity.id} 
-                className={`flex items-center space-x-3 p-3 rounded-lg border-l-4 ${getPriorityColor(activity.priority)} transition-colors hover:shadow-sm`}
-              >
-                <div className="flex-shrink-0">
-                  {getActivityIcon(activity.type)}
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                  {activity.description && (
-                    <p className="text-xs text-gray-600 mt-1">{activity.description}</p>
-                  )}
-                  <div className="flex items-center justify-between mt-2">
-                    <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                      activity.status === 'completed' ? 'bg-green-100 text-green-800' :
-                      activity.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-blue-100 text-blue-800'
-                    }`}>
-                      {getStatusText(activity.status)}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {formatTimeAgo(activity.created_at)}
-                    </span>
+        <ScrollArea className="h-96 w-full pr-4">
+          <div className="space-y-3">
+            {activitiesData && activitiesData.length > 0 ? (
+              activitiesData.map((activity) => (
+                <div 
+                  key={activity.id} 
+                  className={`flex items-center space-x-3 p-3 rounded-lg border-l-4 ${getPriorityColor(activity.priority)} transition-colors hover:shadow-sm`}
+                >
+                  <div className="flex-shrink-0">
+                    {getActivityIcon(activity.type)}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">{activity.title}</p>
+                    {activity.description && (
+                      <p className="text-xs text-gray-600 mt-1">{activity.description}</p>
+                    )}
+                    <div className="flex items-center justify-between mt-2">
+                      <span className={`inline-block px-2 py-1 text-xs rounded-full ${
+                        activity.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        activity.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
+                        {getStatusText(activity.status)}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {formatTimeAgo(activity.created_at)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500 text-center py-4">{t('noActivitiesFound')}</p>
-          )}
-          {!isExpanded && activitiesData && activitiesData.length > 0 && (
-            <div className="text-center pt-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsExpanded(true)}
-                className="text-sm text-gray-600"
-              >
-                Показати всі активності...
-              </Button>
-            </div>
-          )}
-        </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-center py-4">{t('noActivitiesFound')}</p>
+            )}
+          </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   );

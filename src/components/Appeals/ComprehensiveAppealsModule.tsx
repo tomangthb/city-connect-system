@@ -3,13 +3,14 @@ import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAppeals } from '@/hooks/useAppeals';
-import { FileText, Download, Settings } from 'lucide-react';
-import { toast } from 'sonner';
+import { Download, Settings } from 'lucide-react';
 import AppealFilters from './AppealFilters';
 import AppealsTable from './AppealsTable';
 import AppealDetailsDialog from './AppealDetailsDialog';
 import AppealReviewDialog from './AppealReviewDialog';
 import CreateAppealDialog from './CreateAppealDialog';
+import AppealsExportDialog from './AppealsExportDialog';
+import AppealsSettingsDialog from './AppealsSettingsDialog';
 
 const ComprehensiveAppealsModule = () => {
   const { data: appeals, isLoading, refetch } = useAppeals();
@@ -95,10 +96,6 @@ const ComprehensiveAppealsModule = () => {
     setDateFilter('all');
   };
 
-  const handleExport = () => {
-    toast.info('Функція експорту буде доступна найближчим часом');
-  };
-
   const getStatsData = () => {
     if (!appeals) return { total: 0, new: 0, inProgress: 0, completed: 0 };
     
@@ -131,14 +128,18 @@ const ComprehensiveAppealsModule = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-2" />
-            Експорт
-          </Button>
-          <Button variant="outline">
-            <Settings className="h-4 w-4 mr-2" />
-            Налаштування
-          </Button>
+          <AppealsExportDialog>
+            <Button variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Експорт
+            </Button>
+          </AppealsExportDialog>
+          <AppealsSettingsDialog>
+            <Button variant="outline">
+              <Settings className="h-4 w-4 mr-2" />
+              Налаштування
+            </Button>
+          </AppealsSettingsDialog>
           <CreateAppealDialog onAppealCreated={refetch} />
         </div>
       </div>

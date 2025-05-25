@@ -22,6 +22,7 @@ import { toast } from 'sonner';
 import AddServiceDialog from './AddServiceDialog';
 import EditServiceDialog from './EditServiceDialog';
 import ManageServiceDialog from './ManageServiceDialog';
+import ServicesFilterDialog from './ServicesFilterDialog';
 import { addActivity } from '@/utils/activityUtils';
 
 interface ServicesModuleProps {
@@ -31,6 +32,11 @@ interface ServicesModuleProps {
 const ServicesModule = ({ userType }: ServicesModuleProps) => {
   const { language, t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+    category: 'all',
+    status: 'all',
+    processingTime: 'all'
+  });
 
   const { data: services, isLoading, refetch } = useQuery({
     queryKey: ['services'],
@@ -53,9 +59,38 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
     const category = language === 'en' ? service.category : (service.category_uk || service.category);
     const description = language === 'en' ? service.description : (service.description_uk || service.description);
     
-    return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    // Search filter
+    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) ||
            category.toLowerCase().includes(searchTerm.toLowerCase()) ||
            (description && description.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    if (!matchesSearch) return false;
+
+    // Category filter
+    if (filters.category !== 'all' && service.category !== filters.category) {
+      return false;
+    }
+
+    // Status filter
+    if (filters.status !== 'all' && service.status !== filters.status) {
+      return false;
+    }
+
+    // Processing time filter
+    if (filters.processingTime !== 'all') {
+      const processingTime = service.processing_time || '';
+      if (filters.processingTime === 'fast' && !processingTime.includes('1-3')) {
+        return false;
+      }
+      if (filters.processingTime === 'medium' && !processingTime.includes('week')) {
+        return false;
+      }
+      if (filters.processingTime === 'slow' && !processingTime.includes('2+')) {
+        return false;
+      }
+    }
+
+    return true;
   }) || [];
 
   const handleRequestService = async (service: any) => {
@@ -167,10 +202,27 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="outline">
-          <Filter className="h-4 w-4 mr-2" />
-          {t('filter') || 'Filter'}
-        </Button>
+        <ServicesFilterDialog onFiltersApplied={setFilters}>
+          <Button variant="outline">
+            <Filter className="h-4 w-4 mr-2" />
+            {t('filter') || 'Filter'}
+          </Button>
+        </ServicesFilterDialog>
+      </div>
+
+      {/* Results info */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-gray-600">
+          {language === 'en' ? 
+            `Showing ${filteredServices.length} of ${services?.length || 0} services` :
+            `Показано ${filteredServices.length} з ${services?.length || 0} послуг`
+          }
+        </p>
+        {(filters.category !== 'all' || filters.status !== 'all' || filters.processingTime !== 'all') && (
+          <p className="text-sm text-blue-600">
+            {language === 'en' ? 'Filters applied' : 'Застосовано фільтри'}
+          </p>
+        )}
       </div>
 
       {/* Services Grid */}

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface PreferencesFormProps {
   language: 'en' | 'uk';
@@ -20,6 +21,12 @@ const PreferencesForm = ({
   onDarkModeChange 
 }: PreferencesFormProps) => {
   const { t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
+
+  const handleThemeToggle = (checked: boolean) => {
+    toggleTheme();
+    onDarkModeChange(checked);
+  };
 
   return (
     <Card>
@@ -53,8 +60,8 @@ const PreferencesForm = ({
             <p className="text-sm text-gray-600">{t('switchDarkTheme')}</p>
           </div>
           <Switch 
-            checked={darkMode} 
-            onCheckedChange={onDarkModeChange}
+            checked={theme === 'dark'} 
+            onCheckedChange={handleThemeToggle}
           />
         </div>
       </CardContent>
