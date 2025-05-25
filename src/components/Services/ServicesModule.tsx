@@ -13,7 +13,9 @@ import {
   CheckCircle,
   Plus,
   Edit,
-  Trash2
+  Trash2,
+  Eye,
+  Star
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
@@ -23,6 +25,7 @@ import AddServiceDialog from './AddServiceDialog';
 import EditServiceDialog from './EditServiceDialog';
 import ManageServiceDialog from './ManageServiceDialog';
 import ServicesFilterDialog from './ServicesFilterDialog';
+import ServiceDetailDialog from './ServiceDetailDialog';
 import { addActivity } from '@/utils/activityUtils';
 
 interface ServicesModuleProps {
@@ -35,7 +38,8 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
   const [filters, setFilters] = useState({
     category: 'all',
     status: 'all',
-    processingTime: 'all'
+    processingTime: 'all',
+    lifeSituation: 'all'
   });
 
   const { data: services, isLoading, refetch } = useQuery({
@@ -57,12 +61,18 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
   const filteredServices = services?.filter(service => {
     const name = language === 'en' ? service.name : (service.name_uk || service.name);
     const category = language === 'en' ? service.category : (service.category_uk || service.category);
+    const subcategory = language === 'en' ? service.subcategory : (service.subcategory_uk || service.subcategory);
     const description = language === 'en' ? service.description : (service.description_uk || service.description);
+    const lifeSituations = language === 'en' ? service.life_situations : (service.life_situations_uk || service.life_situations);
     
     // Search filter
     const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) ||
            category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           (description && description.toLowerCase().includes(searchTerm.toLowerCase()));
+           (subcategory && subcategory.toLowerCase().includes(searchTerm.toLowerCase())) ||
+           (description && description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+           (lifeSituations && lifeSituations.some((situation: string) => 
+             situation.toLowerCase().includes(searchTerm.toLowerCase())
+           ));
     
     if (!matchesSearch) return false;
 
@@ -86,6 +96,13 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
         return false;
       }
       if (filters.processingTime === 'slow' && !processingTime.includes('2+')) {
+        return false;
+      }
+    }
+
+    // Life situation filter
+    if (filters.lifeSituation !== 'all') {
+      if (!lifeSituations || !lifeSituations.includes(filters.lifeSituation)) {
         return false;
       }
     }
@@ -114,22 +131,6 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
     } catch (error) {
       console.error('Error requesting service:', error);
       toast.error(t('errorRequestingService') || 'Error requesting service');
-    }
-  };
-
-  const handleManageService = async (service: any) => {
-    try {
-      await addActivity({
-        title: language === 'en' ? `Service managed: ${service.name}` : `Послуга керована: ${service.name_uk || service.name}`,
-        description: `Opened management for service: ${service.name}`,
-        type: 'service',
-        priority: 'low',
-        status: 'completed'
-      });
-
-      toast.info(t('serviceManagement') || 'Service management opened');
-    } catch (error) {
-      console.error('Error logging activity:', error);
     }
   };
 
@@ -196,7 +197,7 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input 
-            placeholder={t('searchServices') || 'Search services...'} 
+            placeholder={t('searchServices') || 'Search services, categories, life situations...'} 
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -218,7 +219,7 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
             `Показано ${filteredServices.length} з ${services?.length || 0} послуг`
           }
         </p>
-        {(filters.category !== 'all' || filters.status !== 'all' || filters.processingTime !== 'all') && (
+        {(filters.category !== 'all' || filters.status !== 'all' || filters.processingTime !== 'all' || filters.lifeSituation !== 'all') && (
           <p className="text-sm text-blue-600">
             {language === 'en' ? 'Filters applied' : 'Застосовано фільтри'}
           </p>
@@ -230,18 +231,30 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
         {filteredServices.map((service) => {
           const name = language === 'en' ? service.name : (service.name_uk || service.name);
           const category = language === 'en' ? service.category : (service.category_uk || service.category);
+          const subcategory = language === 'en' ? service.subcategory : (service.subcategory_uk || service.subcategory);
           const description = language === 'en' ? service.description : (service.description_uk || service.description);
 
           return (
-            <Card key={service.id} className="hover:shadow-md transition-shadow">
+            <Card key={service.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg">{name}</CardTitle>
-                  <Badge variant="secondary">{category}</Badge>
+                  <div className="flex-1">
+                    <CardTitle className="text-lg line-clamp-2">{name}</CardTitle>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      <Badge variant="secondary">{category}</Badge>
+                      {subcategory && <Badge variant="outline" className="text-xs">{subcategory}</Badge>}
+                    </div>
+                  </div>
+                  {service.average_rating > 0 && (
+                    <div className="flex items-center gap-1 ml-2">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span className="text-sm font-medium">{service.average_rating.toFixed(1)}</span>
+                    </div>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 mb-4">{description}</p>
+                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{description}</p>
                 
                 <div className="space-y-2 mb-4">
                   {service.processing_time && (
@@ -260,24 +273,30 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
                       <span>{t('activeRequests') || 'Active requests'}: {service.requests || 0}</span>
                     </div>
                   )}
+                  {service.total_reviews > 0 && (
+                    <div className="flex items-center text-sm">
+                      <Star className="h-4 w-4 mr-2 text-gray-400" />
+                      <span>{service.total_reviews} {language === 'en' ? 'reviews' : 'відгуків'}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex space-x-2">
                   {userType === 'employee' ? (
                     <>
                       <ManageServiceDialog service={service} onServiceUpdated={refetch}>
-                        <Button className="flex-1">
+                        <Button className="flex-1" size="sm">
                           {t('manage') || 'Manage'}
                         </Button>
                       </ManageServiceDialog>
                       <EditServiceDialog service={service} onServiceUpdated={refetch}>
-                        <Button variant="outline" size="icon">
+                        <Button variant="outline" size="sm">
                           <Edit className="h-4 w-4" />
                         </Button>
                       </EditServiceDialog>
                       <Button 
                         variant="outline" 
-                        size="icon" 
+                        size="sm"
                         className="text-red-600 hover:text-red-700"
                         onClick={() => handleDeleteService(service)}
                       >
@@ -286,15 +305,19 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
                     </>
                   ) : (
                     <>
+                      <ServiceDetailDialog service={service} userType={userType}>
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-1" />
+                          {language === 'en' ? 'Details' : 'Деталі'}
+                        </Button>
+                      </ServiceDetailDialog>
                       <Button 
-                        className="flex-1"
+                        className="flex-1" 
+                        size="sm"
                         onClick={() => handleRequestService(service)}
                         disabled={service.status !== 'Available'}
                       >
                         {t('requestServiceButton') || 'Request Service'}
-                      </Button>
-                      <Button variant="outline">
-                        <FileText className="h-4 w-4" />
                       </Button>
                     </>
                   )}

@@ -105,6 +105,100 @@ export type Database = {
         }
         Relationships: []
       }
+      appointment_slots: {
+        Row: {
+          created_at: string
+          current_appointments: number | null
+          date: string
+          end_time: string
+          id: string
+          is_available: boolean | null
+          max_appointments: number | null
+          specialist_id: string | null
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          current_appointments?: number | null
+          date: string
+          end_time: string
+          id?: string
+          is_available?: boolean | null
+          max_appointments?: number | null
+          specialist_id?: string | null
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          current_appointments?: number | null
+          date?: string
+          end_time?: string
+          id?: string
+          is_available?: boolean | null
+          max_appointments?: number | null
+          specialist_id?: string | null
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_slots_specialist_id_fkey"
+            columns: ["specialist_id"]
+            isOneToOne: false
+            referencedRelation: "specialists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appointments: {
+        Row: {
+          appointment_date: string
+          created_at: string
+          id: string
+          location: string | null
+          notes: string | null
+          service_id: string | null
+          specialist_name: string | null
+          specialist_position: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          appointment_date: string
+          created_at?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          service_id?: string | null
+          specialist_name?: string | null
+          specialist_position?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          appointment_date?: string
+          created_at?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          service_id?: string | null
+          specialist_name?: string | null
+          specialist_position?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asset_reservations: {
         Row: {
           approved_by: string | null
@@ -612,45 +706,189 @@ export type Database = {
         }
         Relationships: []
       }
+      service_reviews: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          id: string
+          is_anonymous: boolean | null
+          rating: number
+          review_text: string | null
+          service_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean | null
+          rating: number
+          review_text?: string | null
+          service_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean | null
+          rating?: number
+          review_text?: string | null
+          service_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_reviews_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_reviews_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
+          average_rating: number | null
           category: string
           category_uk: string
+          contact_info: Json | null
+          cost: string | null
+          cost_uk: string | null
           created_at: string | null
           description: string | null
           description_uk: string | null
           id: string
+          legal_basis: string | null
+          legal_basis_uk: string | null
+          life_situations: string[] | null
+          life_situations_uk: string[] | null
           name: string
           name_uk: string
           processing_time: string | null
+          providing_authority: string | null
+          providing_authority_uk: string | null
           requests: number | null
+          required_documents: string[] | null
+          required_documents_uk: string[] | null
           status: string | null
+          steps_to_obtain: string[] | null
+          steps_to_obtain_uk: string[] | null
+          subcategory: string | null
+          subcategory_uk: string | null
+          target_audience: string | null
+          target_audience_uk: string | null
+          total_reviews: number | null
         }
         Insert: {
+          average_rating?: number | null
           category: string
           category_uk: string
+          contact_info?: Json | null
+          cost?: string | null
+          cost_uk?: string | null
           created_at?: string | null
           description?: string | null
           description_uk?: string | null
           id?: string
+          legal_basis?: string | null
+          legal_basis_uk?: string | null
+          life_situations?: string[] | null
+          life_situations_uk?: string[] | null
           name: string
           name_uk: string
           processing_time?: string | null
+          providing_authority?: string | null
+          providing_authority_uk?: string | null
           requests?: number | null
+          required_documents?: string[] | null
+          required_documents_uk?: string[] | null
           status?: string | null
+          steps_to_obtain?: string[] | null
+          steps_to_obtain_uk?: string[] | null
+          subcategory?: string | null
+          subcategory_uk?: string | null
+          target_audience?: string | null
+          target_audience_uk?: string | null
+          total_reviews?: number | null
         }
         Update: {
+          average_rating?: number | null
           category?: string
           category_uk?: string
+          contact_info?: Json | null
+          cost?: string | null
+          cost_uk?: string | null
           created_at?: string | null
           description?: string | null
           description_uk?: string | null
           id?: string
+          legal_basis?: string | null
+          legal_basis_uk?: string | null
+          life_situations?: string[] | null
+          life_situations_uk?: string[] | null
           name?: string
           name_uk?: string
           processing_time?: string | null
+          providing_authority?: string | null
+          providing_authority_uk?: string | null
           requests?: number | null
+          required_documents?: string[] | null
+          required_documents_uk?: string[] | null
           status?: string | null
+          steps_to_obtain?: string[] | null
+          steps_to_obtain_uk?: string[] | null
+          subcategory?: string | null
+          subcategory_uk?: string | null
+          target_audience?: string | null
+          target_audience_uk?: string | null
+          total_reviews?: number | null
+        }
+        Relationships: []
+      }
+      specialists: {
+        Row: {
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          department: string
+          id: string
+          is_available: boolean | null
+          name: string
+          position: string
+          services: string[] | null
+          working_hours: Json | null
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          department: string
+          id?: string
+          is_available?: boolean | null
+          name: string
+          position: string
+          services?: string[] | null
+          working_hours?: Json | null
+        }
+        Update: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          department?: string
+          id?: string
+          is_available?: boolean | null
+          name?: string
+          position?: string
+          services?: string[] | null
+          working_hours?: Json | null
         }
         Relationships: []
       }
