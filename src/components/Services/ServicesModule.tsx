@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import ServicesCatalog from './ServicesCatalog';
 import ServiceCategoryPage from './ServiceCategoryPage';
+import ServiceDetailDialog from './ServiceDetailDialog';
 
 interface ServicesModuleProps {
   userType: 'employee' | 'resident';
@@ -52,13 +53,31 @@ const ServicesModule = ({ userType, activeTab }: ServicesModuleProps) => {
     }
   };
 
+  const handleServiceSelect = (service: any) => {
+    setSelectedService(service);
+  };
+
+  const handleCloseServiceDetail = () => {
+    setSelectedService(null);
+  };
+
   // Render services catalog for main services page
   if (activeTab === 'services' || activeTab === 'services-catalog') {
     return (
-      <ServicesCatalog
-        userType={userType}
-        onServiceSelect={setSelectedService}
-      />
+      <>
+        <ServicesCatalog
+          userType={userType}
+          onServiceSelect={handleServiceSelect}
+        />
+        {selectedService && (
+          <ServiceDetailDialog
+            service={selectedService}
+            userType={userType}
+            onClose={handleCloseServiceDetail}
+            onBookAppointment={handleCloseServiceDetail}
+          />
+        )}
+      </>
     );
   }
 
@@ -66,21 +85,41 @@ const ServicesModule = ({ userType, activeTab }: ServicesModuleProps) => {
   const categoryConfig = categoryMappings[activeTab as keyof typeof categoryMappings];
   if (categoryConfig) {
     return (
-      <ServiceCategoryPage
-        userType={userType}
-        category={categoryConfig.category}
-        categoryTitle={categoryConfig.title}
-        onServiceSelect={setSelectedService}
-      />
+      <>
+        <ServiceCategoryPage
+          userType={userType}
+          category={categoryConfig.category}
+          categoryTitle={categoryConfig.title}
+          onServiceSelect={handleServiceSelect}
+        />
+        {selectedService && (
+          <ServiceDetailDialog
+            service={selectedService}
+            userType={userType}
+            onClose={handleCloseServiceDetail}
+            onBookAppointment={handleCloseServiceDetail}
+          />
+        )}
+      </>
     );
   }
 
   // Fallback to services catalog
   return (
-    <ServicesCatalog
-      userType={userType}
-      onServiceSelect={setSelectedService}
-    />
+    <>
+      <ServicesCatalog
+        userType={userType}
+        onServiceSelect={handleServiceSelect}
+      />
+      {selectedService && (
+        <ServiceDetailDialog
+          service={selectedService}
+          userType={userType}
+          onClose={handleCloseServiceDetail}
+          onBookAppointment={handleCloseServiceDetail}
+        />
+      )}
+    </>
   );
 };
 

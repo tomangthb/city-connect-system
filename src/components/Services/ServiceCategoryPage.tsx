@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Filter, Plus } from 'lucide-react';
+import { Search, Filter, Plus, Edit, Trash2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,7 +10,6 @@ import { toast } from 'sonner';
 import AddServiceDialog from './AddServiceDialog';
 import EditServiceDialog from './EditServiceDialog';
 import ServicesFilterDialog from './ServicesFilterDialog';
-import ServiceDetailDialog from './ServiceDetailDialog';
 import BookAppointmentDialog from './BookAppointmentDialog';
 import { addActivity } from '@/utils/activityUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,7 +26,6 @@ const ServiceCategoryPage = ({ userType, category, categoryTitle, onServiceSelec
   const { language, t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [editingService, setEditingService] = useState<any>(null);
-  const [selectedService, setSelectedService] = useState<any>(null);
   const [filters, setFilters] = useState({
     category: 'all',
     status: 'all',
@@ -135,6 +133,15 @@ const ServiceCategoryPage = ({ userType, category, categoryTitle, onServiceSelec
     }
   };
 
+  const handleEditService = (service: any) => {
+    setEditingService(service);
+  };
+
+  const handleServiceUpdated = () => {
+    refetch();
+    setEditingService(null);
+  };
+
   if (isLoading) {
     return (
       <div className="p-6 flex justify-center">
@@ -162,7 +169,7 @@ const ServiceCategoryPage = ({ userType, category, categoryTitle, onServiceSelec
           <AddServiceDialog onServiceAdded={refetch}>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              {t('addNewService') || 'Додати послугу'}
+              {t('addNewService') || 'Додати нову послугу'}
             </Button>
           </AddServiceDialog>
         )}
@@ -244,30 +251,32 @@ const ServiceCategoryPage = ({ userType, category, categoryTitle, onServiceSelec
                   {t('learnMore') || 'Докладніше'}
                 </Button>
                 
-                {userType === 'resident' ? (
+                {userType === 'resident' && service.status === 'Available' ? (
                   <BookAppointmentDialog service={service}>
                     <Button size="sm" className="flex-1">
                       {t('bookAppointment') || 'Записатися'}
                     </Button>
                   </BookAppointmentDialog>
-                ) : (
-                  <div className="flex gap-1">
+                ) : userType === 'employee' ? (
+                  <div className="flex gap-1 flex-1">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setEditingService(service)}
+                      onClick={() => handleEditService(service)}
+                      className="flex-1"
                     >
-                      Edit
+                      <Edit className="h-4 w-4 mr-1" />
+                      {language === 'en' ? 'Edit' : 'Редагувати'}
                     </Button>
                     <Button
                       variant="destructive"
                       size="sm"
                       onClick={() => handleDeleteService(service)}
                     >
-                      Delete
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                )}
+                ) : null}
               </div>
             </CardContent>
           </Card>
@@ -282,23 +291,11 @@ const ServiceCategoryPage = ({ userType, category, categoryTitle, onServiceSelec
         </div>
       )}
 
-      {/* Dialogs */}
-      {selectedService && (
-        <ServiceDetailDialog
-          service={selectedService}
-          onClose={() => setSelectedService(null)}
-          onBookAppointment={() => setSelectedService(null)}
-          userType={userType}
-        />
-      )}
-
+      {/* Edit Service Dialog */}
       {editingService && (
         <EditServiceDialog 
           service={editingService} 
-          onServiceUpdated={() => {
-            refetch();
-            setEditingService(null);
-          }}
+          onServiceUpdated={handleServiceUpdated}
         >
           <div />
         </EditServiceDialog>
