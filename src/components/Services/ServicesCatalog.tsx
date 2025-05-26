@@ -16,7 +16,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import AddServiceDialog from './AddServiceDialog';
+import CreateServiceDialog from './CreateServiceDialog';
 import ServicesFilterDialog from './ServicesFilterDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -137,12 +137,12 @@ const ServicesCatalog = ({ userType, onServiceSelect }: ServicesCatalogProps) =>
           </p>
         </div>
         {userType === 'employee' && (
-          <AddServiceDialog onServiceAdded={refetch}>
+          <CreateServiceDialog onServiceCreated={refetch}>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               {t('addNewService') || 'Додати послугу'}
             </Button>
-          </AddServiceDialog>
+          </CreateServiceDialog>
         )}
       </div>
 

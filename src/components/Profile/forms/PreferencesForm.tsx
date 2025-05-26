@@ -31,12 +31,12 @@ const PreferencesForm = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('preferences')}</CardTitle>
+        <CardTitle>{t('preferences') || 'Налаштування'}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
           <Label className="flex items-center mb-3">
-            {t('language')}
+            {t('language') || 'Мова'}
           </Label>
           <div className="flex gap-2">
             <Button 
@@ -56,8 +56,10 @@ const PreferencesForm = ({
         
         <div className="flex items-center justify-between">
           <div>
-            <Label>{t('darkMode')}</Label>
-            <p className="text-sm text-gray-600">{t('switchDarkTheme')}</p>
+            <Label>{t('darkMode') || 'Темна тема'}</Label>
+            <p className="text-sm text-gray-600">
+              {t('switchDarkTheme') || 'Перемкнути на темну тему'}
+            </p>
           </div>
           <Switch 
             checked={theme === 'dark'} 

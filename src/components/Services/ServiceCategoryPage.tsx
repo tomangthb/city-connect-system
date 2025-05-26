@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import AddServiceDialog from './AddServiceDialog';
+import CreateServiceDialog from './CreateServiceDialog';
 import EditServiceDialog from './EditServiceDialog';
 import ServicesFilterDialog from './ServicesFilterDialog';
 import BookAppointmentDialog from './BookAppointmentDialog';
@@ -166,12 +165,12 @@ const ServiceCategoryPage = ({ userType, category, categoryTitle, onServiceSelec
           </p>
         </div>
         {userType === 'employee' && (
-          <AddServiceDialog onServiceAdded={refetch}>
+          <CreateServiceDialog onServiceCreated={refetch}>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               {t('addNewService') || 'Додати нову послугу'}
             </Button>
-          </AddServiceDialog>
+          </CreateServiceDialog>
         )}
       </div>
 

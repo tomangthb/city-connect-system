@@ -30,19 +30,36 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
     queryFn: async () => {
       const { data, error } = await supabase
         .from('appeals')
-        .select('id, status')
+        .select('id, status, created_at')
         .order('created_at', { ascending: false });
       
       if (error) {
         console.error('Error fetching appeals:', error);
-        return { total: 0, pending: 0 };
+        return { total: 0, pending: 0, chartData: [] };
       }
       
       const pending = data?.filter(appeal => 
         appeal.status === 'Under Review' || appeal.status === 'Pending'
       ).length || 0;
+
+      // Create chart data for appeals trend (last 7 days)
+      const chartData = [];
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        
+        const dayAppeals = data?.filter(appeal => 
+          appeal.created_at?.startsWith(dateStr)
+        ).length || 0;
+        
+        chartData.push({
+          date: dateStr,
+          value: dayAppeals
+        });
+      }
       
-      return { total: data?.length || 0, pending };
+      return { total: data?.length || 0, pending, chartData };
     }
   });
 
@@ -51,14 +68,32 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
     queryFn: async () => {
       const { data, error } = await supabase
         .from('services')
-        .select('id, status')
+        .select('id, status, created_at')
         .eq('status', 'Available');
       
       if (error) {
         console.error('Error fetching services:', error);
-        return 0;
+        return { count: 0, chartData: [] };
       }
-      return data?.length || 0;
+
+      // Create chart data for active services (last 7 days)
+      const chartData = [];
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        
+        const dayServices = data?.filter(service => 
+          service.created_at?.startsWith(dateStr)
+        ).length || 0;
+        
+        chartData.push({
+          date: dateStr,
+          value: dayServices
+        });
+      }
+
+      return { count: data?.length || 0, chartData };
     }
   });
 
@@ -78,23 +113,6 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
     }
   });
 
-  // Fetch analytics data for charts
-  const { data: analyticsData } = useQuery({
-    queryKey: ['analytics'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('analytics_data')
-        .select('*')
-        .order('date', { ascending: true });
-      
-      if (error) {
-        console.error('Error fetching analytics:', error);
-        return [];
-      }
-      return data || [];
-    }
-  });
-
   const kpiData = [
     { 
       title: t('pendingAppeals'), 
@@ -106,7 +124,7 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
     },
     { 
       title: t('activeServices'), 
-      value: servicesData || 0,
+      value: servicesData?.count || 0,
       change: 2,
       icon: FileText, 
       color: 'text-blue-600',
@@ -121,22 +139,6 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
       onClick: () => onTabChange ? onTabChange('administration') : toast.info(t('loadingCitizens'))
     }
   ];
-
-  // Process analytics data for charts
-  const appealsChartData = analyticsData?.filter(d => d.category === 'appeals').map(d => ({
-    date: d.date,
-    value: d.value
-  })) || [];
-
-  const revenueChartData = analyticsData?.filter(d => d.category === 'revenue').map(d => ({
-    date: d.date,
-    value: d.value
-  })) || [];
-
-  const servicesChartData = analyticsData?.filter(d => d.category === 'services').map(d => ({
-    date: d.date,
-    value: d.value
-  })) || [];
 
   const districtRankingData = [
     {
@@ -187,7 +189,7 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
         </p>
       </div>
 
-      {/* KPI Cards without targets and revenue */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {kpiData.map((kpi, index) => (
           <Card key={index} className="hover:shadow-md transition-shadow cursor-pointer" onClick={kpi.onClick}>
@@ -213,23 +215,17 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
         ))}
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      {/* Charts Section - Only Appeals Trend and Active Services */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <MetricsChart 
           title={language === 'en' ? 'Appeals Trend' : 'Тренд звернень'}
-          data={appealsChartData}
+          data={appealsData?.chartData || []}
           type="line"
           color="#f59e0b"
         />
         <MetricsChart 
-          title={language === 'en' ? 'Revenue Growth' : 'Зростання доходу'}
-          data={revenueChartData}
-          type="bar"
-          color="#10b981"
-        />
-        <MetricsChart 
           title={language === 'en' ? 'Active Services' : 'Активні послуги'}
-          data={servicesChartData}
+          data={servicesData?.chartData || []}
           type="line"
           color="#3b82f6"
         />
