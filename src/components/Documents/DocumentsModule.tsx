@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, Download, Upload, Trash, Plus, Search } from 'lucide-react';
@@ -6,38 +7,51 @@ import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { addActivity } from '@/utils/activityUtils';
+import { supabase } from '@/integrations/supabase/client';
 import CreateFolderDialog from './CreateFolderDialog';
 import UploadDocumentDialog from './UploadDocumentDialog';
+
+interface Document {
+  id: string;
+  name: string;
+  category: string;
+  date: string;
+  size: string;
+  url?: string;
+  type?: string;
+}
 
 const DocumentsModule = () => {
   const { language, t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  // Sample document data
-  const documents = [
+  // Sample document data as fallback
+  const sampleDocuments = [
     { 
-      id: 1, 
+      id: '1', 
       name: language === 'en' ? 'Budget Report 2024' : 'Звіт про бюджет 2024', 
       category: language === 'en' ? 'Financial' : 'Фінансовий', 
       date: '2024-05-15', 
       size: '3.5 MB' 
     },
     { 
-      id: 2, 
+      id: '2', 
       name: language === 'en' ? 'City Development Plan' : 'План розвитку міста', 
       category: language === 'en' ? 'Planning' : 'Планування', 
       date: '2024-04-22', 
       size: '8.2 MB' 
     },
     { 
-      id: 3, 
+      id: '3', 
       name: language === 'en' ? 'Public Services Report' : 'Звіт про публічні послуги', 
       category: language === 'en' ? 'Services' : 'Послуги', 
       date: '2024-05-10', 
       size: '2.1 MB' 
     },
     { 
-      id: 4, 
+      id: '4', 
       name: language === 'en' ? 'Environmental Assessment' : 'Екологічна оцінка', 
       category: language === 'en' ? 'Environment' : 'Довкілля', 
       date: '2024-04-05', 
@@ -45,12 +59,30 @@ const DocumentsModule = () => {
     }
   ];
 
+  useEffect(() => {
+    loadDocuments();
+  }, []);
+
+  const loadDocuments = async () => {
+    setLoading(true);
+    try {
+      // Try to load from storage or database
+      // For now, we'll use sample data but structure it properly
+      setDocuments(sampleDocuments);
+    } catch (error) {
+      console.error('Error loading documents:', error);
+      setDocuments(sampleDocuments);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredDocuments = documents.filter(doc =>
     doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     doc.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDownloadDocument = async (doc: any) => {
+  const handleDownloadDocument = async (doc: Document) => {
     try {
       // Simulate download
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -63,21 +95,23 @@ const DocumentsModule = () => {
         status: 'completed'
       });
 
-      toast.success(t('documentDownloaded') || 'Document downloaded');
+      toast.success(language === 'en' ? 'Document downloaded successfully' : 'Документ успішно завантажено');
     } catch (error) {
       console.error('Error downloading document:', error);
-      toast.error(t('errorDownloadingDocument') || 'Error downloading document');
+      toast.error(language === 'en' ? 'Error downloading document' : 'Помилка завантаження документа');
     }
   };
 
-  const handleDeleteDocument = async (doc: any) => {
-    if (!confirm(t('confirmDeleteDocument') || 'Are you sure you want to delete this document?')) {
+  const handleDeleteDocument = async (doc: Document) => {
+    if (!confirm(language === 'en' ? 
+      `Are you sure you want to delete "${doc.name}"?` : 
+      `Ви впевнені, що хочете видалити "${doc.name}"?`)) {
       return;
     }
 
     try {
-      // Simulate deletion
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Remove from state
+      setDocuments(prev => prev.filter(d => d.id !== doc.id));
       
       await addActivity({
         title: language === 'en' ? `Document deleted: ${doc.name}` : `Документ видалено: ${doc.name}`,
@@ -87,18 +121,54 @@ const DocumentsModule = () => {
         status: 'completed'
       });
 
-      toast.success(t('documentDeleted') || 'Document deleted successfully');
+      toast.success(language === 'en' ? 'Document deleted successfully' : 'Документ успішно видалено');
     } catch (error) {
       console.error('Error deleting document:', error);
-      toast.error(t('errorDeletingDocument') || 'Error deleting document');
+      toast.error(language === 'en' ? 'Error deleting document' : 'Помилка видалення документа');
     }
   };
+
+  const handleDocumentUploaded = (newDocument: Omit<Document, 'id'>) => {
+    const documentWithId: Document = {
+      ...newDocument,
+      id: Date.now().toString()
+    };
+    setDocuments(prev => [...prev, documentWithId]);
+    toast.success(language === 'en' ? 'Document uploaded successfully' : 'Документ успішно завантажено');
+  };
+
+  const handleFolderCreated = (folderName: string) => {
+    const newFolder: Document = {
+      id: Date.now().toString(),
+      name: folderName,
+      category: language === 'en' ? 'Folder' : 'Папка',
+      date: new Date().toISOString().split('T')[0],
+      size: '-',
+      type: 'folder'
+    };
+    setDocuments(prev => [...prev, newFolder]);
+    toast.success(language === 'en' ? 'Folder created successfully' : 'Папку успішно створено');
+  };
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="text-center">
+          <p className="text-gray-500">
+            {language === 'en' ? 'Loading documents...' : 'Завантаження документів...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">{t('documentManagement') || 'Document Management'}</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {language === 'en' ? 'Document Management' : 'Управління документами'}
+          </h2>
           <p className="text-gray-600">
             {language === 'en' 
               ? 'Manage all city council documents in one place' 
@@ -106,15 +176,15 @@ const DocumentsModule = () => {
           </p>
         </div>
         <div className="flex space-x-2">
-          <CreateFolderDialog>
+          <CreateFolderDialog onFolderCreated={handleFolderCreated}>
             <Button variant="outline">
               <Plus className="h-4 w-4 mr-2" />
               {language === 'en' ? 'New Folder' : 'Нова папка'}
             </Button>
           </CreateFolderDialog>
-          <UploadDocumentDialog>
+          <UploadDocumentDialog onDocumentUploaded={handleDocumentUploaded}>
             <Button className="flex items-center">
-              <Plus className="h-4 w-4 mr-2" />
+              <Upload className="h-4 w-4 mr-2" />
               {language === 'en' ? 'Upload Document' : 'Завантажити документ'}
             </Button>
           </UploadDocumentDialog>
@@ -178,14 +248,16 @@ const DocumentsModule = () => {
                     <td className="py-3 px-4 text-gray-600">{doc.size}</td>
                     <td className="py-3 px-4">
                       <div className="flex justify-end space-x-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleDownloadDocument(doc)}
-                          title={language === 'en' ? 'Download' : 'Завантажити'}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
+                        {doc.type !== 'folder' && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleDownloadDocument(doc)}
+                            title={language === 'en' ? 'Download' : 'Завантажити'}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button 
                           variant="ghost" 
                           size="sm" 
