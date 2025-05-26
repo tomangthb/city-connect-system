@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { addActivity } from '@/utils/activityUtils';
-import AppealReviewDialog from './AppealReviewDialog';
+import ComprehensiveAppealsModule from './ComprehensiveAppealsModule';
 
 interface AppealsModuleProps {
   userType: 'employee' | 'resident';
@@ -24,9 +25,14 @@ interface AppealsModuleProps {
 
 const AppealsModule = ({ userType }: AppealsModuleProps) => {
   const { t } = useLanguage();
+
+  // For employees, show the comprehensive module
+  if (userType === 'employee') {
+    return <ComprehensiveAppealsModule />;
+  }
+
+  // For residents, show the original functionality
   const [showForm, setShowForm] = useState(false);
-  const [selectedAppeal, setSelectedAppeal] = useState<any>(null);
-  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [newAppeal, setNewAppeal] = useState({
     title: '',
     category: '',
@@ -88,11 +94,6 @@ const AppealsModule = ({ userType }: AppealsModuleProps) => {
     }
   };
 
-  const handleReviewAppeal = (appeal: any) => {
-    setSelectedAppeal(appeal);
-    setReviewDialogOpen(true);
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Completed': return 'bg-green-100 text-green-800';
@@ -125,21 +126,17 @@ const AppealsModule = ({ userType }: AppealsModuleProps) => {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">{t('citizensAppeals') || 'Citizens Appeals'}</h2>
           <p className="text-gray-600">
-            {userType === 'employee' 
-              ? (t('manageRespond') || 'Manage and respond to citizen appeals')
-              : (t('submitTrack') || 'Submit and track your appeals')}
+            {t('submitTrack') || 'Submit and track your appeals'}
           </p>
         </div>
-        {userType === 'resident' && (
-          <Button onClick={() => setShowForm(!showForm)}>
-            <Plus className="h-4 w-4 mr-2" />
-            {t('submitAppeal') || 'Submit Appeal'}
-          </Button>
-        )}
+        <Button onClick={() => setShowForm(!showForm)}>
+          <Plus className="h-4 w-4 mr-2" />
+          {t('submitAppeal') || 'Submit Appeal'}
+        </Button>
       </div>
 
       {/* New Appeal Form for Residents */}
-      {userType === 'resident' && showForm && (
+      {showForm && (
         <Card>
           <CardHeader>
             <CardTitle>{t('submitAppealTitle') || 'Submit New Appeal'}</CardTitle>
@@ -237,13 +234,9 @@ const AppealsModule = ({ userType }: AppealsModuleProps) => {
                     </div>
                   </div>
 
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleReviewAppeal(appeal)}
-                  >
+                  <Button variant="outline" size="sm">
                     <Eye className="h-4 w-4 mr-2" />
-                    {userType === 'employee' ? (t('review') || 'Review') : (t('viewDetails') || 'View Details')}
+                    {t('viewDetails') || 'View Details'}
                   </Button>
                 </div>
               </CardContent>
@@ -255,14 +248,6 @@ const AppealsModule = ({ userType }: AppealsModuleProps) => {
           </div>
         )}
       </div>
-
-      {/* Review Dialog */}
-      <AppealReviewDialog
-        appeal={selectedAppeal}
-        open={reviewDialogOpen}
-        onOpenChange={setReviewDialogOpen}
-        onAppealUpdated={refetch}
-      />
     </div>
   );
 };
