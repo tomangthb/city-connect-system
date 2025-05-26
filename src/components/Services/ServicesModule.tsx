@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,9 +21,10 @@ import { addActivity } from '@/utils/activityUtils';
 
 interface ServicesModuleProps {
   userType: 'employee' | 'resident';
+  activeTab?: string;
 }
 
-const ServicesModule = ({ userType }: ServicesModuleProps) => {
+const ServicesModule = ({ userType, activeTab }: ServicesModuleProps) => {
   const { language, t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [editingService, setEditingService] = useState<any>(null);
@@ -358,14 +358,9 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
       )}
 
       {appointmentService && (
-        <BookAppointmentDialog
-          service={appointmentService}
-          onClose={() => setAppointmentService(null)}
-          onSuccess={() => {
-            setAppointmentService(null);
-            toast.success(language === 'en' ? 'Appointment booked successfully!' : 'Запис на прийом успішно створено!');
-          }}
-        />
+        <BookAppointmentDialog service={appointmentService}>
+          <div />
+        </BookAppointmentDialog>
       )}
 
       {editingService && (
