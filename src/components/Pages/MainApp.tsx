@@ -9,6 +9,7 @@ import AppSidebar from '@/components/Layout/AppSidebar';
 import Header from '@/components/Layout/Header';
 import EmployeeDashboard from '@/components/Employee/EmployeeDashboard';
 import ResidentDashboard from '@/components/Resident/ResidentDashboard';
+import ResidentServicesModule from '@/components/Resident/ResidentServicesModule';
 import InfrastructureModule from '@/components/Infrastructure/InfrastructureModule';
 import ResourcesModule from '@/components/Resources/ResourcesModule';
 import ServicesModule from '@/components/Services/ServicesModule';
@@ -32,7 +33,7 @@ const MainApp = ({ userType }: MainAppProps) => {
   const location = useLocation();
   const { notifications, setNotifications } = useNotifications();
   const [activeTab, setActiveTab] = useState(
-    userType === 'employee' ? 'dashboard' : 'home'
+    userType === 'employee' ? 'dashboard' : 'dashboard'
   );
   const [showSettings, setShowSettings] = useState(false);
 
@@ -64,19 +65,40 @@ const MainApp = ({ userType }: MainAppProps) => {
       return <ProfileSettings />;
     }
 
+    // Resident-specific rendering
+    if (userType === 'resident') {
+      switch (activeTab) {
+        case 'dashboard':
+          return <ResidentDashboard />;
+        case 'services':
+        case 'services-catalog':
+        case 'housing-utilities':
+        case 'permits-registration':
+        case 'social-services':
+        case 'transport-traffic':
+        case 'education':
+        case 'land-planning':
+        case 'environmental':
+          return <ResidentServicesModule />;
+        case 'appeals':
+          return <AppealsModule userType={userType} />;
+        case 'resources':
+          return <ResourcesModule userType={userType} />;
+        case 'news':
+          return <NewsModule />;
+        case 'payments':
+          return <PaymentsModule />;
+        default:
+          return <div>{t('pageNotFound') || 'Page Not Found'}</div>;
+      }
+    }
+
+    // Employee-specific rendering
     switch (activeTab) {
       case 'dashboard':
-        return userType === 'employee' ? (
-          <EmployeeDashboard onTabChange={handleTabChange} onOpenSettings={handleOpenSettings} />
-        ) : (
-          <ResidentDashboard />
-        );
+        return <EmployeeDashboard onTabChange={handleTabChange} onOpenSettings={handleOpenSettings} />;
       case 'resources':
-        return userType === 'employee' ? (
-          <InfrastructureModule />
-        ) : (
-          <ResourcesModule userType={userType} />
-        );
+        return <InfrastructureModule />;
       case 'services':
       case 'services-catalog':
       case 'housing-utilities':
