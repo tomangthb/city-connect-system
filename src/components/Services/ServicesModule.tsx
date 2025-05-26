@@ -251,7 +251,7 @@ const ServicesModule = ({ userType, activeTab = 'services' }: ServicesModuleProp
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <MetricsChart data={servicesByCategory} />
+                  <MetricsChart data={servicesByCategory} title="" />
                 </CardContent>
               </Card>
               

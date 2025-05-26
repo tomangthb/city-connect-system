@@ -230,11 +230,11 @@ const ComprehensiveAppealsModule = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Всі категорії</SelectItem>
-                  <SelectItem value="Housing">ЖКГ</SelectItem>
-                  <SelectItem value="Transport">Транспорт</SelectItem>
-                  <SelectItem value="Social">Соціальні питання</SelectItem>
-                  <SelectItem value="Environment">Довкілля</SelectItem>
-                  <SelectItem value="Other">Інше</SelectItem>
+                  <SelectItem value="technical">Технічне</SelectItem>
+                  <SelectItem value="administrative">Адміністративне</SelectItem>
+                  <SelectItem value="complaint">Скарга</SelectItem>
+                  <SelectItem value="suggestion">Пропозиція</SelectItem>
+                  <SelectItem value="other">Інше</SelectItem>
                 </SelectContent>
               </Select>
             </div>

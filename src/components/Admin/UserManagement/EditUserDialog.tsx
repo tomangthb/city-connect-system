@@ -7,20 +7,20 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface User {
   id: string;
   email: string;
-  first_name?: string;
-  last_name?: string;
-  patronymic?: string;
+  first_name: string;
+  last_name: string;
+  patronymic: string;
   user_type: 'employee' | 'resident';
-  address?: string;
-  phone?: string;
-  roles?: string[];
-  status: string;
+  address: string;
+  phone: string;
+  created_at: string;
+  roles: string[];
 }
 
 interface EditUserDialogProps {
@@ -32,84 +32,66 @@ interface EditUserDialogProps {
 const EditUserDialog = ({ children, user, onUserUpdated }: EditUserDialogProps) => {
   const { language } = useLanguage();
   const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: user.first_name || '',
-    lastName: user.last_name || '',
+    first_name: user.first_name || '',
+    last_name: user.last_name || '',
     patronymic: user.patronymic || '',
-    email: user.email,
+    email: user.email || '',
     phone: user.phone || '',
     address: user.address || '',
-    userType: user.user_type,
-    roles: user.roles || [],
-    status: user.status
+    user_type: user.user_type || 'resident'
   });
+  const [selectedRoles, setSelectedRoles] = useState<string[]>(user.roles || []);
 
-  const availableRoles = [
-    { id: 'admin', name: language === 'en' ? 'Administrator' : 'Адміністратор' },
-    { id: 'employee', name: language === 'en' ? 'Employee' : 'Працівник' },
-    { id: 'resident', name: language === 'en' ? 'Resident' : 'Мешканець' },
-    { id: 'moderator', name: language === 'en' ? 'Moderator' : 'Модератор' },
-    { id: 'operator', name: language === 'en' ? 'Operator' : 'Оператор' },
-    { id: 'specialist', name: language === 'en' ? 'Specialist' : 'Спеціаліст' }
-  ];
-
-  const handleRoleChange = (roleId: string, checked: boolean) => {
-    if (checked) {
-      setFormData(prev => ({ ...prev, roles: [...prev.roles, roleId] }));
-    } else {
-      setFormData(prev => ({ ...prev, roles: prev.roles.filter(r => r !== roleId) }));
-    }
-  };
+  const availableRoles = ['admin', 'employee', 'resident'];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.firstName || !formData.lastName || !formData.email) {
-      toast.error(language === 'en' ? 'Please fill all required fields' : 'Будь ласка, заповніть всі обов\'язкові поля');
-      return;
-    }
+    setIsUpdating(true);
 
-    setIsLoading(true);
     try {
       // Update profile
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          patronymic: formData.patronymic,
-          phone: formData.phone,
-          address: formData.address,
-          user_type: formData.userType
-        })
+        .update(formData)
         .eq('id', user.id);
 
       if (profileError) throw profileError;
 
-      // Update roles - delete existing and add new ones
-      await supabase.from('user_roles').delete().eq('user_id', user.id);
-      
-      if (formData.roles.length > 0) {
-        const roleInserts = formData.roles.map(role => ({
-          user_id: user.id,
-          role: role
-        }));
-        
-        const { error: rolesError } = await supabase
-          .from('user_roles')
-          .insert(roleInserts);
+      // Update roles - first delete existing roles
+      const { error: deleteError } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', user.id);
 
-        if (rolesError) throw rolesError;
+      if (deleteError) throw deleteError;
+
+      // Insert new roles one by one
+      for (const role of selectedRoles) {
+        const { error: insertError } = await supabase
+          .from('user_roles')
+          .insert([{ user_id: user.id, role: role as 'admin' | 'employee' | 'resident' }]);
+
+        if (insertError) throw insertError;
       }
 
-      toast.success(language === 'en' ? 'User updated successfully' : 'Користувача успішно оновлено');
+      toast.success(language === 'en' ? 'User updated successfully' : 'Користувача оновлено успішно');
       setOpen(false);
       onUserUpdated();
     } catch (error) {
       console.error('Error updating user:', error);
       toast.error(language === 'en' ? 'Error updating user' : 'Помилка оновлення користувача');
     } finally {
-      setIsLoading(false);
+      setIsUpdating(false);
+    }
+  };
+
+  const handleRoleChange = (role: string, checked: boolean) => {
+    if (checked) {
+      setSelectedRoles([...selectedRoles, role]);
+    } else {
+      setSelectedRoles(selectedRoles.filter(r => r !== role));
     }
   };
 
@@ -118,104 +100,112 @@ const EditUserDialog = ({ children, user, onUserUpdated }: EditUserDialogProps) 
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{language === 'en' ? 'Edit User' : 'Редагувати користувача'}</DialogTitle>
+          <DialogTitle>
+            {language === 'en' ? 'Edit User' : 'Редагувати користувача'}
+          </DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="firstName">{language === 'en' ? 'First Name' : 'Ім\'я'} *</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="first_name">{language === 'en' ? 'First Name' : "Ім'я"}</Label>
               <Input
-                id="firstName"
-                value={formData.firstName}
-                onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                id="first_name"
+                value={formData.first_name}
+                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                required
               />
             </div>
             
-            <div>
-              <Label htmlFor="lastName">{language === 'en' ? 'Last Name' : 'Прізвище'} *</Label>
+            <div className="space-y-2">
+              <Label htmlFor="last_name">{language === 'en' ? 'Last Name' : 'Прізвище'}</Label>
               <Input
-                id="lastName"
-                value={formData.lastName}
-                onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                id="last_name"
+                value={formData.last_name}
+                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                required
               />
             </div>
           </div>
 
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="patronymic">{language === 'en' ? 'Patronymic' : 'По батькові'}</Label>
             <Input
               id="patronymic"
               value={formData.patronymic}
-              onChange={(e) => setFormData(prev => ({ ...prev, patronymic: e.target.value }))}
+              onChange={(e) => setFormData({ ...formData, patronymic: e.target.value })}
             />
           </div>
 
-          <div>
-            <Label htmlFor="email">{language === 'en' ? 'Email' : 'Електронна пошта'} *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
             />
           </div>
 
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="phone">{language === 'en' ? 'Phone' : 'Телефон'}</Label>
             <Input
               id="phone"
               value={formData.phone}
-              onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             />
           </div>
 
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="address">{language === 'en' ? 'Address' : 'Адреса'}</Label>
             <Input
               id="address"
               value={formData.address}
-              onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
             />
           </div>
 
-          <div>
-            <Label>{language === 'en' ? 'User Type' : 'Тип користувача'}</Label>
-            <Select value={formData.userType} onValueChange={(value) => setFormData(prev => ({ ...prev, userType: value as 'employee' | 'resident' }))}>
+          <div className="space-y-2">
+            <Label htmlFor="user_type">{language === 'en' ? 'User Type' : 'Тип користувача'}</Label>
+            <Select 
+              value={formData.user_type} 
+              onValueChange={(value) => setFormData({ ...formData, user_type: value as 'employee' | 'resident' })}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="employee">{language === 'en' ? 'Employee' : 'Співробітник'}</SelectItem>
                 <SelectItem value="resident">{language === 'en' ? 'Resident' : 'Мешканець'}</SelectItem>
-                <SelectItem value="employee">{language === 'en' ? 'Employee' : 'Працівник'}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div>
-            <Label className="text-base font-medium">{language === 'en' ? 'Roles' : 'Ролі'}</Label>
-            <div className="grid grid-cols-2 gap-2 mt-2">
+          <div className="space-y-2">
+            <Label>{language === 'en' ? 'Roles' : 'Ролі'}</Label>
+            <div className="space-y-2">
               {availableRoles.map((role) => (
-                <div key={role.id} className="flex items-center space-x-2">
+                <div key={role} className="flex items-center space-x-2">
                   <Checkbox
-                    id={role.id}
-                    checked={formData.roles.includes(role.id)}
-                    onCheckedChange={(checked) => handleRoleChange(role.id, checked as boolean)}
+                    id={role}
+                    checked={selectedRoles.includes(role)}
+                    onCheckedChange={(checked) => handleRoleChange(role, checked as boolean)}
                   />
-                  <Label htmlFor={role.id}>{role.name}</Label>
+                  <Label htmlFor={role} className="capitalize">{role}</Label>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               {language === 'en' ? 'Cancel' : 'Скасувати'}
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (language === 'en' ? 'Updating...' : 'Оновлення...') : (language === 'en' ? 'Update User' : 'Оновити користувача')}
+            <Button type="submit" disabled={isUpdating}>
+              {isUpdating ? (language === 'en' ? 'Updating...' : 'Оновлення...') : (language === 'en' ? 'Update User' : 'Оновити користувача')}
             </Button>
           </div>
         </form>

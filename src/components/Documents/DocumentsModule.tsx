@@ -137,10 +137,19 @@ const DocumentsModule = () => {
   });
 
   const handleViewDocument = (doc: any) => {
+    // Simulate opening document in new tab
+    const blob = new Blob(['Document content'], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
     toast.success(language === 'en' ? 'Opening document...' : 'Відкриваємо документ...');
   };
 
   const handleDownloadDocument = (doc: any) => {
+    // Simulate file download
+    const link = document.createElement('a');
+    link.href = '#';
+    link.download = `${doc.name}.${doc.type}`;
+    link.click();
     toast.success(language === 'en' ? 'Downloading document...' : 'Завантажуємо документ...');
   };
 
