@@ -2,68 +2,158 @@
 import { TranslationRecord } from './types';
 
 export const servicesTranslations: Record<string, TranslationRecord> = {
-  // Services Module
+  // Main titles
+  administrativeServices: {
+    en: 'Administrative Services',
+    uk: 'Адміністративні послуги'
+  },
+  servicesDescription: {
+    en: 'Complete catalog of administrative services with detailed information and online booking',
+    uk: 'Повний каталог адміністративних послуг з детальною інформацією та онлайн записом'
+  },
+  employeeServicesDescription: {
+    en: 'Comprehensive service management and administration',
+    uk: 'Комплексне управління та адміністрування послуг'
+  },
+  
+  // Search and filters
+  searchServices: {
+    en: 'Search by service name, category, life situation...',
+    uk: 'Пошук за назвою послуги, категорією, життєвою ситуацією...'
+  },
+  searchAndFilter: {
+    en: 'Search & Filter Services',
+    uk: 'Пошук та фільтрація послуг'
+  },
+  
+  // Service categories
+  housingUtilities: {
+    en: 'Housing and Utilities',
+    uk: 'Житлово-комунальні послуги'
+  },
+  permitsRegistration: {
+    en: 'Permits and Registration',
+    uk: 'Дозвільні та реєстраційні послуги'
+  },
+  socialServices: {
+    en: 'Social Services',
+    uk: 'Соціальні послуги'
+  },
+  transportTraffic: {
+    en: 'Transport and Traffic',
+    uk: 'Транспорт та дорожній рух'
+  },
+  education: {
+    en: 'Education',
+    uk: 'Освіта'
+  },
+  landUsePlanning: {
+    en: 'Land Use and Urban Planning',
+    uk: 'Землекористування та містобудування'
+  },
+  environmentalServices: {
+    en: 'Environmental Services',
+    uk: 'Екологічні послуги'
+  },
+  
+  // Service actions
+  bookAppointment: {
+    en: 'Book Appointment',
+    uk: 'Записатися на прийом'
+  },
+  learnMore: {
+    en: 'Learn More',
+    uk: 'Докладніше'
+  },
   requestService: {
     en: 'Request Service',
-    uk: 'Запросити послугу'
+    uk: 'Замовити послугу'
   },
-  manageProvide: {
-    en: 'Manage and provide city services',
-    uk: 'Управління та надання міських послуг'
+  
+  // Service details
+  serviceDetails: {
+    en: 'Service Details',
+    uk: 'Деталі послуги'
   },
-  accessRequest: {
-    en: 'Access and request city services',
-    uk: 'Доступ та запит міських послуг'
+  requiredDocuments: {
+    en: 'Required Documents',
+    uk: 'Необхідні документи'
   },
-  activate: {
-    en: 'Activate',
-    uk: 'Активувати'
+  processingTime: {
+    en: 'Processing Time',
+    uk: 'Термін обробки'
   },
-  deactivate: {
-    en: 'Deactivate',
-    uk: 'Деактивувати'
+  serviceCost: {
+    en: 'Service Cost',
+    uk: 'Вартість послуги'
   },
-  viewService: {
-    en: 'View Service',
-    uk: 'Переглянути послугу'
+  providingAuthority: {
+    en: 'Providing Authority',
+    uk: 'Надавач послуги'
   },
-  requestServiceButton: {
-    en: 'Request Service',
-    uk: 'Запросити послугу'
+  legalBasis: {
+    en: 'Legal Basis',
+    uk: 'Правова основа'
   },
-  manage: {
-    en: 'Manage',
-    uk: 'Управляти'
+  stepsToObtain: {
+    en: 'Steps to Obtain',
+    uk: 'Кроки для отримання'
   },
-
-  // Services management
-  serviceName: {
-    en: 'Service Name',
-    uk: 'Назва послуги'
+  targetAudience: {
+    en: 'Target Audience',
+    uk: 'Цільова аудиторія'
+  },
+  contactInfo: {
+    en: 'Contact Information',
+    uk: 'Контактна інформація'
+  },
+  lifeSituations: {
+    en: 'Life Situations',
+    uk: 'Життєві ситуації'
+  },
+  
+  // Results and stats
+  showingServices: {
+    en: 'Showing',
+    uk: 'Показано'
+  },
+  ofServices: {
+    en: 'of',
+    uk: 'з'
+  },
+  services: {
+    en: 'services',
+    uk: 'послуг'
+  },
+  filtersApplied: {
+    en: 'Filters applied',
+    uk: 'Застосовано фільтри'
+  },
+  noServicesFound: {
+    en: 'No services found matching your criteria',
+    uk: 'Не знайдено послуг за вашими критеріями'
+  },
+  adjustSearchCriteria: {
+    en: 'Try adjusting your search terms or filters',
+    uk: 'Спробуйте змінити умови пошуку або фільтри'
+  },
+  
+  // Common terms
+  filter: {
+    en: 'Filter',
+    uk: 'Фільтр'
   },
   addNewService: {
     en: 'Add New Service',
     uk: 'Додати нову послугу'
   },
-  serviceAdded: {
-    en: 'Service added successfully',
-    uk: 'Послугу успішно додано'
-  },
-  errorAddingService: {
-    en: 'Error adding service',
-    uk: 'Помилка додавання послуги'
-  },
   serviceRequested: {
     en: 'Service requested successfully',
-    uk: 'Послугу успішно запитано'
+    uk: 'Послугу успішно замовлено'
   },
   errorRequestingService: {
     en: 'Error requesting service',
-    uk: 'Помилка запиту послуги'
-  },
-  serviceManagement: {
-    en: 'Service management opened',
-    uk: 'Відкрито управління послугами'
+    uk: 'Помилка при замовленні послуги'
   },
   confirmDeleteService: {
     en: 'Are you sure you want to delete this service?',
@@ -75,162 +165,24 @@ export const servicesTranslations: Record<string, TranslationRecord> = {
   },
   errorDeletingService: {
     en: 'Error deleting service',
-    uk: 'Помилка видалення послуги'
+    uk: 'Помилка при видаленні послуги'
   },
-  searchServices: {
-    en: 'Search services...',
-    uk: 'Пошук послуг...'
+  loading: {
+    en: 'Loading...',
+    uk: 'Завантаження...'
   },
-  filter: {
-    en: 'Filter',
-    uk: 'Фільтр'
+  
+  // Rating and reviews
+  rating: {
+    en: 'Rating',
+    uk: 'Рейтинг'
   },
-  processing: {
-    en: 'Processing',
-    uk: 'Обробка'
+  reviews: {
+    en: 'reviews',
+    uk: 'відгуків'
   },
-  activeRequests: {
-    en: 'Active requests',
-    uk: 'Активні запити'
-  },
-  available: {
-    en: 'Available',
-    uk: 'Доступна'
-  },
-  unavailable: {
-    en: 'Unavailable',
-    uk: 'Недоступна'
-  },
-  maintenance: {
-    en: 'Maintenance',
-    uk: 'Технічне обслуговування'
-  },
-  processingTime: {
-    en: 'Processing Time',
-    uk: 'Час обробки'
-  },
-  adding: {
-    en: 'Adding...',
-    uk: 'Додавання...'
-  },
-  addService: {
-    en: 'Add Service',
-    uk: 'Додати послугу'
-  },
-  noServicesFound: {
-    en: 'No services found',
-    uk: 'Послуги не знайдено'
-  },
-  cityServices: {
-    en: 'City Services',
-    uk: 'Міські послуги'
-  },
-  serviceUpdated: {
-    en: 'Service updated successfully',
-    uk: 'Послугу успішно оновлено'
-  },
-  errorUpdatingService: {
-    en: 'Error updating service',
-    uk: 'Помилка оновлення послуги'
-  },
-  enterServiceName: {
-    en: 'Enter service name',
-    uk: 'Введіть назву послуги'
-  },
-  enterServiceNameUk: {
-    en: 'Enter service name in Ukrainian',
-    uk: 'Введіть назву послуги українською'
-  },
-  selectCategory: {
-    en: 'Select category',
-    uk: 'Оберіть категорію'
-  },
-  financial: {
-    en: 'Financial',
-    uk: 'Фінансові'
-  },
-  administrative: {
-    en: 'Administrative',
-    uk: 'Адміністративні'
-  },
-  technical: {
-    en: 'Technical',
-    uk: 'Технічні'
-  },
-  social: {
-    en: 'Social',
-    uk: 'Соціальні'
-  },
-  enterDescription: {
-    en: 'Enter service description',
-    uk: 'Введіть опис послуги'
-  },
-  enterDescriptionUk: {
-    en: 'Enter service description in Ukrainian',
-    uk: 'Введіть опис послуги українською'
-  },
-  enterProcessingTime: {
-    en: 'Enter processing time',
-    uk: 'Введіть час обробки'
-  },
-  selectStatus: {
-    en: 'Select status',
-    uk: 'Оберіть статус'
-  },
-  updating: {
-    en: 'Updating...',
-    uk: 'Оновлення...'
-  },
-  update: {
-    en: 'Update',
-    uk: 'Оновити'
-  },
-  editService: {
-    en: 'Edit Service',
-    uk: 'Редагувати послугу'
-  },
-  manageService: {
-    en: 'Manage Service',
-    uk: 'Управління послугою'
-  },
-  serviceDetails: {
-    en: 'Service Details',
-    uk: 'Деталі послуги'
-  },
-  serviceStatistics: {
-    en: 'Service Statistics',
-    uk: 'Статистика послуги'
-  },
-  totalRequests: {
-    en: 'Total Requests',
-    uk: 'Загальна кількість запитів'
-  },
-  completedRequests: {
-    en: 'Completed Requests',
-    uk: 'Виконані запити'
-  },
-  pendingRequests: {
-    en: 'Pending Requests',
-    uk: 'Запити на розгляді'
-  },
-  averageProcessingTime: {
-    en: 'Average Processing Time',
-    uk: 'Середній час обробки'
-  },
-  activateService: {
-    en: 'Activate Service',
-    uk: 'Активувати послугу'
-  },
-  deactivateService: {
-    en: 'Deactivate Service',
-    uk: 'Деактивувати послугу'
-  },
-  serviceActivated: {
-    en: 'Service activated successfully',
-    uk: 'Послугу успішно активовано'
-  },
-  serviceDeactivated: {
-    en: 'Service deactivated successfully',
-    uk: 'Послугу успішно деактивовано'
+  noRating: {
+    en: 'No rating yet',
+    uk: 'Поки немає рейтингу'
   }
 };
