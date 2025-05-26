@@ -6,10 +6,23 @@ import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, UserPlus, Filter } from 'lucide-react';
+import { Search, UserPlus } from 'lucide-react';
 import CreateUserDialog from './CreateUserDialog';
-import UsersList from './UsersList';
 import UserFilters from './UserFilters';
+
+interface User {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  patronymic: string;
+  user_type: 'employee' | 'resident';
+  address: string;
+  phone: string;
+  created_at: string;
+  roles: string[];
+  status: string;
+}
 
 const UserAccountsTab = () => {
   const { language } = useLanguage();
@@ -64,14 +77,14 @@ const UserAccountsTab = () => {
               ...profile,
               roles: roleData?.map(r => r.role) || [],
               status: 'active'
-            };
+            } as User;
           } catch (roleError) {
             console.error('Error fetching roles for user:', profile.id, roleError);
             return {
               ...profile,
               roles: [],
               status: 'active'
-            };
+            } as User;
           }
         })
       );
@@ -133,7 +146,34 @@ const UserAccountsTab = () => {
               </p>
             </div>
           ) : (
-            <UsersList users={filteredUsers} onUserUpdated={refetch} />
+            <div className="space-y-4">
+              {filteredUsers.map((user) => (
+                <div key={user.id} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium">
+                        {user.first_name} {user.last_name}
+                      </h3>
+                      <p className="text-sm text-gray-600">{user.email}</p>
+                      <p className="text-sm text-gray-500">
+                        {language === 'en' ? 'Type:' : 'Тип:'} {user.user_type}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {language === 'en' ? 'Roles:' : 'Ролі:'} {user.roles.join(', ')}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">
+                        {language === 'en' ? 'Edit' : 'Редагувати'}
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        {language === 'en' ? 'Delete' : 'Видалити'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>

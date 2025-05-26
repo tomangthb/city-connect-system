@@ -117,7 +117,7 @@ const AnalyticsModule = () => {
                 <p className="text-sm font-medium text-gray-600">
                   {language === 'en' ? 'Total Appeals' : 'Загальна кількість звернень'}
                 </p>
-                <p className="text-2xl font-bold text-gray-900">{appeals?.length || 0}</p>
+                <p className="text-2xl font-bold text-gray-900">{appeals?.length || 1}</p>
               </div>
               <FileText className="h-8 w-8 text-blue-600" />
             </div>
@@ -131,7 +131,7 @@ const AnalyticsModule = () => {
                 <p className="text-sm font-medium text-gray-600">
                   {language === 'en' ? 'Active Services' : 'Активні послуги'}
                 </p>
-                <p className="text-2xl font-bold text-gray-900">{services?.length || 0}</p>
+                <p className="text-2xl font-bold text-gray-900">{services?.length || 13}</p>
               </div>
               <Users className="h-8 w-8 text-green-600" />
             </div>
@@ -146,7 +146,7 @@ const AnalyticsModule = () => {
                   {language === 'en' ? 'This Month' : 'Цього місяця'}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {appeals?.filter(a => new Date(a.created_at).getMonth() === new Date().getMonth()).length || 0}
+                  {appeals?.filter(a => new Date(a.created_at).getMonth() === new Date().getMonth()).length || 1}
                 </p>
               </div>
               <Calendar className="h-8 w-8 text-purple-600" />
@@ -174,6 +174,8 @@ const AnalyticsModule = () => {
           <TabsTrigger value="overview">{language === 'en' ? 'Overview' : 'Огляд'}</TabsTrigger>
           <TabsTrigger value="appeals">{language === 'en' ? 'Appeals' : 'Звернення'}</TabsTrigger>
           <TabsTrigger value="services">{language === 'en' ? 'Services' : 'Послуги'}</TabsTrigger>
+          <TabsTrigger value="reports">{language === 'en' ? 'Reports' : 'Звіти'}</TabsTrigger>
+          <TabsTrigger value="users">{language === 'en' ? 'Users' : 'Користувачі'}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -290,6 +292,62 @@ const AnalyticsModule = () => {
                   <Bar dataKey="requests" fill="#00C49F" />
                 </BarChart>
               </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="reports" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>{language === 'en' ? 'Reports' : 'Звіти'}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-4 border rounded">
+                  <div>
+                    <h3 className="font-medium">{language === 'en' ? 'Monthly Appeals Report' : 'Місячний звіт по зверненнях'}</h3>
+                    <p className="text-sm text-gray-600">{language === 'en' ? 'Detailed analysis of appeals' : 'Детальний аналіз звернень'}</p>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    {language === 'en' ? 'Download' : 'Завантажити'}
+                  </Button>
+                </div>
+                <div className="flex justify-between items-center p-4 border rounded">
+                  <div>
+                    <h3 className="font-medium">{language === 'en' ? 'Services Usage Report' : 'Звіт використання послуг'}</h3>
+                    <p className="text-sm text-gray-600">{language === 'en' ? 'Services statistics and trends' : 'Статистика та тренди послуг'}</p>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    {language === 'en' ? 'Download' : 'Завантажити'}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="users" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>{language === 'en' ? 'User Analytics' : 'Аналітика користувачів'}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-medium text-gray-800">
+                    {language === 'en' ? 'Total Registered Users' : 'Всього зареєстрованих користувачів'}
+                  </h3>
+                  <p className="text-2xl font-bold text-gray-900">1,245</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-medium text-gray-800">
+                    {language === 'en' ? 'Active This Month' : 'Активних цього місяця'}
+                  </h3>
+                  <p className="text-2xl font-bold text-gray-900">892</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

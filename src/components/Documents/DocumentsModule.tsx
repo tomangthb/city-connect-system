@@ -6,19 +6,27 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
-  Filter, 
   Download, 
   Eye, 
   FileText, 
   Image, 
-  File
+  File,
+  Upload
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from 'sonner';
+import UploadDocumentDialog from './UploadDocumentDialog';
+import DocumentFiltersDialog from './DocumentFiltersDialog';
 
 const DocumentsModule = () => {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [filters, setFilters] = useState({
+    category: 'all',
+    type: 'all',
+    status: 'all',
+    dateRange: 'all'
+  });
 
   // Sample documents data
   const documents = [
@@ -52,13 +60,6 @@ const DocumentsModule = () => {
       uploadDate: '2024-01-08',
       status: 'approved'
     }
-  ];
-
-  const categories = [
-    { value: 'all', label: language === 'en' ? 'All Documents' : 'Всі документи' },
-    { value: 'certificates', label: language === 'en' ? 'Certificates' : 'Довідки' },
-    { value: 'applications', label: language === 'en' ? 'Applications' : 'Заяви' },
-    { value: 'identity', label: language === 'en' ? 'Identity Documents' : 'Документи особи' }
   ];
 
   const getFileIcon = (type: string) => {
@@ -103,19 +104,70 @@ const DocumentsModule = () => {
     const matchesSearch = (language === 'en' ? doc.nameEn : doc.name)
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || doc.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    
+    const matchesCategory = filters.category === 'all' || doc.category === filters.category;
+    const matchesType = filters.type === 'all' || doc.type === filters.type;
+    const matchesStatus = filters.status === 'all' || doc.status === filters.status;
+    
+    let matchesDate = true;
+    if (filters.dateRange !== 'all') {
+      const docDate = new Date(doc.uploadDate);
+      const now = new Date();
+      
+      switch (filters.dateRange) {
+        case 'today':
+          matchesDate = docDate.toDateString() === now.toDateString();
+          break;
+        case 'week':
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          matchesDate = docDate >= weekAgo;
+          break;
+        case 'month':
+          const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+          matchesDate = docDate >= monthAgo;
+          break;
+        case 'year':
+          const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+          matchesDate = docDate >= yearAgo;
+          break;
+      }
+    }
+    
+    return matchesSearch && matchesCategory && matchesType && matchesStatus && matchesDate;
   });
+
+  const handleViewDocument = (doc: any) => {
+    toast.success(language === 'en' ? 'Opening document...' : 'Відкриваємо документ...');
+  };
+
+  const handleDownloadDocument = (doc: any) => {
+    toast.success(language === 'en' ? 'Downloading document...' : 'Завантажуємо документ...');
+  };
+
+  const handleDocumentUploaded = () => {
+    // Refresh documents list
+    toast.success(language === 'en' ? 'Document uploaded successfully' : 'Документ успішно завантажено');
+  };
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">{t('documents')}</h2>
-        <p className="text-gray-600">
-          {language === 'en' 
-            ? 'Manage and view your documents' 
-            : 'Керуйте та переглядайте свої документи'}
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {language === 'en' ? 'Document Management' : 'Управління документами'}
+          </h2>
+          <p className="text-gray-600">
+            {language === 'en' 
+              ? 'Manage and view your documents' 
+              : 'Керуйте та переглядайте свої документи'}
+          </p>
+        </div>
+        <UploadDocumentDialog onDocumentUploaded={handleDocumentUploaded}>
+          <Button>
+            <Upload className="h-4 w-4 mr-2" />
+            {language === 'en' ? 'Upload Document' : 'Завантажити документ'}
+          </Button>
+        </UploadDocumentDialog>
       </div>
 
       {/* Search and Filter */}
@@ -132,21 +184,10 @@ const DocumentsModule = () => {
               />
             </div>
             <div className="flex gap-2">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                {categories.map((category) => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-              <Button variant="outline">
-                <Filter className="h-4 w-4 mr-2" />
-                {language === 'en' ? 'Filter' : 'Фільтр'}
-              </Button>
+              <DocumentFiltersDialog
+                filters={filters}
+                onFiltersChange={setFilters}
+              />
             </div>
           </div>
         </CardContent>
@@ -182,11 +223,21 @@ const DocumentsModule = () => {
               </div>
               
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => handleViewDocument(doc)}
+                >
                   <Eye className="h-4 w-4 mr-2" />
                   {language === 'en' ? 'View' : 'Переглянути'}
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => handleDownloadDocument(doc)}
+                >
                   <Download className="h-4 w-4 mr-2" />
                   {language === 'en' ? 'Download' : 'Завантажити'}
                 </Button>

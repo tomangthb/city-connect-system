@@ -1,19 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Search, 
-  Filter, 
-  Plus, 
-  BarChart3,
-  TrendingUp,
-  Users,
-  Star
-} from 'lucide-react';
+import { Search, Plus, BarChart3, Building, Bus, GraduationCap, MapPin, Leaf } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,7 +18,7 @@ interface ServicesModuleProps {
 }
 
 const ServicesModule = ({ userType, activeTab = 'services' }: ServicesModuleProps) => {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -40,7 +31,7 @@ const ServicesModule = ({ userType, activeTab = 'services' }: ServicesModuleProp
         .from('services')
         .select('*')
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
       return data || [];
     }
@@ -59,17 +50,13 @@ const ServicesModule = ({ userType, activeTab = 'services' }: ServicesModuleProp
   // Filter services
   const filteredServices = React.useMemo(() => {
     if (!services) return [];
-    
     return services.filter(service => {
       const nameMatch = (language === 'en' ? service.name : service.name_uk)
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
-      
       const categoryMatch = selectedCategory === 'all' || 
         (language === 'en' ? service.category : service.category_uk) === selectedCategory;
-      
       const statusMatch = selectedStatus === 'all' || service.status === selectedStatus;
-      
       return nameMatch && categoryMatch && statusMatch;
     });
   }, [services, searchTerm, selectedCategory, selectedStatus, language]);
@@ -77,15 +64,12 @@ const ServicesModule = ({ userType, activeTab = 'services' }: ServicesModuleProp
   // Group services by category for chart
   const servicesByCategory = React.useMemo(() => {
     if (!services) return [];
-    
-    const categoryGroups: { [key: string]: number } = {};
-    
+    const categoryGroups: Record<string, number> = {};
     services.forEach(service => {
       const category = language === 'en' ? service.category : service.category_uk;
       categoryGroups[category] = (categoryGroups[category] || 0) + 1;
     });
-    
-    return Object.entries(categoryGroups).map(([name, value], index) => ({
+    return Object.entries(categoryGroups).map(([name, value]) => ({
       name,
       value,
       percentage: Math.round((value / services.length) * 100)
@@ -114,9 +98,7 @@ const ServicesModule = ({ userType, activeTab = 'services' }: ServicesModuleProp
             {language === 'en' ? 'City Services' : 'Міські послуги'}
           </h2>
           <p className="text-gray-600">
-            {language === 'en' 
-              ? 'Browse and manage city services' 
-              : 'Переглядайте та керуйте міськими послугами'}
+            {language === 'en' ? 'Browse and manage city services' : 'Переглядайте та керуйте міськими послугами'}
           </p>
         </div>
         {userType === 'employee' && (
@@ -134,6 +116,32 @@ const ServicesModule = ({ userType, activeTab = 'services' }: ServicesModuleProp
           <TabsTrigger value="services">
             {language === 'en' ? 'Services' : 'Послуги'}
           </TabsTrigger>
+          <TabsTrigger value="housing-utilities">
+            <Building className="h-4 w-4 mr-2" />
+            {language === 'en' ? 'Housing and Utilities' : 'ЖКГ'}
+          </TabsTrigger>
+          <TabsTrigger value="permits-registration">
+            {language === 'en' ? 'Permits and Registration' : 'Дозволи та реєстрація'}
+          </TabsTrigger>
+          <TabsTrigger value="social-services">
+            {language === 'en' ? 'Social Services' : 'Соціальні послуги'}
+          </TabsTrigger>
+          <TabsTrigger value="transport-traffic">
+            <Bus className="h-4 w-4 mr-2" />
+            {language === 'en' ? 'Transport and Traffic' : 'Транспорт та трафік'}
+          </TabsTrigger>
+          <TabsTrigger value="education">
+            <GraduationCap className="h-4 w-4 mr-2" />
+            {language === 'en' ? 'Education' : 'Освіта'}
+          </TabsTrigger>
+          <TabsTrigger value="land-planning">
+            <MapPin className="h-4 w-4 mr-2" />
+            {language === 'en' ? 'Land Use and Urban Planning' : 'Землекористування та планування'}
+          </TabsTrigger>
+          <TabsTrigger value="environmental">
+            <Leaf className="h-4 w-4 mr-2" />
+            {language === 'en' ? 'Environmental Services' : 'Екологічні послуги'}
+          </TabsTrigger>
           {userType === 'employee' && (
             <TabsTrigger value="analytics">
               <BarChart3 className="h-4 w-4 mr-2" />
@@ -143,7 +151,7 @@ const ServicesModule = ({ userType, activeTab = 'services' }: ServicesModuleProp
         </TabsList>
 
         <TabsContent value="services" className="space-y-6">
-          {/* Search and Filters */}
+          {/* Search and Filter */}
           <Card>
             <CardContent className="p-4">
               <div className="flex flex-col md:flex-row gap-4">
@@ -177,13 +185,10 @@ const ServicesModule = ({ userType, activeTab = 'services' }: ServicesModuleProp
                       {language === 'en' ? 'All Status' : 'Всі статуси'}
                     </option>
                     <option value="Available">
-                      {language === 'en' ? 'Available' : 'Доступні'}
+                      {language === 'en' ? 'Available' : 'Доступно'}
                     </option>
                     <option value="Unavailable">
-                      {language === 'en' ? 'Unavailable' : 'Недоступні'}
-                    </option>
-                    <option value="Maintenance">
-                      {language === 'en' ? 'Under Maintenance' : 'На обслуговуванні'}
+                      {language === 'en' ? 'Unavailable' : 'Недоступно'}
                     </option>
                   </select>
                 </div>
@@ -205,10 +210,10 @@ const ServicesModule = ({ userType, activeTab = 'services' }: ServicesModuleProp
 
           {filteredServices.length === 0 && (
             <div className="text-center py-12">
-              <div className="text-gray-500 mb-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
                 {language === 'en' ? 'No services found' : 'Послуги не знайдено'}
-              </div>
-              <p className="text-gray-400">
+              </h3>
+              <p className="text-gray-600">
                 {language === 'en' 
                   ? 'Try adjusting your search or filter criteria' 
                   : 'Спробуйте змінити параметри пошуку або фільтра'}
@@ -217,126 +222,59 @@ const ServicesModule = ({ userType, activeTab = 'services' }: ServicesModuleProp
           )}
         </TabsContent>
 
+        {/* Category-specific tabs */}
+        {['housing-utilities', 'permits-registration', 'social-services', 'transport-traffic', 'education', 'land-planning', 'environmental'].map(category => (
+          <TabsContent key={category} value={category} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {services?.filter(service => {
+                const serviceCategory = (language === 'en' ? service.category : service.category_uk).toLowerCase();
+                return serviceCategory.includes(category.replace('-', ' '));
+              }).map((service) => (
+                <ServiceCard 
+                  key={service.id} 
+                  service={service} 
+                  userType={userType}
+                  onServiceUpdated={handleServiceUpdated}
+                />
+              ))}
+            </div>
+          </TabsContent>
+        ))}
+
         {userType === 'employee' && (
           <TabsContent value="analytics" className="space-y-6">
-            {/* Analytics Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">
-                        {language === 'en' ? 'Total Services' : 'Всього послуг'}
-                      </p>
-                      <p className="text-3xl font-bold">{services?.length || 0}</p>
-                    </div>
-                    <div className="p-3 rounded-full bg-blue-100">
-                      <BarChart3 className="h-6 w-6 text-blue-600" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">
-                        {language === 'en' ? 'Available' : 'Доступні'}
-                      </p>
-                      <p className="text-3xl font-bold text-green-600">
-                        {services?.filter(s => s.status === 'Available').length || 0}
-                      </p>
-                    </div>
-                    <div className="p-3 rounded-full bg-green-100">
-                      <TrendingUp className="h-6 w-6 text-green-600" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">
-                        {language === 'en' ? 'Average Rating' : 'Середня оцінка'}
-                      </p>
-                      <p className="text-3xl font-bold text-yellow-600">
-                        {services?.length ? 
-                          (services.reduce((sum, s) => sum + (s.average_rating || 0), 0) / services.length).toFixed(1) : 
-                          '0.0'
-                        }
-                      </p>
-                    </div>
-                    <div className="p-3 rounded-full bg-yellow-100">
-                      <Star className="h-6 w-6 text-yellow-600" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">
-                        {language === 'en' ? 'Total Reviews' : 'Всього відгуків'}
-                      </p>
-                      <p className="text-3xl font-bold text-purple-600">
-                        {services?.reduce((sum, s) => sum + (s.total_reviews || 0), 0) || 0}
-                      </p>
-                    </div>
-                    <div className="p-3 rounded-full bg-purple-100">
-                      <Users className="h-6 w-6 text-purple-600" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Service Distribution Chart */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <MetricsChart 
-                title={language === 'en' ? 'Service Distribution by Category' : 'Розподіл послуг за категоріями'}
-                data={servicesByCategory}
-                type="pie"
-                showLegend={true}
-              />
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {language === 'en' ? 'Services Distribution' : 'Розподіл послуг'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <MetricsChart data={servicesByCategory} />
+                </CardContent>
+              </Card>
               
               <Card>
                 <CardHeader>
                   <CardTitle>
-                    {language === 'en' ? 'Service Status Overview' : 'Огляд статусів послуг'}
+                    {language === 'en' ? 'Service Statistics' : 'Статистика послуг'}
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {['Available', 'Unavailable', 'Maintenance'].map((status) => {
-                      const count = services?.filter(s => s.status === status).length || 0;
-                      const percentage = services?.length ? Math.round((count / services.length) * 100) : 0;
-                      
-                      return (
-                        <div key={status} className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className={`w-3 h-3 rounded-full ${
-                              status === 'Available' ? 'bg-green-500' :
-                              status === 'Unavailable' ? 'bg-red-500' : 'bg-yellow-500'
-                            }`} />
-                            <span className="font-medium">
-                              {status === 'Available' ? (language === 'en' ? 'Available' : 'Доступні') :
-                               status === 'Unavailable' ? (language === 'en' ? 'Unavailable' : 'Недоступні') :
-                               (language === 'en' ? 'Under Maintenance' : 'На обслуговуванні')
-                              }
-                            </span>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-bold">{count}</div>
-                            <div className="text-sm text-gray-500">{percentage}%</div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between">
+                    <span>{language === 'en' ? 'Total Services:' : 'Всього послуг:'}</span>
+                    <span className="font-bold">{services?.length || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{language === 'en' ? 'Available:' : 'Доступно:'}</span>
+                    <span className="font-bold text-green-600">
+                      {services?.filter(s => s.status === 'Available').length || 0}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{language === 'en' ? 'Categories:' : 'Категорій:'}</span>
+                    <span className="font-bold">{categories.length - 1}</span>
                   </div>
                 </CardContent>
               </Card>

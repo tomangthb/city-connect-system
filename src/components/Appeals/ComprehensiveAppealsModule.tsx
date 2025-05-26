@@ -2,9 +2,10 @@
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAppeals } from '@/hooks/useAppeals';
-import { Download, Settings } from 'lucide-react';
-import AppealFilters from './AppealFilters';
+import { Download, Settings, Search, X } from 'lucide-react';
 import AppealsTable from './AppealsTable';
 import AppealDetailsDialog from './AppealDetailsDialog';
 import AppealReviewDialog from './AppealReviewDialog';
@@ -180,18 +181,82 @@ const ComprehensiveAppealsModule = () => {
         </Card>
       </div>
 
-      {/* Filters */}
-      <AppealFilters
-        searchTerm={searchTerm}
-        statusFilter={statusFilter}
-        categoryFilter={categoryFilter}
-        dateFilter={dateFilter}
-        onSearchChange={setSearchTerm}
-        onStatusChange={setStatusFilter}
-        onCategoryChange={setCategoryFilter}
-        onDateChange={setDateFilter}
-        onClearFilters={handleClearFilters}
-      />
+      {/* Filters and Search */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>Фільтри та пошук</span>
+            {(searchTerm || statusFilter !== 'all' || categoryFilter !== 'all' || dateFilter !== 'all') && (
+              <Button variant="outline" size="sm" onClick={handleClearFilters}>
+                <X className="h-4 w-4 mr-2" />
+                Очистити
+              </Button>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Пошук за темою, ім'ям, ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">Статус</label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Всі статуси</SelectItem>
+                  <SelectItem value="Under Review">На розгляді</SelectItem>
+                  <SelectItem value="In Progress">В обробці</SelectItem>
+                  <SelectItem value="Completed">Вирішено</SelectItem>
+                  <SelectItem value="Rejected">Відхилено</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">Категорія</label>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Всі категорії</SelectItem>
+                  <SelectItem value="Housing">ЖКГ</SelectItem>
+                  <SelectItem value="Transport">Транспорт</SelectItem>
+                  <SelectItem value="Social">Соціальні питання</SelectItem>
+                  <SelectItem value="Environment">Довкілля</SelectItem>
+                  <SelectItem value="Other">Інше</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">Період</label>
+              <Select value={dateFilter} onValueChange={setDateFilter}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Весь час</SelectItem>
+                  <SelectItem value="today">Сьогодні</SelectItem>
+                  <SelectItem value="week">Цей тиждень</SelectItem>
+                  <SelectItem value="month">Цей місяць</SelectItem>
+                  <SelectItem value="quarter">Цей квартал</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Results Info */}
       <div className="flex justify-between items-center">
