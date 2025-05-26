@@ -1,287 +1,384 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Plus, BarChart3, Building, Bus, GraduationCap, MapPin, Leaf } from 'lucide-react';
+import { 
+  Search, 
+  Filter,
+  Plus,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import ServiceCard from './ServiceCard';
-import CreateServiceDialog from './CreateServiceDialog';
-import MetricsChart from '../Employee/MetricsChart';
+import { toast } from 'sonner';
+import AddServiceDialog from './AddServiceDialog';
+import EditServiceDialog from './EditServiceDialog';
+import ServicesFilterDialog from './ServicesFilterDialog';
+import ServiceDetailDialog from './ServiceDetailDialog';
+import BookAppointmentDialog from './BookAppointmentDialog';
+import { addActivity } from '@/utils/activityUtils';
 
 interface ServicesModuleProps {
   userType: 'employee' | 'resident';
-  activeTab?: string;
 }
 
-const ServicesModule = ({ userType, activeTab = 'services' }: ServicesModuleProps) => {
-  const { language } = useLanguage();
+const ServicesModule = ({ userType }: ServicesModuleProps) => {
+  const { language, t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [editingService, setEditingService] = useState<any>(null);
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [appointmentService, setAppointmentService] = useState<any>(null);
+  const [filters, setFilters] = useState({
+    category: 'all',
+    status: 'all',
+    processingTime: 'all',
+    lifeSituation: 'all'
+  });
 
-  // Fetch services
   const { data: services, isLoading, refetch } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('services')
         .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+        .order('category', { ascending: true });
+      
+      if (error) {
+        console.error('Error fetching services:', error);
+        return [];
+      }
       return data || [];
     }
   });
 
-  // Get unique categories for filter
-  const categories = React.useMemo(() => {
-    if (!services) return [];
-    const uniqueCategories = [...new Set(services.map(s => language === 'en' ? s.category : s.category_uk))];
-    return [
-      { value: 'all', label: language === 'en' ? 'All Categories' : 'Всі категорії' },
-      ...uniqueCategories.map(cat => ({ value: cat, label: cat }))
-    ];
-  }, [services, language]);
+  const filteredServices = services?.filter(service => {
+    const name = language === 'en' ? service.name : (service.name_uk || service.name);
+    const category = language === 'en' ? service.category : (service.category_uk || service.category);
+    const subcategory = language === 'en' ? service.subcategory : (service.subcategory_uk || service.subcategory);
+    const description = language === 'en' ? service.description : (service.description_uk || service.description);
+    const lifeSituations = language === 'en' ? service.life_situations : (service.life_situations_uk || service.life_situations);
+    
+    // Search filter
+    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           (subcategory && subcategory.toLowerCase().includes(searchTerm.toLowerCase())) ||
+           (description && description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+           (lifeSituations && lifeSituations.some((situation: string) => 
+             situation.toLowerCase().includes(searchTerm.toLowerCase())
+           ));
+    
+    if (!matchesSearch) return false;
 
-  // Filter services
-  const filteredServices = React.useMemo(() => {
-    if (!services) return [];
-    return services.filter(service => {
-      const nameMatch = (language === 'en' ? service.name : service.name_uk)
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const categoryMatch = selectedCategory === 'all' || 
-        (language === 'en' ? service.category : service.category_uk) === selectedCategory;
-      const statusMatch = selectedStatus === 'all' || service.status === selectedStatus;
-      return nameMatch && categoryMatch && statusMatch;
-    });
-  }, [services, searchTerm, selectedCategory, selectedStatus, language]);
+    // Apply filters
+    if (filters.category !== 'all' && service.category !== filters.category) return false;
+    if (filters.status !== 'all' && service.status !== filters.status) return false;
+    if (filters.processingTime !== 'all') {
+      const processingTime = service.processing_time || '';
+      if (filters.processingTime === 'fast' && !processingTime.includes('1-3')) return false;
+      if (filters.processingTime === 'medium' && !processingTime.includes('week')) return false;
+      if (filters.processingTime === 'slow' && !processingTime.includes('2+')) return false;
+    }
+    if (filters.lifeSituation !== 'all') {
+      if (!lifeSituations || !lifeSituations.includes(filters.lifeSituation)) return false;
+    }
 
-  // Group services by category for chart
-  const servicesByCategory = React.useMemo(() => {
-    if (!services) return [];
-    const categoryGroups: Record<string, number> = {};
-    services.forEach(service => {
-      const category = language === 'en' ? service.category : service.category_uk;
-      categoryGroups[category] = (categoryGroups[category] || 0) + 1;
-    });
-    return Object.entries(categoryGroups).map(([name, value]) => ({
-      name,
-      value,
-      percentage: Math.round((value / services.length) * 100)
-    }));
-  }, [services, language]);
+    return true;
+  }) || [];
 
-  const handleServiceUpdated = () => {
-    refetch();
+  // Group services by category
+  const servicesByCategory = filteredServices.reduce((acc, service) => {
+    const category = language === 'en' ? service.category : (service.category_uk || service.category);
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(service);
+    return acc;
+  }, {} as Record<string, any[]>);
+
+  const handleRequestService = async (service: any) => {
+    try {
+      await addActivity({
+        title: language === 'en' ? `Service requested: ${service.name}` : `Послуга запитана: ${service.name_uk || service.name}`,
+        description: `Requested service: ${service.name}`,
+        type: 'service',
+        priority: 'medium',
+        status: 'pending'
+      });
+
+      await supabase
+        .from('services')
+        .update({ requests: (service.requests || 0) + 1 })
+        .eq('id', service.id);
+
+      toast.success(t('serviceRequested') || 'Service requested successfully');
+      refetch();
+    } catch (error) {
+      console.error('Error requesting service:', error);
+      toast.error(t('errorRequestingService') || 'Error requesting service');
+    }
+  };
+
+  const handleDeleteService = async (service: any) => {
+    if (!confirm(t('confirmDeleteService') || 'Are you sure you want to delete this service?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('services')
+        .delete()
+        .eq('id', service.id);
+
+      if (error) throw error;
+
+      await addActivity({
+        title: language === 'en' ? `Service deleted: ${service.name}` : `Послуга видалена: ${service.name_uk || service.name}`,
+        description: `Deleted service: ${service.name}`,
+        type: 'service',
+        priority: 'high',
+        status: 'completed'
+      });
+
+      toast.success(t('serviceDeleted') || 'Service deleted successfully');
+      refetch();
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      toast.error(t('errorDeletingService') || 'Error deleting service');
+    }
+  };
+
+  const scrollContainer = (containerId: string, direction: 'left' | 'right') => {
+    const container = document.getElementById(containerId);
+    if (container) {
+      const scrollAmount = 320;
+      container.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
   };
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <div className="text-center">
-          {language === 'en' ? 'Loading services...' : 'Завантаження послуг...'}
-        </div>
+      <div className="p-6 flex justify-center">
+        <div>{t('loading') || 'Loading...'}</div>
       </div>
     );
   }
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            {language === 'en' ? 'City Services' : 'Міські послуги'}
-          </h2>
-          <p className="text-gray-600">
-            {language === 'en' ? 'Browse and manage city services' : 'Переглядайте та керуйте міськими послугами'}
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t('administrativeServices') || 'Адміністративні послуги'}
+          </h1>
+          <p className="text-gray-600 mt-2">
+            {userType === 'employee' 
+              ? (t('employeeServicesDescription') || 'Комплексне управління та адміністрування послуг')
+              : (t('servicesDescription') || 'Повний каталог адміністративних послуг з детальною інформацією та онлайн записом')}
           </p>
         </div>
         {userType === 'employee' && (
-          <CreateServiceDialog onServiceCreated={handleServiceUpdated}>
+          <AddServiceDialog onServiceAdded={refetch}>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              {language === 'en' ? 'Add Service' : 'Додати послугу'}
+              {t('addNewService') || 'Add New Service'}
             </Button>
-          </CreateServiceDialog>
+          </AddServiceDialog>
         )}
       </div>
 
-      <Tabs defaultValue="services" className="w-full">
-        <TabsList>
-          <TabsTrigger value="services">
-            {language === 'en' ? 'Services' : 'Послуги'}
-          </TabsTrigger>
-          <TabsTrigger value="housing-utilities">
-            <Building className="h-4 w-4 mr-2" />
-            {language === 'en' ? 'Housing and Utilities' : 'ЖКГ'}
-          </TabsTrigger>
-          <TabsTrigger value="permits-registration">
-            {language === 'en' ? 'Permits and Registration' : 'Дозволи та реєстрація'}
-          </TabsTrigger>
-          <TabsTrigger value="social-services">
-            {language === 'en' ? 'Social Services' : 'Соціальні послуги'}
-          </TabsTrigger>
-          <TabsTrigger value="transport-traffic">
-            <Bus className="h-4 w-4 mr-2" />
-            {language === 'en' ? 'Transport and Traffic' : 'Транспорт та трафік'}
-          </TabsTrigger>
-          <TabsTrigger value="education">
-            <GraduationCap className="h-4 w-4 mr-2" />
-            {language === 'en' ? 'Education' : 'Освіта'}
-          </TabsTrigger>
-          <TabsTrigger value="land-planning">
-            <MapPin className="h-4 w-4 mr-2" />
-            {language === 'en' ? 'Land Use and Urban Planning' : 'Землекористування та планування'}
-          </TabsTrigger>
-          <TabsTrigger value="environmental">
-            <Leaf className="h-4 w-4 mr-2" />
-            {language === 'en' ? 'Environmental Services' : 'Екологічні послуги'}
-          </TabsTrigger>
-          {userType === 'employee' && (
-            <TabsTrigger value="analytics">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              {language === 'en' ? 'Analytics' : 'Аналітика'}
-            </TabsTrigger>
-          )}
-        </TabsList>
+      {/* Search and Filters */}
+      <div className="bg-white rounded-lg border p-6 space-y-4">
+        <h3 className="font-semibold text-lg">
+          {t('searchAndFilter') || 'Пошук та фільтрація послуг'}
+        </h3>
+        
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input 
+              placeholder={t('searchServices') || 'Пошук за назвою послуги, категорією, життєвою ситуацією...'}
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <ServicesFilterDialog onFiltersApplied={setFilters}>
+            <Button variant="outline">
+              <Filter className="h-4 w-4 mr-2" />
+              {t('filter') || 'Фільтр'}
+            </Button>
+          </ServicesFilterDialog>
+        </div>
 
-        <TabsContent value="services" className="space-y-6">
-          {/* Search and Filter */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder={language === 'en' ? 'Search services...' : 'Пошук послуг...'}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
+        {/* Results info */}
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-gray-600">
+            {language === 'en' ? 
+              `Showing ${filteredServices.length} of ${services?.length || 0} services` :
+              `Показано ${filteredServices.length} з ${services?.length || 0} послуг`
+            }
+          </span>
+          {(filters.category !== 'all' || filters.status !== 'all' || filters.processingTime !== 'all' || filters.lifeSituation !== 'all') && (
+            <span className="text-blue-600 font-medium">
+              {t('filtersApplied') || 'Застосовано фільтри'}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Services Catalog by Categories */}
+      <div className="space-y-8">
+        {Object.keys(servicesByCategory).length > 0 ? (
+          Object.entries(servicesByCategory).map(([category, categoryServices]) => (
+            <div key={category} className="bg-white rounded-lg border p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">{category}</h2>
                 <div className="flex gap-2">
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => scrollContainer(`category-${category}`, 'left')}
                   >
-                    {categories.map((category) => (
-                      <option key={category.value} value={category.value}>
-                        {category.label}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => scrollContainer(`category-${category}`, 'right')}
                   >
-                    <option value="all">
-                      {language === 'en' ? 'All Status' : 'Всі статуси'}
-                    </option>
-                    <option value="Available">
-                      {language === 'en' ? 'Available' : 'Доступно'}
-                    </option>
-                    <option value="Unavailable">
-                      {language === 'en' ? 'Unavailable' : 'Недоступно'}
-                    </option>
-                  </select>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Services Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredServices.map((service) => (
-              <ServiceCard 
-                key={service.id} 
-                service={service} 
-                userType={userType}
-                onServiceUpdated={handleServiceUpdated}
-              />
-            ))}
-          </div>
-
-          {filteredServices.length === 0 && (
-            <div className="text-center py-12">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {language === 'en' ? 'No services found' : 'Послуги не знайдено'}
-              </h3>
-              <p className="text-gray-600">
-                {language === 'en' 
-                  ? 'Try adjusting your search or filter criteria' 
-                  : 'Спробуйте змінити параметри пошуку або фільтра'}
-              </p>
-            </div>
-          )}
-        </TabsContent>
-
-        {/* Category-specific tabs */}
-        {['housing-utilities', 'permits-registration', 'social-services', 'transport-traffic', 'education', 'land-planning', 'environmental'].map(category => (
-          <TabsContent key={category} value={category} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {services?.filter(service => {
-                const serviceCategory = (language === 'en' ? service.category : service.category_uk).toLowerCase();
-                return serviceCategory.includes(category.replace('-', ' '));
-              }).map((service) => (
-                <ServiceCard 
-                  key={service.id} 
-                  service={service} 
-                  userType={userType}
-                  onServiceUpdated={handleServiceUpdated}
-                />
-              ))}
-            </div>
-          </TabsContent>
-        ))}
-
-        {userType === 'employee' && (
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    {language === 'en' ? 'Services Distribution' : 'Розподіл послуг'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <MetricsChart data={servicesByCategory} title="" />
-                </CardContent>
-              </Card>
               
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    {language === 'en' ? 'Service Statistics' : 'Статистика послуг'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between">
-                    <span>{language === 'en' ? 'Total Services:' : 'Всього послуг:'}</span>
-                    <span className="font-bold">{services?.length || 0}</span>
+              <div
+                id={`category-${category}`}
+                className="flex gap-4 overflow-x-auto scrollbar-hide pb-4"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {categoryServices.map((service) => (
+                  <div key={service.id} className="flex-shrink-0 w-80 bg-gray-50 rounded-lg p-4 border">
+                    <div className="space-y-3">
+                      <div>
+                        <h3 className="font-semibold text-lg text-gray-900">
+                          {language === 'en' ? service.name : (service.name_uk || service.name)}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {language === 'en' ? service.subcategory : (service.subcategory_uk || service.subcategory)}
+                        </p>
+                      </div>
+                      
+                      <p className="text-sm text-gray-700 line-clamp-3">
+                        {language === 'en' ? service.description : (service.description_uk || service.description)}
+                      </p>
+                      
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">
+                          {service.processing_time}
+                        </span>
+                        {service.average_rating && (
+                          <span className="text-yellow-600">
+                            ⭐ {service.average_rating.toFixed(1)} ({service.total_reviews})
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => setSelectedService(service)}
+                        >
+                          {t('learnMore') || 'Докладніше'}
+                        </Button>
+                        
+                        {userType === 'resident' ? (
+                          <Button
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => setAppointmentService(service)}
+                          >
+                            {t('bookAppointment') || 'Записатися'}
+                          </Button>
+                        ) : (
+                          <div className="flex gap-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setEditingService(service)}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteService(service)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span>{language === 'en' ? 'Available:' : 'Доступно:'}</span>
-                    <span className="font-bold text-green-600">
-                      {services?.filter(s => s.status === 'Available').length || 0}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>{language === 'en' ? 'Categories:' : 'Категорій:'}</span>
-                    <span className="font-bold">{categories.length - 1}</span>
-                  </div>
-                </CardContent>
-              </Card>
+                ))}
+              </div>
             </div>
-          </TabsContent>
+          ))
+        ) : (
+          <div className="text-center py-12 bg-white rounded-lg border">
+            <p className="text-gray-500 text-lg">
+              {t('noServicesFound') || 'Не знайдено послуг за вашими критеріями'}
+            </p>
+            <p className="text-gray-400 text-sm mt-2">
+              {t('adjustSearchCriteria') || 'Спробуйте змінити умови пошуку або фільтри'}
+            </p>
+          </div>
         )}
-      </Tabs>
+      </div>
+
+      {/* Dialogs */}
+      {selectedService && (
+        <ServiceDetailDialog
+          service={selectedService}
+          onClose={() => setSelectedService(null)}
+          onBookAppointment={() => {
+            setAppointmentService(selectedService);
+            setSelectedService(null);
+          }}
+          userType={userType}
+        />
+      )}
+
+      {appointmentService && (
+        <BookAppointmentDialog
+          service={appointmentService}
+          onClose={() => setAppointmentService(null)}
+          onSuccess={() => {
+            setAppointmentService(null);
+            toast.success(language === 'en' ? 'Appointment booked successfully!' : 'Запис на прийом успішно створено!');
+          }}
+        />
+      )}
+
+      {editingService && (
+        <EditServiceDialog 
+          service={editingService} 
+          onServiceUpdated={() => {
+            refetch();
+            setEditingService(null);
+          }}
+        >
+          <div />
+        </EditServiceDialog>
+      )}
     </div>
   );
 };
