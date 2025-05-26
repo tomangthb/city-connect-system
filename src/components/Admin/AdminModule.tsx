@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/useLanguage';
 import { UserCog, Shield, Settings, Users, Key } from 'lucide-react';
-import UserManagementDialog from './UserManagementDialog';
+import UserManagementModule from './UserManagement/UserManagementModule';
 import AccessControlDialog from './AccessControlDialog';
 import ApiIntegrationsDialog from './ApiIntegrationsDialog';
 import SystemStatusDialog from './SystemStatusDialog';
@@ -15,6 +15,7 @@ interface AdminModuleProps {
 
 const AdminModule = ({ onOpenSettings }: AdminModuleProps) => {
   const { language, t } = useLanguage();
+  const [activeSection, setActiveSection] = React.useState<string | null>(null);
   
   const adminSections = [
     { 
@@ -58,18 +59,35 @@ const AdminModule = ({ onOpenSettings }: AdminModuleProps) => {
   const handleSectionClick = (section: any) => {
     if (section.component === 'system-settings' && onOpenSettings) {
       onOpenSettings();
+    } else if (section.component === 'user-management') {
+      setActiveSection('user-management');
     }
   };
+
+  if (activeSection === 'user-management') {
+    return (
+      <div>
+        <div className="mb-4">
+          <Button variant="outline" onClick={() => setActiveSection(null)}>
+            ← {language === 'en' ? 'Back to Administration' : 'Назад до адміністрування'}
+          </Button>
+        </div>
+        <UserManagementModule />
+      </div>
+    );
+  }
 
   const renderSectionButton = (section: any) => {
     switch (section.component) {
       case 'user-management':
         return (
-          <UserManagementDialog>
-            <Button variant="outline" className="w-full">
-              {language === 'en' ? 'Manage' : 'Керувати'}
-            </Button>
-          </UserManagementDialog>
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={() => handleSectionClick(section)}
+          >
+            {language === 'en' ? 'Manage' : 'Керувати'}
+          </Button>
         );
       case 'access-control':
         return (
