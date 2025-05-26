@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/Layout/AppSidebar';
 import Header from '@/components/Layout/Header';
 import EmployeeDashboard from '@/components/Employee/EmployeeDashboard';
@@ -95,21 +96,23 @@ const MainApp = ({ userType }: MainAppProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <AppSidebar userType={userType} activeTab={activeTab} onTabChange={handleTabChange} />
-      <div className="ml-64">
-        <Header 
-          userType={userType} 
-          userName={user?.email || 'User'}
-          notifications={notifications}
-          setNotifications={setNotifications}
-          onOpenSettings={() => handleTabChange('account')}
-        />
-        <main className="p-6">
-          {renderContent()}
-        </main>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-gray-100">
+        <AppSidebar userType={userType} activeTab={activeTab} onTabChange={handleTabChange} />
+        <SidebarInset>
+          <Header 
+            userType={userType} 
+            userName={user?.email || 'User'}
+            notifications={notifications}
+            setNotifications={setNotifications}
+            onOpenSettings={() => handleTabChange('account')}
+          />
+          <main className="p-6">
+            {renderContent()}
+          </main>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
