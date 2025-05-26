@@ -10,9 +10,10 @@ import { addActivity } from '@/utils/activityUtils';
 
 interface CreateFolderDialogProps {
   children: React.ReactNode;
+  onFolderCreated?: (folderName: string) => void;
 }
 
-const CreateFolderDialog = ({ children }: CreateFolderDialogProps) => {
+const CreateFolderDialog = ({ children, onFolderCreated }: CreateFolderDialogProps) => {
   const { language, t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [folderName, setFolderName] = useState('');
@@ -34,6 +35,10 @@ const CreateFolderDialog = ({ children }: CreateFolderDialogProps) => {
         priority: 'low',
         status: 'completed'
       });
+
+      if (onFolderCreated) {
+        onFolderCreated(folderName);
+      }
 
       toast.success(language === 'en' ? 'Folder created successfully' : 'Папку успішно створено');
       setOpen(false);

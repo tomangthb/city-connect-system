@@ -9,11 +9,21 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { addActivity } from '@/utils/activityUtils';
 
-interface UploadDocumentDialogProps {
-  children: React.ReactNode;
+interface Document {
+  name: string;
+  category: string;
+  date: string;
+  size: string;
+  url?: string;
+  type?: string;
 }
 
-const UploadDocumentDialog = ({ children }: UploadDocumentDialogProps) => {
+interface UploadDocumentDialogProps {
+  children: React.ReactNode;
+  onDocumentUploaded?: (newDocument: Omit<Document, 'id'>) => void;
+}
+
+const UploadDocumentDialog = ({ children, onDocumentUploaded }: UploadDocumentDialogProps) => {
   const { language, t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [documentName, setDocumentName] = useState('');
@@ -32,11 +42,28 @@ const UploadDocumentDialog = ({ children }: UploadDocumentDialogProps) => {
       return;
     }
 
+    if (!category) {
+      toast.error(language === 'en' ? 'Please select a category' : 'Будь ласка, оберіть категорію');
+      return;
+    }
+
     setIsUploading(true);
     
     try {
       // Simulate file upload
       await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const newDocument: Omit<Document, 'id'> = {
+        name: documentName,
+        category: category,
+        date: new Date().toISOString().split('T')[0],
+        size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+        type: 'document'
+      };
+
+      if (onDocumentUploaded) {
+        onDocumentUploaded(newDocument);
+      }
       
       await addActivity({
         title: language === 'en' ? `Document uploaded: ${documentName}` : `Документ завантажено: ${documentName}`,

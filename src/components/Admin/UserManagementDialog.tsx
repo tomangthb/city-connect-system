@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -63,10 +62,14 @@ const UserManagementDialog = ({ children }: UserManagementDialogProps) => {
             .select('role')
             .eq('user_id', profile.id);
 
+          // Ensure user_type is properly typed
+          const userType = profile.user_type === 'employee' ? 'employee' : 'resident';
+
           return {
             ...profile,
+            user_type: userType,
             roles: roleData?.map(r => r.role) || []
-          };
+          } as User;
         })
       );
 
