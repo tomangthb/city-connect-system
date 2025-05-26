@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -9,12 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/components/ui/use-toast';
-import { Globe } from 'lucide-react';
+import { Globe, Building, Users } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 
-// Registration form schema - simplified to just basic info
+// Registration form schema - includes user type selection
 const registrationSchema = z.object({
   firstName: z.string().min(2, { message: "First name is required" }),
   lastName: z.string().min(2, { message: "Last name is required" }),
@@ -22,6 +22,7 @@ const registrationSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   confirmPassword: z.string(),
+  userType: z.enum(['employee', 'resident'], { message: "Please select user type" }),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -49,7 +50,7 @@ const Auth = () => {
     },
   });
 
-  // Registration form
+  // Registration form with user type
   const registrationForm = useForm<z.infer<typeof registrationSchema>>({
     resolver: zodResolver(registrationSchema),
     defaultValues: {
@@ -59,6 +60,7 @@ const Auth = () => {
       email: '',
       password: '',
       confirmPassword: '',
+      userType: 'resident',
     },
   });
 
@@ -86,13 +88,13 @@ const Auth = () => {
     }
   };
 
-  // Handle registration submission - default to employee type
+  // Handle registration submission with user type
   const onRegisterSubmit = async (data: z.infer<typeof registrationSchema>) => {
     const { error } = await signUp(data.email, data.password, {
       firstName: data.firstName,
       lastName: data.lastName,
       patronymic: data.patronymic,
-      userType: 'employee' // Default to employee
+      userType: data.userType
     });
     
     if (error) {
@@ -180,6 +182,46 @@ const Auth = () => {
             <TabsContent value="register">
               <Form {...registrationForm}>
                 <form onSubmit={registrationForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                  {/* User Type Selection */}
+                  <FormField
+                    control={registrationForm.control}
+                    name="userType"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel>Account Type</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex flex-col space-y-3"
+                          >
+                            <div className="flex items-center space-x-3 border rounded-lg p-3 hover:bg-gray-50">
+                              <RadioGroupItem value="resident" id="resident" />
+                              <label htmlFor="resident" className="flex items-center space-x-2 cursor-pointer flex-1">
+                                <Users className="h-5 w-5 text-green-600" />
+                                <div>
+                                  <div className="font-medium">Resident</div>
+                                  <div className="text-sm text-gray-500">Access city services and submit requests</div>
+                                </div>
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-3 border rounded-lg p-3 hover:bg-gray-50">
+                              <RadioGroupItem value="employee" id="employee" />
+                              <label htmlFor="employee" className="flex items-center space-x-2 cursor-pointer flex-1">
+                                <Building className="h-5 w-5 text-blue-600" />
+                                <div>
+                                  <div className="font-medium">Employee</div>
+                                  <div className="text-sm text-gray-500">Administrative access and management tools</div>
+                                </div>
+                              </label>
+                            </div>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={registrationForm.control}
