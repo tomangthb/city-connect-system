@@ -25,10 +25,15 @@ const UserManagementDialog = ({ children }: UserManagementDialogProps) => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchUsers = async () => {
+    if (!open) return;
+    
     setLoading(true);
     setError(null);
+    
     try {
-      const { data: profiles, error } = await supabase
+      console.log('Fetching users...');
+      
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select(`
           id,
@@ -41,12 +46,15 @@ const UserManagementDialog = ({ children }: UserManagementDialogProps) => {
           created_at
         `);
 
-      if (error) {
-        console.error('Profiles error:', error);
-        throw error;
+      if (profilesError) {
+        console.error('Profiles error:', profilesError);
+        throw profilesError;
       }
 
+      console.log('Fetched profiles:', profiles);
+
       if (!profiles || profiles.length === 0) {
+        console.log('No profiles found');
         setUsers([]);
         return;
       }
@@ -55,12 +63,15 @@ const UserManagementDialog = ({ children }: UserManagementDialogProps) => {
       const usersWithRoles = await Promise.all(
         profiles.map(async (profile) => {
           try {
-            const { data: roleData } = await supabase
+            const { data: roleData, error: roleError } = await supabase
               .from('user_roles')
               .select('role')
               .eq('user_id', profile.id);
 
-            // Ensure user_type is properly typed
+            if (roleError) {
+              console.error('Role error for user:', profile.id, roleError);
+            }
+
             const userType = profile.user_type === 'employee' ? 'employee' : 'resident';
 
             return {
@@ -79,6 +90,7 @@ const UserManagementDialog = ({ children }: UserManagementDialogProps) => {
         })
       );
 
+      console.log('Users with roles:', usersWithRoles);
       setUsers(usersWithRoles);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -92,6 +104,7 @@ const UserManagementDialog = ({ children }: UserManagementDialogProps) => {
 
   useEffect(() => {
     if (open) {
+      console.log('Dialog opened, fetching users...');
       fetchUsers();
     }
   }, [open]);
@@ -123,14 +136,14 @@ const UserManagementDialog = ({ children }: UserManagementDialogProps) => {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>{language === 'en' ? 'User Management' : 'Управління користувачами'}</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
+        <div className="flex-1 overflow-hidden flex flex-col space-y-4">
           {/* Header Actions */}
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center flex-shrink-0">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -150,20 +163,22 @@ const UserManagementDialog = ({ children }: UserManagementDialogProps) => {
 
           {/* Error Display */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded flex-shrink-0">
               {error}
             </div>
           )}
 
           {/* Users List */}
-          <UsersList 
-            users={filteredUsers}
-            loading={loading}
-            onUserUpdated={fetchUsers}
-            language={language}
-          />
+          <div className="flex-1 overflow-hidden">
+            <UsersList 
+              users={filteredUsers}
+              loading={loading}
+              onUserUpdated={fetchUsers}
+              language={language}
+            />
+          </div>
 
-          <div className="flex justify-between items-center pt-4 border-t">
+          <div className="flex justify-between items-center pt-4 border-t flex-shrink-0">
             <p className="text-sm text-gray-500">
               {language === 'en' ? 
                 `Showing ${filteredUsers.length} users` :

@@ -17,7 +17,7 @@ import DocumentsModule from '@/components/Documents/DocumentsModule';
 import AnalyticsModule from '@/components/Analytics/AnalyticsModule';
 import AdminModule from '@/components/Admin/AdminModule';
 import NewsModule from '@/components/News/NewsModule';
-import UserAccountModule from '@/components/User/UserAccountModule';
+import ProfileSettings from '@/components/Profile/ProfileSettings';
 import PaymentsModule from '@/components/Payments/PaymentsModule';
 import { useNotifications } from '@/hooks/useNotifications';
 
@@ -34,6 +34,7 @@ const MainApp = ({ userType }: MainAppProps) => {
   const [activeTab, setActiveTab] = useState(
     userType === 'employee' ? 'dashboard' : 'home'
   );
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     const path = location.pathname.split('/')[1];
@@ -44,7 +45,13 @@ const MainApp = ({ userType }: MainAppProps) => {
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
+    setShowSettings(false);
     navigate(`/${tab}`);
+  };
+
+  const handleOpenSettings = () => {
+    setShowSettings(true);
+    setActiveTab('account');
   };
 
   const handleLogout = () => {
@@ -53,10 +60,14 @@ const MainApp = ({ userType }: MainAppProps) => {
   };
 
   const renderContent = () => {
+    if (showSettings || activeTab === 'account') {
+      return <ProfileSettings />;
+    }
+
     switch (activeTab) {
       case 'dashboard':
         return userType === 'employee' ? (
-          <EmployeeDashboard />
+          <EmployeeDashboard onTabChange={handleTabChange} onOpenSettings={handleOpenSettings} />
         ) : (
           <ResidentDashboard />
         );
@@ -83,11 +94,9 @@ const MainApp = ({ userType }: MainAppProps) => {
       case 'analytics':
         return <AnalyticsModule />;
       case 'administration':
-        return <AdminModule />;
+        return <AdminModule onOpenSettings={handleOpenSettings} />;
       case 'news':
         return <NewsModule />;
-      case 'account':
-        return <UserAccountModule />;
       case 'payments':
         return <PaymentsModule />;
       default:
@@ -105,7 +114,7 @@ const MainApp = ({ userType }: MainAppProps) => {
             userName={user?.email || 'User'}
             notifications={notifications}
             setNotifications={setNotifications}
-            onOpenSettings={() => handleTabChange('account')}
+            onOpenSettings={handleOpenSettings}
           />
           <main className="p-6">
             {renderContent()}

@@ -5,8 +5,7 @@ import {
   Users, 
   FileText, 
   MessageSquare, 
-  TrendingUp,
-  DollarSign
+  TrendingUp
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
@@ -100,7 +99,7 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
     { 
       title: t('pendingAppeals'), 
       value: appealsData?.pending || 0,
-      change: 5, // Static for now, could be calculated from historical data
+      change: 5,
       icon: MessageSquare, 
       color: 'text-orange-600',
       onClick: () => onTabChange ? onTabChange('appeals') : toast.info(t('loadingAppeals'))
@@ -120,15 +119,7 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
       icon: Users, 
       color: 'text-green-600',
       onClick: () => onTabChange ? onTabChange('administration') : toast.info(t('loadingCitizens'))
-    },
-    { 
-      title: t('monthlyRevenue'), 
-      value: `₴${(45200).toLocaleString()}`,
-      change: 1500,
-      icon: DollarSign, 
-      color: 'text-purple-600',
-      onClick: () => onTabChange ? onTabChange('analytics') : toast.info(t('loadingFinancial'))
-    },
+    }
   ];
 
   // Process analytics data for charts
@@ -150,48 +141,38 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
   const districtRankingData = [
     {
       rank: 1,
-      name: language === 'en' ? 'Galytskyi' : 'Галицький',
-      features: language === 'en' 
-        ? 'Historic center, high prices, cultural life, limited green areas.' 
-        : 'Історичний центр, високі ціни, культурне життя, обмежені зелені зони.',
+      name: 'Галицький',
+      features: 'Історичний центр, високі ціни, культурне життя, обмежені зелені зони.',
       rating: 4.7,
-      status: language === 'en' ? 'Excellent' : 'Відмінно'
+      status: 'Відмінно'
     },
     {
       rank: 2,
-      name: language === 'en' ? 'Frankivskyi' : 'Франківський',
-      features: language === 'en' 
-        ? 'Many parks, well-developed infrastructure, prestigious district, higher prices.' 
-        : 'Багато парків, добре розвинена інфраструктура, престижний район, вищі ціни.',
+      name: 'Франківський',
+      features: 'Багато парків, добре розвинена інфраструктура, престижний район, вищі ціни.',
       rating: 4.5,
-      status: language === 'en' ? 'Excellent' : 'Відмінно'
+      status: 'Відмінно'
     },
     {
       rank: 3,
-      name: language === 'en' ? 'Lychakivskyi' : 'Личаківський',
-      features: language === 'en' 
-        ? 'Green areas, mix of old/new construction, quieter neighborhoods.' 
-        : 'Зелені зони, поєднання старої/нової забудови, спокійніші райони.',
+      name: 'Личаківський',
+      features: 'Зелені зони, поєднання старої/нової забудови, спокійніші райони.',
       rating: 4.3,
-      status: language === 'en' ? 'Good' : 'Добре'
+      status: 'Добре'
     },
     {
       rank: 4,
-      name: language === 'en' ? 'Shevchenkivskyi' : 'Шевченківський',
-      features: language === 'en' 
-        ? 'More affordable housing, developed social infrastructure, large size.' 
-        : 'Доступніша нерухомість, розвинена соціальна інфраструктура, великий розмір.',
+      name: 'Шевченківський',
+      features: 'Доступніша нерухомість, розвинена соціальна інфраструктура, великий розмір.',
       rating: 4.1,
-      status: language === 'en' ? 'Good' : 'Добре'
+      status: 'Добре'
     },
     {
       rank: 5,
-      name: language === 'en' ? 'Sykhivskyi' : 'Сихівський',
-      features: language === 'en' 
-        ? 'Largest residential district, budget prices, high population density, distance from center.' 
-        : 'Найбільший спальний район, бюджетні ціни, висока щільність населення, віддаленість від центру.',
+      name: 'Сихівський',
+      features: 'Найбільший спальний район, бюджетні ціни, висока щільність населення, віддаленість від центру.',
       rating: 3.8,
-      status: language === 'en' ? 'Good' : 'Добре'
+      status: 'Добре'
     }
   ];
 
@@ -206,8 +187,8 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
         </p>
       </div>
 
-      {/* KPI Cards without targets */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* KPI Cards without targets and revenue */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {kpiData.map((kpi, index) => (
           <Card key={index} className="hover:shadow-md transition-shadow cursor-pointer" onClick={kpi.onClick}>
             <CardContent className="p-6">
@@ -284,7 +265,7 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
                     </td>
                     <td className="p-2">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        district.status === 'Excellent' || district.status === 'Відмінно'
+                        district.status === 'Відмінно'
                           ? 'bg-green-100 text-green-800'
                           : 'bg-blue-100 text-blue-800'
                       }`}>

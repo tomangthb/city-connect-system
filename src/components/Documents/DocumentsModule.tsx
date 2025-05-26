@@ -1,289 +1,214 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, Download, Upload, Trash, Plus, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Search, 
+  Filter, 
+  Download, 
+  Eye, 
+  FileText, 
+  Image, 
+  File
+} from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { toast } from 'sonner';
-import { addActivity } from '@/utils/activityUtils';
-import { supabase } from '@/integrations/supabase/client';
-import CreateFolderDialog from './CreateFolderDialog';
-import UploadDocumentDialog from './UploadDocumentDialog';
-
-interface Document {
-  id: string;
-  name: string;
-  category: string;
-  date: string;
-  size: string;
-  url?: string;
-  type?: string;
-}
 
 const DocumentsModule = () => {
   const { language, t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  // Sample document data as fallback
-  const sampleDocuments = [
-    { 
-      id: '1', 
-      name: language === 'en' ? 'Budget Report 2024' : 'Звіт про бюджет 2024', 
-      category: language === 'en' ? 'Financial' : 'Фінансовий', 
-      date: '2024-05-15', 
-      size: '3.5 MB' 
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
+  // Sample documents data
+  const documents = [
+    {
+      id: '1',
+      name: 'Довідка про прописку',
+      nameEn: 'Residence Certificate',
+      type: 'pdf',
+      size: '2.4 MB',
+      category: 'certificates',
+      uploadDate: '2024-01-15',
+      status: 'approved'
     },
-    { 
-      id: '2', 
-      name: language === 'en' ? 'City Development Plan' : 'План розвитку міста', 
-      category: language === 'en' ? 'Planning' : 'Планування', 
-      date: '2024-04-22', 
-      size: '8.2 MB' 
+    {
+      id: '2',
+      name: 'Заява на субсидію',
+      nameEn: 'Subsidy Application',
+      type: 'docx',
+      size: '1.2 MB',
+      category: 'applications',
+      uploadDate: '2024-01-10',
+      status: 'pending'
     },
-    { 
-      id: '3', 
-      name: language === 'en' ? 'Public Services Report' : 'Звіт про публічні послуги', 
-      category: language === 'en' ? 'Services' : 'Послуги', 
-      date: '2024-05-10', 
-      size: '2.1 MB' 
-    },
-    { 
-      id: '4', 
-      name: language === 'en' ? 'Environmental Assessment' : 'Екологічна оцінка', 
-      category: language === 'en' ? 'Environment' : 'Довкілля', 
-      date: '2024-04-05', 
-      size: '5.7 MB' 
+    {
+      id: '3',
+      name: 'Паспорт (копія)',
+      nameEn: 'Passport Copy',
+      type: 'jpg',
+      size: '3.1 MB',
+      category: 'identity',
+      uploadDate: '2024-01-08',
+      status: 'approved'
     }
   ];
 
-  useEffect(() => {
-    loadDocuments();
-  }, []);
+  const categories = [
+    { value: 'all', label: language === 'en' ? 'All Documents' : 'Всі документи' },
+    { value: 'certificates', label: language === 'en' ? 'Certificates' : 'Довідки' },
+    { value: 'applications', label: language === 'en' ? 'Applications' : 'Заяви' },
+    { value: 'identity', label: language === 'en' ? 'Identity Documents' : 'Документи особи' }
+  ];
 
-  const loadDocuments = async () => {
-    setLoading(true);
-    try {
-      // Try to load from storage or database
-      // For now, we'll use sample data but structure it properly
-      setDocuments(sampleDocuments);
-    } catch (error) {
-      console.error('Error loading documents:', error);
-      setDocuments(sampleDocuments);
-    } finally {
-      setLoading(false);
+  const getFileIcon = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'pdf':
+        return <FileText className="h-8 w-8 text-red-500" />;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return <Image className="h-8 w-8 text-blue-500" />;
+      default:
+        return <File className="h-8 w-8 text-gray-500" />;
     }
   };
 
-  const filteredDocuments = documents.filter(doc =>
-    doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleDownloadDocument = async (doc: Document) => {
-    try {
-      // Simulate download
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      await addActivity({
-        title: language === 'en' ? `Document downloaded: ${doc.name}` : `Документ завантажено: ${doc.name}`,
-        description: `Downloaded document: ${doc.name}`,
-        type: 'event',
-        priority: 'low',
-        status: 'completed'
-      });
-
-      toast.success(language === 'en' ? 'Document downloaded successfully' : 'Документ успішно завантажено');
-    } catch (error) {
-      console.error('Error downloading document:', error);
-      toast.error(language === 'en' ? 'Error downloading document' : 'Помилка завантаження документа');
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return (
+          <Badge className="bg-green-100 text-green-800">
+            {language === 'en' ? 'Approved' : 'Схвалено'}
+          </Badge>
+        );
+      case 'pending':
+        return (
+          <Badge className="bg-yellow-100 text-yellow-800">
+            {language === 'en' ? 'Pending' : 'На розгляді'}
+          </Badge>
+        );
+      case 'rejected':
+        return (
+          <Badge className="bg-red-100 text-red-800">
+            {language === 'en' ? 'Rejected' : 'Відхилено'}
+          </Badge>
+        );
+      default:
+        return null;
     }
   };
 
-  const handleDeleteDocument = async (doc: Document) => {
-    if (!confirm(language === 'en' ? 
-      `Are you sure you want to delete "${doc.name}"?` : 
-      `Ви впевнені, що хочете видалити "${doc.name}"?`)) {
-      return;
-    }
-
-    try {
-      // Remove from state
-      setDocuments(prev => prev.filter(d => d.id !== doc.id));
-      
-      await addActivity({
-        title: language === 'en' ? `Document deleted: ${doc.name}` : `Документ видалено: ${doc.name}`,
-        description: `Deleted document: ${doc.name}`,
-        type: 'event',
-        priority: 'medium',
-        status: 'completed'
-      });
-
-      toast.success(language === 'en' ? 'Document deleted successfully' : 'Документ успішно видалено');
-    } catch (error) {
-      console.error('Error deleting document:', error);
-      toast.error(language === 'en' ? 'Error deleting document' : 'Помилка видалення документа');
-    }
-  };
-
-  const handleDocumentUploaded = (newDocument: Omit<Document, 'id'>) => {
-    const documentWithId: Document = {
-      ...newDocument,
-      id: Date.now().toString()
-    };
-    setDocuments(prev => [...prev, documentWithId]);
-    toast.success(language === 'en' ? 'Document uploaded successfully' : 'Документ успішно завантажено');
-  };
-
-  const handleFolderCreated = (folderName: string) => {
-    const newFolder: Document = {
-      id: Date.now().toString(),
-      name: folderName,
-      category: language === 'en' ? 'Folder' : 'Папка',
-      date: new Date().toISOString().split('T')[0],
-      size: '-',
-      type: 'folder'
-    };
-    setDocuments(prev => [...prev, newFolder]);
-    toast.success(language === 'en' ? 'Folder created successfully' : 'Папку успішно створено');
-  };
-
-  if (loading) {
-    return (
-      <div className="p-6 space-y-6">
-        <div className="text-center">
-          <p className="text-gray-500">
-            {language === 'en' ? 'Loading documents...' : 'Завантаження документів...'}
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const filteredDocuments = documents.filter(doc => {
+    const matchesSearch = (language === 'en' ? doc.nameEn : doc.name)
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || doc.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            {language === 'en' ? 'Document Management' : 'Управління документами'}
-          </h2>
-          <p className="text-gray-600">
-            {language === 'en' 
-              ? 'Manage all city council documents in one place' 
-              : 'Керуйте всіма документами міської ради в одному місці'}
-          </p>
-        </div>
-        <div className="flex space-x-2">
-          <CreateFolderDialog onFolderCreated={handleFolderCreated}>
-            <Button variant="outline">
-              <Plus className="h-4 w-4 mr-2" />
-              {language === 'en' ? 'New Folder' : 'Нова папка'}
-            </Button>
-          </CreateFolderDialog>
-          <UploadDocumentDialog onDocumentUploaded={handleDocumentUploaded}>
-            <Button className="flex items-center">
-              <Upload className="h-4 w-4 mr-2" />
-              {language === 'en' ? 'Upload Document' : 'Завантажити документ'}
-            </Button>
-          </UploadDocumentDialog>
-        </div>
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900">{t('documents')}</h2>
+        <p className="text-gray-600">
+          {language === 'en' 
+            ? 'Manage and view your documents' 
+            : 'Керуйте та переглядайте свої документи'}
+        </p>
       </div>
 
-      {/* Search */}
-      <div className="flex space-x-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input 
-            placeholder={language === 'en' ? 'Search documents...' : 'Пошук документів...'} 
-            className="pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
-
+      {/* Search and Filter */}
       <Card>
-        <CardHeader>
-          <CardTitle>{language === 'en' ? 'Document Library' : 'Бібліотека документів'}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">
-                    {language === 'en' ? 'Name' : 'Назва'}
-                  </th>
-                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">
-                    {language === 'en' ? 'Category' : 'Категорія'}
-                  </th>
-                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">
-                    {language === 'en' ? 'Date' : 'Дата'}
-                  </th>
-                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">
-                    {language === 'en' ? 'Size' : 'Розмір'}
-                  </th>
-                  <th className="py-3 px-4 text-right text-sm font-medium text-gray-500">
-                    {language === 'en' ? 'Actions' : 'Дії'}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredDocuments.map((doc) => (
-                  <tr key={doc.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center">
-                        <FileText className="h-5 w-5 mr-3 text-blue-600" />
-                        <span className="font-medium text-gray-900">{doc.name}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-gray-600">{doc.category}</td>
-                    <td className="py-3 px-4 text-gray-600">
-                      {new Date(doc.date).toLocaleDateString(
-                        language === 'en' ? 'en-US' : 'uk-UA'
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-gray-600">{doc.size}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex justify-end space-x-2">
-                        {doc.type !== 'folder' && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleDownloadDocument(doc)}
-                            title={language === 'en' ? 'Download' : 'Завантажити'}
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        )}
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => handleDeleteDocument(doc)}
-                          title={language === 'en' ? 'Delete' : 'Видалити'}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          
-          {filteredDocuments.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-gray-500">
-                {language === 'en' ? 'No documents found' : 'Документи не знайдено'}
-              </p>
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder={language === 'en' ? 'Search documents...' : 'Пошук документів...'}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
             </div>
-          )}
+            <div className="flex gap-2">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {categories.map((category) => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+              <Button variant="outline">
+                <Filter className="h-4 w-4 mr-2" />
+                {language === 'en' ? 'Filter' : 'Фільтр'}
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
+
+      {/* Documents Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredDocuments.map((doc) => (
+          <Card key={doc.id} className="hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  {getFileIcon(doc.type)}
+                  <div>
+                    <h3 className="font-medium text-gray-900">
+                      {language === 'en' ? doc.nameEn : doc.name}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {doc.type.toUpperCase()} • {doc.size}
+                    </p>
+                  </div>
+                </div>
+                {getStatusBadge(doc.status)}
+              </div>
+              
+              <div className="text-sm text-gray-600 mb-4">
+                <p>
+                  {language === 'en' ? 'Uploaded:' : 'Завантажено:'} {' '}
+                  {new Date(doc.uploadDate).toLocaleDateString(
+                    language === 'en' ? 'en-US' : 'uk-UA'
+                  )}
+                </p>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="flex-1">
+                  <Eye className="h-4 w-4 mr-2" />
+                  {language === 'en' ? 'View' : 'Переглянути'}
+                </Button>
+                <Button variant="outline" size="sm" className="flex-1">
+                  <Download className="h-4 w-4 mr-2" />
+                  {language === 'en' ? 'Download' : 'Завантажити'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {filteredDocuments.length === 0 && (
+        <div className="text-center py-12">
+          <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            {language === 'en' ? 'No documents found' : 'Документи не знайдено'}
+          </h3>
+          <p className="text-gray-600">
+            {language === 'en' 
+              ? 'Try adjusting your search or filter criteria' 
+              : 'Спробуйте змінити параметри пошуку або фільтра'}
+          </p>
+        </div>
+      )}
     </div>
   );
 };
