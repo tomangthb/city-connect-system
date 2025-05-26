@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/useLanguage';
 import { UserCog, Shield, Settings, Users, Key } from 'lucide-react';
 import UserManagementDialog from './UserManagementDialog';
+import AccessControlDialog from './AccessControlDialog';
+import ApiIntegrationsDialog from './ApiIntegrationsDialog';
 import SystemStatusDialog from './SystemStatusDialog';
 
 interface AdminModuleProps {
@@ -30,7 +32,8 @@ const AdminModule = ({ onOpenSettings }: AdminModuleProps) => {
       icon: Shield,
       description: language === 'en' 
         ? 'Define access rules and security policies for the system.' 
-        : 'Визначте правила доступу та політики безпеки для системи.'
+        : 'Визначте правила доступу та політики безпеки для системи.',
+      component: 'access-control'
     },
     { 
       id: 'system-settings', 
@@ -47,13 +50,53 @@ const AdminModule = ({ onOpenSettings }: AdminModuleProps) => {
       icon: Key,
       description: language === 'en' 
         ? 'Manage API keys and third-party service integrations.' 
-        : 'Керуйте ключами API та інтеграціями сторонніх сервісів.'
+        : 'Керуйте ключами API та інтеграціями сторонніх сервісів.',
+      component: 'api-integrations'
     }
   ];
 
   const handleSectionClick = (section: any) => {
     if (section.component === 'system-settings' && onOpenSettings) {
       onOpenSettings();
+    }
+  };
+
+  const renderSectionButton = (section: any) => {
+    switch (section.component) {
+      case 'user-management':
+        return (
+          <UserManagementDialog>
+            <Button variant="outline" className="w-full">
+              {language === 'en' ? 'Manage' : 'Керувати'}
+            </Button>
+          </UserManagementDialog>
+        );
+      case 'access-control':
+        return (
+          <AccessControlDialog>
+            <Button variant="outline" className="w-full">
+              {language === 'en' ? 'Manage' : 'Керувати'}
+            </Button>
+          </AccessControlDialog>
+        );
+      case 'api-integrations':
+        return (
+          <ApiIntegrationsDialog>
+            <Button variant="outline" className="w-full">
+              {language === 'en' ? 'Manage' : 'Керувати'}
+            </Button>
+          </ApiIntegrationsDialog>
+        );
+      default:
+        return (
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={() => handleSectionClick(section)}
+          >
+            {language === 'en' ? 'Manage' : 'Керувати'}
+          </Button>
+        );
     }
   };
 
@@ -80,7 +123,7 @@ const AdminModule = ({ onOpenSettings }: AdminModuleProps) => {
         {adminSections.map((section) => {
           const Icon = section.icon;
           return (
-            <Card key={section.id} className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card key={section.id} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-2">
                 <div className="flex items-center space-x-3">
                   <div className="bg-blue-100 p-2 rounded-lg">
@@ -91,21 +134,7 @@ const AdminModule = ({ onOpenSettings }: AdminModuleProps) => {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">{section.description}</p>
-                {section.component === 'user-management' ? (
-                  <UserManagementDialog>
-                    <Button variant="outline" className="w-full">
-                      {language === 'en' ? 'Manage' : 'Керувати'}
-                    </Button>
-                  </UserManagementDialog>
-                ) : (
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => handleSectionClick(section)}
-                  >
-                    {language === 'en' ? 'Manage' : 'Керувати'}
-                  </Button>
-                )}
+                {renderSectionButton(section)}
               </CardContent>
             </Card>
           );

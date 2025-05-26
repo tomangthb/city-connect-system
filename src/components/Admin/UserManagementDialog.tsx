@@ -22,9 +22,11 @@ const UserManagementDialog = ({ children }: UserManagementDialogProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     setLoading(true);
+    setError(null);
     try {
       const { data: profiles, error } = await supabase
         .from('profiles')
@@ -39,31 +41,50 @@ const UserManagementDialog = ({ children }: UserManagementDialogProps) => {
           created_at
         `);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Profiles error:', error);
+        throw error;
+      }
+
+      if (!profiles || profiles.length === 0) {
+        setUsers([]);
+        return;
+      }
 
       // Fetch user roles for each user
       const usersWithRoles = await Promise.all(
-        (profiles || []).map(async (profile) => {
-          const { data: roleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', profile.id);
+        profiles.map(async (profile) => {
+          try {
+            const { data: roleData } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', profile.id);
 
-          // Ensure user_type is properly typed
-          const userType = profile.user_type === 'employee' ? 'employee' : 'resident';
+            // Ensure user_type is properly typed
+            const userType = profile.user_type === 'employee' ? 'employee' : 'resident';
 
-          return {
-            ...profile,
-            user_type: userType,
-            roles: roleData?.map(r => r.role) || []
-          } as User;
+            return {
+              ...profile,
+              user_type: userType,
+              roles: roleData?.map(r => r.role) || []
+            } as User;
+          } catch (roleError) {
+            console.error('Error fetching roles for user:', profile.id, roleError);
+            return {
+              ...profile,
+              user_type: profile.user_type === 'employee' ? 'employee' : 'resident',
+              roles: []
+            } as User;
+          }
         })
       );
 
       setUsers(usersWithRoles);
     } catch (error) {
       console.error('Error fetching users:', error);
-      toast.error(language === 'en' ? 'Error loading users' : 'Помилка завантаження користувачів');
+      const errorMessage = language === 'en' ? 'Error loading users' : 'Помилка завантаження користувачів';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -102,7 +123,7 @@ const UserManagementDialog = ({ children }: UserManagementDialogProps) => {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-6xl">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{language === 'en' ? 'User Management' : 'Управління користувачами'}</DialogTitle>
         </DialogHeader>
@@ -127,6 +148,13 @@ const UserManagementDialog = ({ children }: UserManagementDialogProps) => {
             </CreateUserDialog>
           </div>
 
+          {/* Error Display */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
+
           {/* Users List */}
           <UsersList 
             users={filteredUsers}
@@ -135,7 +163,7 @@ const UserManagementDialog = ({ children }: UserManagementDialogProps) => {
             language={language}
           />
 
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center pt-4 border-t">
             <p className="text-sm text-gray-500">
               {language === 'en' ? 
                 `Showing ${filteredUsers.length} users` :
