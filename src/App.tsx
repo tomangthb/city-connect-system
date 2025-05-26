@@ -25,6 +25,24 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/dashboard" element={<Index />} />
+                <Route path="/resources" element={<Index />} />
+                <Route path="/services" element={<Index />} />
+                <Route path="/services-catalog" element={<Index />} />
+                <Route path="/housing-utilities" element={<Index />} />
+                <Route path="/permits-registration" element={<Index />} />
+                <Route path="/social-services" element={<Index />} />
+                <Route path="/transport-traffic" element={<Index />} />
+                <Route path="/education" element={<Index />} />
+                <Route path="/land-planning" element={<Index />} />
+                <Route path="/environmental" element={<Index />} />
+                <Route path="/appeals" element={<Index />} />
+                <Route path="/documents" element={<Index />} />
+                <Route path="/analytics" element={<Index />} />
+                <Route path="/administration" element={<Index />} />
+                <Route path="/news" element={<Index />} />
+                <Route path="/account" element={<Index />} />
+                <Route path="/payments" element={<Index />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
