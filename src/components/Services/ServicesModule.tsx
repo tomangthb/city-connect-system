@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -147,6 +146,10 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
       console.error('Error deleting service:', error);
       toast.error(t('errorDeletingService') || 'Error deleting service');
     }
+  };
+
+  const handleBookAppointment = (service: any) => {
+    setSelectedService(null);
   };
 
   const scrollContainer = (containerId: string, direction: 'left' | 'right') => {
@@ -300,13 +303,11 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
                         </Button>
                         
                         {userType === 'resident' ? (
-                          <Button
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => setAppointmentService(service)}
-                          >
-                            {t('bookAppointment') || 'Записатися'}
-                          </Button>
+                          <BookAppointmentDialog service={service}>
+                            <Button size="sm" className="flex-1">
+                              {t('bookAppointment') || 'Записатися'}
+                            </Button>
+                          </BookAppointmentDialog>
                         ) : (
                           <div className="flex gap-1">
                             <Button
@@ -349,22 +350,8 @@ const ServicesModule = ({ userType }: ServicesModuleProps) => {
         <ServiceDetailDialog
           service={selectedService}
           onClose={() => setSelectedService(null)}
-          onBookAppointment={() => {
-            setAppointmentService(selectedService);
-            setSelectedService(null);
-          }}
+          onBookAppointment={() => handleBookAppointment(selectedService)}
           userType={userType}
-        />
-      )}
-
-      {appointmentService && (
-        <BookAppointmentDialog
-          service={appointmentService}
-          onClose={() => setAppointmentService(null)}
-          onSuccess={() => {
-            setAppointmentService(null);
-            toast.success(language === 'en' ? 'Appointment booked successfully!' : 'Запис на прийом успішно створено!');
-          }}
         />
       )}
 
