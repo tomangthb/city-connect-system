@@ -63,7 +63,7 @@ const MainApp = ({ userType }: MainAppProps) => {
         return userType === 'employee' ? (
           <InfrastructureModule />
         ) : (
-          <ResourcesModule />
+          <ResourcesModule userType={userType} />
         );
       case 'services':
       case 'services-catalog':
