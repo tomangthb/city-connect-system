@@ -1,4 +1,3 @@
-
 import { TranslationRecord } from './types';
 
 export const servicesTranslations: Record<string, TranslationRecord> = {
@@ -184,5 +183,11 @@ export const servicesTranslations: Record<string, TranslationRecord> = {
   noRating: {
     en: 'No rating yet',
     uk: 'Поки немає рейтингу'
+  },
+  
+  // New translations for catalog
+  servicesCatalog: {
+    en: 'Services Catalog',
+    uk: 'Каталог послуг'
   }
 };

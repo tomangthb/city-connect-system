@@ -12,7 +12,13 @@ import {
   User,
   CreditCard,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Building,
+  Users,
+  Truck,
+  GraduationCap,
+  MapPin,
+  Leaf
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import {
@@ -47,6 +53,14 @@ const AppSidebar = ({ userType, activeTab, onTabChange }: AppSidebarProps) => {
       icon: FileText,
       hasSubmenu: true,
       submenu: [
+        { id: 'services-catalog', label: t('servicesCatalog') || 'Каталог послуг', icon: FileText },
+        { id: 'housing-utilities', label: t('housingUtilities') || 'Житлово-комунальні', icon: Building },
+        { id: 'permits-registration', label: t('permitsRegistration') || 'Дозволи та реєстрація', icon: FileText },
+        { id: 'social-services', label: t('socialServices') || 'Соціальні послуги', icon: Users },
+        { id: 'transport-traffic', label: t('transportTraffic') || 'Транспорт та рух', icon: Truck },
+        { id: 'education', label: t('education') || 'Освіта', icon: GraduationCap },
+        { id: 'land-planning', label: t('landUsePlanning') || 'Землекористування', icon: MapPin },
+        { id: 'environmental', label: t('environmentalServices') || 'Екологічні послуги', icon: Leaf },
         { id: 'appeals', label: t('citizensAppeals'), icon: MessageSquare }
       ]
     },
@@ -57,7 +71,22 @@ const AppSidebar = ({ userType, activeTab, onTabChange }: AppSidebarProps) => {
 
   const residentMenuItems = [
     { id: 'dashboard', label: t('home'), icon: Home },
-    { id: 'services', label: t('cityServices'), icon: FileText },
+    { 
+      id: 'services', 
+      label: t('cityServices'), 
+      icon: FileText,
+      hasSubmenu: true,
+      submenu: [
+        { id: 'services-catalog', label: t('servicesCatalog') || 'Каталог послуг', icon: FileText },
+        { id: 'housing-utilities', label: t('housingUtilities') || 'Житлово-комунальні', icon: Building },
+        { id: 'permits-registration', label: t('permitsRegistration') || 'Дозволи та реєстрація', icon: FileText },
+        { id: 'social-services', label: t('socialServices') || 'Соціальні послуги', icon: Users },
+        { id: 'transport-traffic', label: t('transportTraffic') || 'Транспорт та рух', icon: Truck },
+        { id: 'education', label: t('education') || 'Освіта', icon: GraduationCap },
+        { id: 'land-planning', label: t('landUsePlanning') || 'Землекористування', icon: MapPin },
+        { id: 'environmental', label: t('environmentalServices') || 'Екологічні послуги', icon: Leaf }
+      ]
+    },
     { id: 'appeals', label: t('submitAppeal'), icon: MessageSquare },
     { id: 'resources', label: t('cityResources'), icon: Map },
     { id: 'news', label: t('newsEvents'), icon: Calendar },
@@ -70,7 +99,7 @@ const AppSidebar = ({ userType, activeTab, onTabChange }: AppSidebarProps) => {
   const renderMenuItem = (item: any) => {
     const Icon = item.icon;
     
-    if (item.hasSubmenu && userType === 'employee') {
+    if (item.hasSubmenu) {
       return (
         <SidebarMenuItem key={item.id}>
           <Collapsible open={isServicesOpen} onOpenChange={setIsServicesOpen}>
