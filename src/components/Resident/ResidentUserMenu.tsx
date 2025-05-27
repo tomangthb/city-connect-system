@@ -64,7 +64,7 @@ const ResidentUserMenu = ({ userName }: ResidentUserMenuProps) => {
       <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-md z-50">
         <DropdownMenuItem onClick={handleSettings}>
           <Settings className="h-4 w-4 mr-2" />
-          {language === 'en' ? 'Settings' : 'Налаштування'}
+          {language === 'en' ? 'My Account' : 'Мій акаунт'}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>

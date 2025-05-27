@@ -55,13 +55,13 @@ const AddPaymentMethodDialog = ({ open, onOpenChange }: AddPaymentMethodDialogPr
     
     switch (selectedMethod) {
       case 'card':
-        isValid = formData.cardNumber && formData.expiryDate && formData.cvv && formData.cardName;
+        isValid = !!(formData.cardNumber && formData.expiryDate && formData.cvv && formData.cardName);
         break;
       case 'bank':
-        isValid = formData.bankName && formData.accountNumber;
+        isValid = !!(formData.bankName && formData.accountNumber);
         break;
       case 'mobile':
-        isValid = formData.phoneNumber;
+        isValid = !!formData.phoneNumber;
         break;
     }
 

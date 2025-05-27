@@ -2,13 +2,19 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Bell, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Bell, ChevronLeft, ChevronRight, MessageCircle, Send } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
 const NewsSection = () => {
   const { language } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showComments, setShowComments] = useState(false);
+  const [selectedNews, setSelectedNews] = useState<any>(null);
+  const [newComment, setNewComment] = useState('');
+  const [comments, setComments] = useState<any[]>([]);
 
   const cityNews = [
     {
@@ -46,6 +52,15 @@ const NewsSection = () => {
         ? 'Scheduled maintenance will affect water pressure...' 
         : 'Планове обслуговування вплине на тиск води...',
       comments: 15
+    },
+    {
+      id: 5,
+      title: language === 'en' ? 'City Festival Announcement' : 'Оголошення про міський фестиваль',
+      date: '2024-05-10',
+      summary: language === 'en' 
+        ? 'Annual city festival to be held next month...' 
+        : 'Щорічний міський фестиваль відбудеться наступного місяця...',
+      comments: 23
     }
   ];
 
@@ -57,55 +72,135 @@ const NewsSection = () => {
     setCurrentIndex(prev => prev < cityNews.length - 1 ? prev + 1 : 0);
   };
 
-  const handleComments = (newsId: number) => {
-    toast.success(`${language === 'en' ? 'Opening comments for news' : 'Відкриваємо коментарі до новини'} #${newsId}`);
+  const handleComments = (news: any) => {
+    setSelectedNews(news);
+    setShowComments(true);
+    // Mock comments
+    setComments([
+      {
+        id: 1,
+        author: language === 'en' ? 'John Doe' : 'Іван Іваненко',
+        text: language === 'en' ? 'Great news! Looking forward to it.' : 'Чудові новини! З нетерпінням чекаю.',
+        date: '2024-05-21'
+      },
+      {
+        id: 2,
+        author: language === 'en' ? 'Jane Smith' : 'Марія Петренко',
+        text: language === 'en' ? 'Finally! This was long overdue.' : 'Нарешті! Це давно треба було зробити.',
+        date: '2024-05-20'
+      }
+    ]);
+  };
+
+  const handleAddComment = () => {
+    if (!newComment.trim()) {
+      toast.error(language === 'en' ? 'Please enter a comment' : 'Будь ласка, введіть коментар');
+      return;
+    }
+
+    const comment = {
+      id: comments.length + 1,
+      author: language === 'en' ? 'Current User' : 'Поточний користувач',
+      text: newComment,
+      date: new Date().toISOString().split('T')[0]
+    };
+
+    setComments([comment, ...comments]);
+    setNewComment('');
+    toast.success(language === 'en' ? 'Comment added successfully' : 'Коментар успішно додано');
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Bell className="h-5 w-5 mr-2" />
-            {language === 'en' ? 'City News & Events' : 'Міські новини та події'}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={handlePrevious}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm text-gray-500">
-              {currentIndex + 1} / {cityNews.length}
-            </span>
-            <Button variant="ghost" size="sm" onClick={handleNext}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="border-b border-gray-100 pb-3">
-            <h4 className="font-medium text-gray-900 mb-1">{cityNews[currentIndex].title}</h4>
-            <p className="text-sm text-gray-600 mb-2">{cityNews[currentIndex].summary}</p>
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-gray-500">{cityNews[currentIndex].date}</p>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => handleComments(cityNews[currentIndex].id)}
-                className="flex items-center gap-1"
-              >
-                <MessageCircle className="h-4 w-4" />
-                <span className="text-xs">{cityNews[currentIndex].comments}</span>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Bell className="h-5 w-5 mr-2" />
+              {language === 'en' ? 'City News & Events' : 'Міські новини та події'}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={handlePrevious}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm text-gray-500">
+                {currentIndex + 1} / {cityNews.length}
+              </span>
+              <Button variant="ghost" size="sm" onClick={handleNext}>
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="border-b border-gray-100 pb-3">
+              <h4 className="font-medium text-gray-900 mb-1">{cityNews[currentIndex].title}</h4>
+              <p className="text-sm text-gray-600 mb-2">{cityNews[currentIndex].summary}</p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-gray-500">{cityNews[currentIndex].date}</p>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => handleComments(cityNews[currentIndex])}
+                  className="flex items-center gap-1"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  <span className="text-xs">{cityNews[currentIndex].comments}</span>
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-        <Button variant="outline" className="w-full mt-4">
-          {language === 'en' ? 'View All News' : 'Переглянути всі новини'}
-        </Button>
-      </CardContent>
-    </Card>
+          <Button variant="outline" className="w-full mt-4">
+            {language === 'en' ? 'View All News' : 'Переглянути всі новини'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Comments Dialog */}
+      <Dialog open={showComments} onOpenChange={setShowComments}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'en' ? 'Comments' : 'Коментарі'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {selectedNews && (
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <h5 className="font-medium text-sm">{selectedNews.title}</h5>
+                <p className="text-xs text-gray-500">{selectedNews.date}</p>
+              </div>
+            )}
+            
+            <div className="flex gap-2">
+              <Textarea
+                placeholder={language === 'en' ? 'Write a comment...' : 'Написати коментар...'}
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                className="flex-1"
+                rows={2}
+              />
+              <Button onClick={handleAddComment} size="sm">
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="max-h-64 overflow-y-auto space-y-3">
+              {comments.map((comment) => (
+                <div key={comment.id} className="bg-gray-50 p-3 rounded-lg">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="font-medium text-sm">{comment.author}</span>
+                    <span className="text-xs text-gray-500">{comment.date}</span>
+                  </div>
+                  <p className="text-sm text-gray-700">{comment.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

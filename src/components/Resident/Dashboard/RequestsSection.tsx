@@ -27,7 +27,10 @@ const RequestsSection = () => {
   }, [user]);
 
   const fetchAppeals = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const { data, error } = await supabase
@@ -39,12 +42,13 @@ const RequestsSection = () => {
 
       if (error) {
         console.error('Error fetching appeals:', error);
-        return;
+        setAppeals([]);
+      } else {
+        setAppeals(data || []);
       }
-
-      setAppeals(data || []);
     } catch (error) {
       console.error('Error fetching appeals:', error);
+      setAppeals([]);
     } finally {
       setLoading(false);
     }
