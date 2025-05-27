@@ -6,7 +6,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/Layout/AppSidebar';
-import ResidentSidebar from '@/components/Layout/ResidentSidebar';
 import Header from '@/components/Layout/Header';
 import EmployeeDashboard from '@/components/Employee/EmployeeDashboard';
 import ResidentDashboard from '@/components/Resident/ResidentDashboard';
@@ -130,11 +129,7 @@ const MainApp = ({ userType }: MainAppProps) => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-100">
-        {userType === 'employee' ? (
-          <AppSidebar userType={userType} activeTab={activeTab} onTabChange={handleTabChange} />
-        ) : (
-          <ResidentSidebar activeTab={activeTab} onTabChange={handleTabChange} />
-        )}
+        <AppSidebar userType={userType} activeTab={activeTab} onTabChange={handleTabChange} />
         <SidebarInset>
           <Header 
             userType={userType} 
