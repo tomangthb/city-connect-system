@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Newspaper, 
@@ -14,7 +14,8 @@ import {
   Share2,
   Heart,
   MessageCircle,
-  Filter
+  Filter,
+  Send
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
@@ -38,12 +39,46 @@ interface NewsItem {
   isPinned?: boolean;
 }
 
+interface Comment {
+  id: number;
+  author: string;
+  text: string;
+  date: string;
+  newsId: string;
+}
+
 const ResidentNewsModule = () => {
   const { language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
   const [likedNews, setLikedNews] = useState<Set<string>>(new Set());
+  const [showComments, setShowComments] = useState(false);
+  const [selectedNewsForComments, setSelectedNewsForComments] = useState<NewsItem | null>(null);
+  const [newComment, setNewComment] = useState('');
+  const [comments, setComments] = useState<Comment[]>([
+    {
+      id: 1,
+      author: language === 'en' ? 'John Doe' : 'Іван Іваненко',
+      text: language === 'en' ? 'Great news! Looking forward to it.' : 'Чудові новини! З нетерпінням чекаю.',
+      date: '2024-05-21',
+      newsId: '1'
+    },
+    {
+      id: 2,
+      author: language === 'en' ? 'Jane Smith' : 'Марія Петренко',
+      text: language === 'en' ? 'Finally! This was long overdue.' : 'Нарешті! Це давно треба було зробити.',
+      date: '2024-05-20',
+      newsId: '1'
+    },
+    {
+      id: 3,
+      author: language === 'en' ? 'Mike Johnson' : 'Михайло Петренко',
+      text: language === 'en' ? 'This will cause more traffic issues.' : 'Це спричинить більше проблем з трафіком.',
+      date: '2024-05-19',
+      newsId: '2'
+    }
+  ]);
 
   const categories = [
     { id: 'all', name: language === 'en' ? 'All News' : 'Всі новини' },
@@ -139,6 +174,36 @@ const ResidentNewsModule = () => {
       comments: 6
     }
   ];
+
+  const handleComments = (news: NewsItem) => {
+    setSelectedNewsForComments(news);
+    setShowComments(true);
+  };
+
+  const handleAddComment = () => {
+    if (!newComment.trim()) {
+      toast.error(language === 'en' ? 'Please enter a comment' : 'Будь ласка, введіть коментар');
+      return;
+    }
+
+    if (!selectedNewsForComments) return;
+
+    const comment: Comment = {
+      id: comments.length + 1,
+      author: language === 'en' ? 'Current User' : 'Поточний користувач',
+      text: newComment,
+      date: new Date().toISOString().split('T')[0],
+      newsId: selectedNewsForComments.id
+    };
+
+    setComments([comment, ...comments]);
+    setNewComment('');
+    toast.success(language === 'en' ? 'Comment added successfully' : 'Коментар успішно додано');
+  };
+
+  const getNewsComments = (newsId: string) => {
+    return comments.filter(comment => comment.newsId === newsId);
+  };
 
   const filteredNews = newsItems.filter(item => {
     const title = language === 'en' ? item.title : item.titleUk;
@@ -317,9 +382,14 @@ const ResidentNewsModule = () => {
                         {news.likes + (likedNews.has(news.id) ? 1 : 0)}
                       </Button>
                       
-                      <Button variant="ghost" size="sm" className="flex items-center gap-1 text-gray-600">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleComments(news)}
+                        className="flex items-center gap-1 text-gray-600"
+                      >
                         <MessageCircle className="h-4 w-4" />
-                        {news.comments}
+                        {getNewsComments(news.id).length}
                       </Button>
                       
                       <Button 
@@ -347,6 +417,52 @@ const ResidentNewsModule = () => {
           </Card>
         ))}
       </div>
+
+      {/* Comments Dialog */}
+      <Dialog open={showComments} onOpenChange={() => setShowComments(false)}>
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'en' ? 'Comments' : 'Коментарі'}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedNewsForComments && (
+            <div className="space-y-4">
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <h5 className="font-medium text-sm">
+                  {language === 'en' ? selectedNewsForComments.title : selectedNewsForComments.titleUk}
+                </h5>
+                <p className="text-xs text-gray-500">{selectedNewsForComments.date}</p>
+              </div>
+              
+              <div className="flex gap-2">
+                <Textarea
+                  placeholder={language === 'en' ? 'Write a comment...' : 'Написати коментар...'}
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  className="flex-1"
+                  rows={2}
+                />
+                <Button onClick={handleAddComment} size="sm">
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="max-h-64 overflow-y-auto space-y-3">
+                {getNewsComments(selectedNewsForComments.id).map((comment) => (
+                  <div key={comment.id} className="bg-gray-50 p-3 rounded-lg">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="font-medium text-sm">{comment.author}</span>
+                      <span className="text-xs text-gray-500">{comment.date}</span>
+                    </div>
+                    <p className="text-sm text-gray-700">{comment.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* News Detail Dialog */}
       <Dialog open={!!selectedNews} onOpenChange={() => setSelectedNews(null)}>

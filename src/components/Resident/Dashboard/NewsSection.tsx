@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Bell, ChevronLeft, ChevronRight, MessageCircle, Send } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Bell, ChevronUp, ChevronDown, MessageCircle, Send } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
@@ -121,36 +122,40 @@ const NewsSection = () => {
             </div>
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="sm" onClick={handlePrevious}>
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronUp className="h-4 w-4" />
               </Button>
               <span className="text-sm text-gray-500">
                 {currentIndex + 1} / {cityNews.length}
               </span>
               <Button variant="ghost" size="sm" onClick={handleNext}>
-                <ChevronRight className="h-4 w-4" />
+                <ChevronDown className="h-4 w-4" />
               </Button>
             </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="border-b border-gray-100 pb-3">
-              <h4 className="font-medium text-gray-900 mb-1">{cityNews[currentIndex].title}</h4>
-              <p className="text-sm text-gray-600 mb-2">{cityNews[currentIndex].summary}</p>
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-gray-500">{cityNews[currentIndex].date}</p>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => handleComments(cityNews[currentIndex])}
-                  className="flex items-center gap-1"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  <span className="text-xs">{cityNews[currentIndex].comments}</span>
-                </Button>
-              </div>
+          <ScrollArea className="h-48">
+            <div className="space-y-4 pr-4">
+              {cityNews.map((news, index) => (
+                <div key={news.id} className={`border-b border-gray-100 pb-3 ${index === currentIndex ? 'bg-blue-50 p-3 rounded-lg' : ''}`}>
+                  <h4 className="font-medium text-gray-900 mb-1">{news.title}</h4>
+                  <p className="text-sm text-gray-600 mb-2">{news.summary}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-gray-500">{news.date}</p>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleComments(news)}
+                      className="flex items-center gap-1"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      <span className="text-xs">{news.comments}</span>
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          </ScrollArea>
           <Button variant="outline" className="w-full mt-4">
             {language === 'en' ? 'View All News' : 'Переглянути всі новини'}
           </Button>

@@ -16,6 +16,7 @@ const MapboxCityMap = () => {
   const [mapboxToken, setMapboxToken] = useState('');
   const [isTokenSet, setIsTokenSet] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isMapLoading, setIsMapLoading] = useState(false);
 
   // City locations for demonstration
   const cityLocations = [
@@ -42,45 +43,81 @@ const MapboxCityMap = () => {
   ];
 
   const handleTokenSubmit = () => {
-    if (mapboxToken.trim()) {
-      setIsTokenSet(true);
-      initializeMap();
-    } else {
+    if (!mapboxToken.trim()) {
       toast.error(language === 'en' ? 'Please enter a valid Mapbox token' : 'Будь ласка, введіть дійсний токен Mapbox');
+      return;
     }
+    
+    setIsMapLoading(true);
+    setIsTokenSet(true);
+    
+    // Small delay to ensure state is updated before initializing map
+    setTimeout(() => {
+      initializeMap();
+    }, 100);
   };
 
   const initializeMap = () => {
-    if (!mapContainer.current || !mapboxToken) return;
+    if (!mapContainer.current || !mapboxToken) {
+      setIsMapLoading(false);
+      return;
+    }
 
-    mapboxgl.accessToken = mapboxToken;
+    try {
+      // Set the access token
+      mapboxgl.accessToken = mapboxToken;
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [30.5234, 50.4501], // Kyiv coordinates
-      zoom: 12
-    });
+      // Clear any existing map
+      if (map.current) {
+        map.current.remove();
+      }
 
-    // Add navigation controls
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      // Create new map instance
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [30.5234, 50.4501], // Kyiv coordinates
+        zoom: 12
+      });
 
-    // Add markers for city locations
-    cityLocations.forEach((location) => {
-      const marker = new mapboxgl.Marker({
-        color: getMarkerColor(location.type)
-      })
-        .setLngLat(location.coordinates)
-        .setPopup(
-          new mapboxgl.Popup({ offset: 25 })
-            .setHTML(`<h3 style="margin: 0; font-weight: bold;">${location.name}</h3>`)
-        )
-        .addTo(map.current!);
-    });
+      // Add navigation controls
+      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-    map.current.on('load', () => {
-      toast.success(language === 'en' ? 'Map loaded successfully' : 'Карта завантажена успішно');
-    });
+      // Wait for map to load before adding markers
+      map.current.on('load', () => {
+        console.log('Map loaded successfully');
+        setIsMapLoading(false);
+        
+        // Add markers for city locations
+        cityLocations.forEach((location) => {
+          if (map.current) {
+            const marker = new mapboxgl.Marker({
+              color: getMarkerColor(location.type)
+            })
+              .setLngLat(location.coordinates)
+              .setPopup(
+                new mapboxgl.Popup({ offset: 25 })
+                  .setHTML(`<h3 style="margin: 0; font-weight: bold;">${location.name}</h3>`)
+              )
+              .addTo(map.current);
+          }
+        });
+        
+        toast.success(language === 'en' ? 'Map loaded successfully' : 'Карта завантажена успішно');
+      });
+
+      // Handle map errors
+      map.current.on('error', (e) => {
+        console.error('Map error:', e);
+        setIsMapLoading(false);
+        toast.error(language === 'en' ? 'Error loading map. Please check your token.' : 'Помилка завантаження карти. Перевірте ваш токен.');
+      });
+
+    } catch (error) {
+      console.error('Error initializing map:', error);
+      setIsMapLoading(false);
+      toast.error(language === 'en' ? 'Error initializing map' : 'Помилка ініціалізації карти');
+    }
   };
 
   const getMarkerColor = (type: string) => {
@@ -114,6 +151,15 @@ const MapboxCityMap = () => {
     }
   };
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (map.current) {
+        map.current.remove();
+      }
+    };
+  }, []);
+
   if (!isTokenSet) {
     return (
       <Card>
@@ -136,9 +182,13 @@ const MapboxCityMap = () => {
               value={mapboxToken}
               onChange={(e) => setMapboxToken(e.target.value)}
               className="flex-1"
+              onKeyPress={(e) => e.key === 'Enter' && handleTokenSubmit()}
             />
-            <Button onClick={handleTokenSubmit}>
-              {language === 'en' ? 'Set Token' : 'Встановити токен'}
+            <Button onClick={handleTokenSubmit} disabled={isMapLoading}>
+              {isMapLoading 
+                ? (language === 'en' ? 'Loading...' : 'Завантаження...') 
+                : (language === 'en' ? 'Set Token' : 'Встановити токен')
+              }
             </Button>
           </div>
           <p className="text-sm text-gray-500">
@@ -177,7 +227,15 @@ const MapboxCityMap = () => {
           </Button>
         </div>
         
-        <div ref={mapContainer} className="w-full h-96 rounded-lg" />
+        {isMapLoading ? (
+          <div className="w-full h-96 rounded-lg bg-gray-100 flex items-center justify-center">
+            <p className="text-gray-500">
+              {language === 'en' ? 'Loading map...' : 'Завантаження карти...'}
+            </p>
+          </div>
+        ) : (
+          <div ref={mapContainer} className="w-full h-96 rounded-lg" />
+        )}
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
           <div className="flex items-center gap-2">
