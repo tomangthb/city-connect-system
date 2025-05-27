@@ -12,6 +12,7 @@ import ResidentAppealsModule from '@/components/Resident/ResidentAppealsModule';
 import ResidentNewsModule from '@/components/Resident/ResidentNewsModule';
 import ResidentAccountModule from '@/components/Resident/ResidentAccountModule';
 import ResidentPaymentsModule from '@/components/Resident/ResidentPaymentsModule';
+import ResidentResourcesModule from '@/components/Resident/ResidentResourcesModule';
 import { useResidentNotifications } from '@/hooks/useResidentNotifications';
 
 const ResidentPortal = () => {
@@ -71,6 +72,8 @@ const ResidentPortal = () => {
         return <ResidentServicesModule />;
       case 'appeals':
         return <ResidentAppealsModule />;
+      case 'resources':
+        return <ResidentResourcesModule />;
       case 'news':
         return <ResidentNewsModule />;
       case 'account':

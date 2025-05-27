@@ -42,7 +42,7 @@ const ResidentSidebar = ({ activeTab, onTabChange }: ResidentSidebarProps) => {
       icon: Building2,
     },
     {
-      title: language === 'en' ? 'Submit Appeal' : 'Подати звернення',
+      title: language === 'en' ? 'My Appeals' : 'Мої звернення',
       url: 'appeals',
       icon: MessageSquare,
     },
