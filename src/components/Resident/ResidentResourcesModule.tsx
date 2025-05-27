@@ -11,12 +11,14 @@ import {
   Clock,
   Users,
   Phone,
-  Info,
   Calendar,
-  Star
+  Star,
+  Eye,
+  Share2
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
+import ResourceBookingDialog from './ResourceBookingDialog';
 
 interface Resource {
   id: string;
@@ -41,6 +43,8 @@ const ResidentResourcesModule = () => {
   const { language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
 
   const categories = [
     { id: 'all', name: language === 'en' ? 'All Resources' : 'Всі ресурси' },
@@ -171,11 +175,29 @@ const ResidentResourcesModule = () => {
   };
 
   const handleBookResource = (resource: Resource) => {
-    toast.success(`${language === 'en' ? 'Booking request sent for' : 'Запит на бронювання надіслано для'}: ${language === 'en' ? resource.name : resource.nameUk}`);
+    setSelectedResource(resource);
+    setBookingDialogOpen(true);
   };
 
   const handleGetDirections = (resource: Resource) => {
     toast.success(`${language === 'en' ? 'Opening directions to' : 'Відкриваємо маршрут до'}: ${language === 'en' ? resource.name : resource.nameUk}`);
+  };
+
+  const handleViewDetails = (resource: Resource) => {
+    toast.success(`${language === 'en' ? 'Viewing details for' : 'Перегляд деталей'}: ${language === 'en' ? resource.name : resource.nameUk}`);
+  };
+
+  const handleShareResource = (resource: Resource) => {
+    if (navigator.share) {
+      navigator.share({
+        title: language === 'en' ? resource.name : resource.nameUk,
+        text: language === 'en' ? resource.description : resource.descriptionUk,
+        url: window.location.href
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success(language === 'en' ? 'Link copied to clipboard' : 'Посилання скопійовано в буфер обміну');
+    }
   };
 
   return (
@@ -319,8 +341,21 @@ const ResidentResourcesModule = () => {
                   size="sm"
                   onClick={() => handleGetDirections(resource)}
                 >
-                  <MapPin className="h-4 w-4 mr-2" />
-                  {language === 'en' ? 'Directions' : 'Маршрут'}
+                  <MapPin className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleViewDetails(resource)}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleShareResource(resource)}
+                >
+                  <Share2 className="h-4 w-4" />
                 </Button>
               </div>
             </CardContent>
@@ -338,6 +373,12 @@ const ResidentResourcesModule = () => {
           </p>
         </div>
       )}
+
+      <ResourceBookingDialog
+        open={bookingDialogOpen}
+        onOpenChange={setBookingDialogOpen}
+        resource={selectedResource}
+      />
     </div>
   );
 };

@@ -37,7 +37,7 @@ const ResidentUserMenu = ({ userName }: ResidentUserMenuProps) => {
   };
   
   const handleSettings = () => {
-    toast.success(language === 'en' ? 'Settings opened' : 'Налаштування відкрито');
+    navigate('/resident-account');
   };
   
   const getUserInitials = () => {

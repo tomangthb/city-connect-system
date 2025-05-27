@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,11 +12,12 @@ import {
   Download,
   Eye,
   Plus,
-  Search,
-  Filter
+  Search
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
+import AddPaymentMethodDialog from './Payments/AddPaymentMethodDialog';
+import PaymentDetailsDialog from './Payments/PaymentDetailsDialog';
 
 interface Payment {
   id: string;
@@ -47,6 +47,9 @@ const ResidentPaymentsModule = () => {
   const [activeTab, setActiveTab] = useState('bills');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState('all');
+  const [addPaymentMethodOpen, setAddPaymentMethodOpen] = useState(false);
+  const [paymentDetailsOpen, setPaymentDetailsOpen] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | PaymentHistory | null>(null);
 
   const upcomingBills: Payment[] = [
     {
@@ -168,7 +171,8 @@ const ResidentPaymentsModule = () => {
   };
 
   const handleViewDetails = (item: Payment | PaymentHistory) => {
-    toast.success(`${language === 'en' ? 'Viewing details for' : 'Перегляд деталей для'}: ${language === 'en' ? item.type : item.typeUk}`);
+    setSelectedPayment(item);
+    setPaymentDetailsOpen(true);
   };
 
   const filteredHistory = paymentHistory.filter(item => {
@@ -283,7 +287,7 @@ const ResidentPaymentsModule = () => {
             <h3 className="text-lg font-semibold text-gray-900">
               {language === 'en' ? 'Upcoming Bills' : 'Майбутні рахунки'}
             </h3>
-            <Button>
+            <Button onClick={() => setAddPaymentMethodOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               {language === 'en' ? 'Add Payment Method' : 'Додати спосіб оплати'}
             </Button>
@@ -443,6 +447,18 @@ const ResidentPaymentsModule = () => {
           )}
         </div>
       )}
+
+      {/* Dialogs */}
+      <AddPaymentMethodDialog
+        open={addPaymentMethodOpen}
+        onOpenChange={setAddPaymentMethodOpen}
+      />
+
+      <PaymentDetailsDialog
+        open={paymentDetailsOpen}
+        onOpenChange={setPaymentDetailsOpen}
+        payment={selectedPayment}
+      />
     </div>
   );
 };
