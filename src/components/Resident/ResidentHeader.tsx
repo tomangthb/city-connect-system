@@ -2,9 +2,10 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Bell, LogOut, Globe } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import NotificationsPopover from '@/components/Layout/Notifications/NotificationsPopover';
+import ResidentUserMenu from './ResidentUserMenu';
 
 interface Notification {
   id: string;
@@ -21,8 +22,8 @@ interface ResidentHeaderProps {
   onLogout: () => void;
 }
 
-const ResidentHeader = ({ userName, notifications, setNotifications, onLogout }: ResidentHeaderProps) => {
-  const { language, setLanguage, t } = useLanguage();
+const ResidentHeader = ({ userName, notifications, setNotifications }: ResidentHeaderProps) => {
+  const { language, setLanguage } = useLanguage();
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'uk' : 'en');
@@ -49,15 +50,7 @@ const ResidentHeader = ({ userName, notifications, setNotifications, onLogout }:
             setNotifications={setNotifications}
           />
           
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-600">
-              {language === 'en' ? 'Welcome,' : 'Вітаємо,'} {userName}
-            </span>
-            <Button variant="outline" size="sm" onClick={onLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              {language === 'en' ? 'Logout' : 'Вийти'}
-            </Button>
-          </div>
+          <ResidentUserMenu userName={userName} />
         </div>
       </div>
     </header>

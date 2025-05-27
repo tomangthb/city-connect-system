@@ -1,37 +1,15 @@
 
 import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { Globe } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-
-// Registration form schema - simplified to just basic info
-const registrationSchema = z.object({
-  firstName: z.string().min(2, { message: "First name is required" }),
-  lastName: z.string().min(2, { message: "Last name is required" }),
-  patronymic: z.string().optional(),
-  email: z.string().email({ message: "Invalid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-  confirmPassword: z.string(),
-}).refine(data => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
-
-// Login form schema
-const loginSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
-  password: z.string().min(1, { message: "Password is required" }),
-});
+import LoginForm from '@/components/Auth/LoginForm';
+import RegistrationForm from '@/components/Auth/RegistrationForm';
 
 const Auth = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -40,35 +18,11 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Login form
-  const loginForm = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
-  // Registration form
-  const registrationForm = useForm<z.infer<typeof registrationSchema>>({
-    resolver: zodResolver(registrationSchema),
-    defaultValues: {
-      firstName: '',
-      lastName: '',
-      patronymic: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-    },
-  });
-
-  // Toggle language
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'uk' : 'en');
   };
 
-  // Handle login submission
-  const onLoginSubmit = async (data: z.infer<typeof loginSchema>) => {
+  const onLoginSubmit = async (data: { email: string; password: string }) => {
     const { error } = await signIn(data.email, data.password);
     
     if (error) {
@@ -86,13 +40,12 @@ const Auth = () => {
     }
   };
 
-  // Handle registration submission - default to employee type
-  const onRegisterSubmit = async (data: z.infer<typeof registrationSchema>) => {
+  const onRegisterSubmit = async (data: any) => {
     const { error } = await signUp(data.email, data.password, {
       firstName: data.firstName,
       lastName: data.lastName,
       patronymic: data.patronymic,
-      userType: 'employee' // Default to employee
+      userType: 'employee'
     });
     
     if (error) {
@@ -110,7 +63,6 @@ const Auth = () => {
     }
   };
 
-  // If already authenticated, redirect to home
   if (!loading && session) {
     return <Navigate to="/" replace />;
   }
@@ -141,133 +93,12 @@ const Auth = () => {
               <TabsTrigger value="register">{t('register') || 'Register'}</TabsTrigger>
             </TabsList>
 
-            {/* Login Form */}
             <TabsContent value="login">
-              <Form {...loginForm}>
-                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-                  <FormField
-                    control={loginForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('email') || 'Email'}</FormLabel>
-                        <FormControl>
-                          <Input placeholder="email@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={loginForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('password') || 'Password'}</FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full">{t('login') || 'Login'}</Button>
-                </form>
-              </Form>
+              <LoginForm onSubmit={onLoginSubmit} />
             </TabsContent>
 
-            {/* Registration Form */}
             <TabsContent value="register">
-              <Form {...registrationForm}>
-                <form onSubmit={registrationForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={registrationForm.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('firstName') || 'First name'}</FormLabel>
-                          <FormControl>
-                            <Input placeholder="John" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registrationForm.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('lastName') || 'Last name'}</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Doe" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <FormField
-                    control={registrationForm.control}
-                    name="patronymic"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('patronymic') || 'Patronymic'}</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Patronymic" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={registrationForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('email') || 'Email'}</FormLabel>
-                        <FormControl>
-                          <Input placeholder="email@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={registrationForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('password') || 'Password'}</FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={registrationForm.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('confirmPassword') || 'Confirm Password'}</FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <Button type="submit" className="w-full">{t('register') || 'Register'}</Button>
-                </form>
-              </Form>
+              <RegistrationForm onSubmit={onRegisterSubmit} userType="employee" />
             </TabsContent>
           </Tabs>
         </CardContent>

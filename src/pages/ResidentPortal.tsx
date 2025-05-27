@@ -12,14 +12,14 @@ import ResidentAppealsModule from '@/components/Resident/ResidentAppealsModule';
 import ResidentNewsModule from '@/components/Resident/ResidentNewsModule';
 import ResidentAccountModule from '@/components/Resident/ResidentAccountModule';
 import ResidentPaymentsModule from '@/components/Resident/ResidentPaymentsModule';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useResidentNotifications } from '@/hooks/useResidentNotifications';
 
 const ResidentPortal = () => {
   const { t } = useLanguage();
   const { user, loading, userType } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { notifications, setNotifications } = useNotifications();
+  const { notifications, setNotifications } = useResidentNotifications();
   const [activeTab, setActiveTab] = useState('home');
 
   useEffect(() => {
@@ -32,7 +32,6 @@ const ResidentPortal = () => {
     }
   }, [location.pathname]);
 
-  // Show loading while checking authentication
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -44,12 +43,10 @@ const ResidentPortal = () => {
     );
   }
 
-  // Redirect to resident auth if not authenticated
   if (!user) {
     return <Navigate to="/resident-auth" replace />;
   }
 
-  // Redirect employees to their portal
   if (userType === 'employee') {
     return <Navigate to="/" replace />;
   }
