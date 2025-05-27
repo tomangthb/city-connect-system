@@ -50,6 +50,7 @@ const App = () => (
                 {/* Resident portal routes */}
                 <Route path="/resident-services" element={<ResidentPortal />} />
                 <Route path="/resident-appeals" element={<ResidentPortal />} />
+                <Route path="/resident-resources" element={<ResidentPortal />} />
                 <Route path="/resident-news" element={<ResidentPortal />} />
                 <Route path="/resident-account" element={<ResidentPortal />} />
                 <Route path="/resident-payments" element={<ResidentPortal />} />

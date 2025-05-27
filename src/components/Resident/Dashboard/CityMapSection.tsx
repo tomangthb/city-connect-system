@@ -1,9 +1,9 @@
 
 import React from 'react';
-import InteractiveCityMap from './InteractiveCityMap';
+import MapboxCityMap from './MapboxCityMap';
 
 const CityMapSection = () => {
-  return <InteractiveCityMap />;
+  return <MapboxCityMap />;
 };
 
 export default CityMapSection;

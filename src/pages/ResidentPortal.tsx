@@ -24,9 +24,13 @@ const ResidentPortal = () => {
   const [activeTab, setActiveTab] = useState('home');
 
   useEffect(() => {
-    const path = location.pathname.split('/')[1];
-    if (path?.startsWith('resident-')) {
-      const tab = path.replace('resident-', '');
+    const path = location.pathname;
+    
+    // Set activeTab based on current path
+    if (path === '/resident-portal') {
+      setActiveTab('home');
+    } else if (path.startsWith('/resident-')) {
+      const tab = path.replace('/resident-', '');
       setActiveTab(tab);
     } else {
       setActiveTab('home');
@@ -81,7 +85,7 @@ const ResidentPortal = () => {
       case 'payments':
         return <ResidentPaymentsModule />;
       default:
-        return <div>{t('pageNotFound') || 'Page Not Found'}</div>;
+        return <ResidentDashboard />;
     }
   };
 

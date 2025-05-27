@@ -6,15 +6,17 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
-  Filter,
   Building,
   MapPin,
   Clock,
   Users,
   Phone,
-  Info
+  Info,
+  Calendar,
+  Star
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from 'sonner';
 
 interface Resource {
   id: string;
@@ -30,6 +32,9 @@ interface Resource {
   contact: string;
   capacity?: number;
   currentOccupancy?: number;
+  rating?: number;
+  features: string[];
+  featuresUk: string[];
 }
 
 const ResidentResourcesModule = () => {
@@ -61,7 +66,10 @@ const ResidentResourcesModule = () => {
       workingHours: '8:00 - 20:00',
       contact: '+380 44 123-4567',
       capacity: 200,
-      currentOccupancy: 45
+      currentOccupancy: 45,
+      rating: 4.5,
+      features: ['Meeting Rooms', 'Event Spaces', 'Free WiFi', 'Parking', 'Accessibility'],
+      featuresUk: ['Конференц-зали', 'Зали для заходів', 'Безкоштовний WiFi', 'Парковка', 'Доступність']
     },
     {
       id: '2',
@@ -76,7 +84,10 @@ const ResidentResourcesModule = () => {
       workingHours: '6:00 - 22:00',
       contact: '+380 44 234-5678',
       capacity: 500,
-      currentOccupancy: 120
+      currentOccupancy: 120,
+      rating: 4.8,
+      features: ['Gym', 'Swimming Pool', 'Basketball Court', 'Tennis Court', 'Locker Rooms'],
+      featuresUk: ['Тренажерний зал', 'Басейн', 'Баскетбольний майданчик', 'Тенісний корт', 'Роздягальні']
     },
     {
       id: '3',
@@ -91,25 +102,13 @@ const ResidentResourcesModule = () => {
       workingHours: '9:00 - 19:00',
       contact: '+380 44 345-6789',
       capacity: 150,
-      currentOccupancy: 67
+      currentOccupancy: 67,
+      rating: 4.3,
+      features: ['Books', 'Digital Resources', 'Study Areas', 'Computer Access', 'Reading Rooms'],
+      featuresUk: ['Книги', 'Цифрові ресурси', 'Навчальні зони', 'Доступ до комп\'ютерів', 'Читальні зали']
     },
     {
       id: '4',
-      name: 'Youth Recreation Center',
-      nameUk: 'Молодіжний центр відпочинку',
-      category: 'recreation',
-      categoryUk: 'Відпочинок',
-      description: 'Recreation center focused on youth activities and programs.',
-      descriptionUk: 'Центр відпочинку, орієнтований на молодіжні заходи та програми.',
-      location: '23 Youth Plaza',
-      status: 'Maintenance',
-      workingHours: '10:00 - 18:00',
-      contact: '+380 44 456-7890',
-      capacity: 100,
-      currentOccupancy: 0
-    },
-    {
-      id: '5',
       name: 'Cultural Arts Center',
       nameUk: 'Центр культури та мистецтв',
       category: 'culture',
@@ -121,22 +120,10 @@ const ResidentResourcesModule = () => {
       workingHours: '10:00 - 20:00',
       contact: '+380 44 567-8901',
       capacity: 300,
-      currentOccupancy: 85
-    },
-    {
-      id: '6',
-      name: 'Senior Citizens Center',
-      nameUk: 'Центр для людей похилого віку',
-      category: 'social',
-      categoryUk: 'Соціальні послуги',
-      description: 'Dedicated center providing services and activities for senior citizens.',
-      descriptionUk: 'Спеціалізований центр, що надає послуги та заходи для людей похилого віку.',
-      location: '56 Elder Avenue',
-      status: 'Available',
-      workingHours: '8:00 - 17:00',
-      contact: '+380 44 678-9012',
-      capacity: 80,
-      currentOccupancy: 34
+      currentOccupancy: 85,
+      rating: 4.6,
+      features: ['Theater Hall', 'Art Gallery', 'Workshop Rooms', 'Gift Shop', 'Café'],
+      featuresUk: ['Театральна зала', 'Художня галерея', 'Майстерні', 'Сувенірна крамниця', 'Кафе']
     }
   ];
 
@@ -183,16 +170,24 @@ const ResidentResourcesModule = () => {
     return 'text-green-600';
   };
 
+  const handleBookResource = (resource: Resource) => {
+    toast.success(`${language === 'en' ? 'Booking request sent for' : 'Запит на бронювання надіслано для'}: ${language === 'en' ? resource.name : resource.nameUk}`);
+  };
+
+  const handleGetDirections = (resource: Resource) => {
+    toast.success(`${language === 'en' ? 'Opening directions to' : 'Відкриваємо маршрут до'}: ${language === 'en' ? resource.name : resource.nameUk}`);
+  };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           {language === 'en' ? 'City Resources' : 'Міські ресурси'}
         </h2>
         <p className="text-gray-600">
           {language === 'en' 
-            ? 'Explore available city facilities and resources for residents.' 
-            : 'Досліджуйте доступні міські установи та ресурси для громадян.'}
+            ? 'Explore and book available city facilities and resources for residents.' 
+            : 'Досліджуйте та бронюйте доступні міські установи та ресурси для громадян.'}
         </p>
       </div>
 
@@ -237,7 +232,7 @@ const ResidentResourcesModule = () => {
       {/* Resources Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredResources.map((resource) => (
-          <Card key={resource.id} className="hover:shadow-md transition-shadow">
+          <Card key={resource.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <CardTitle className="text-lg">
@@ -247,9 +242,17 @@ const ResidentResourcesModule = () => {
                   {getStatusText(resource.status)}
                 </Badge>
               </div>
-              <p className="text-sm text-blue-600">
-                {language === 'en' ? resource.category : resource.categoryUk}
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-blue-600">
+                  {language === 'en' ? resource.category : resource.categoryUk}
+                </p>
+                {resource.rating && (
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-sm font-medium">{resource.rating}</span>
+                  </div>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-gray-600 text-sm">
@@ -281,15 +284,43 @@ const ResidentResourcesModule = () => {
                   </div>
                 )}
               </div>
+
+              {/* Features */}
+              <div>
+                <p className="text-sm font-medium text-gray-900 mb-2">
+                  {language === 'en' ? 'Features:' : 'Особливості:'}
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {(language === 'en' ? resource.features : resource.featuresUk).slice(0, 3).map((feature, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {feature}
+                    </Badge>
+                  ))}
+                  {resource.features.length > 3 && (
+                    <Badge variant="secondary" className="text-xs">
+                      +{resource.features.length - 3} {language === 'en' ? 'more' : 'ще'}
+                    </Badge>
+                  )}
+                </div>
+              </div>
               
               <div className="flex gap-2">
-                <Button className="flex-1" size="sm">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  {language === 'en' ? 'Get Directions' : 'Як добратись'}
+                <Button 
+                  className="flex-1" 
+                  size="sm"
+                  onClick={() => handleBookResource(resource)}
+                  disabled={resource.status !== 'Available'}
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  {language === 'en' ? 'Book Now' : 'Забронювати'}
                 </Button>
-                <Button variant="outline" size="sm">
-                  <Info className="h-4 w-4 mr-2" />
-                  {language === 'en' ? 'More Info' : 'Детальніше'}
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleGetDirections(resource)}
+                >
+                  <MapPin className="h-4 w-4 mr-2" />
+                  {language === 'en' ? 'Directions' : 'Маршрут'}
                 </Button>
               </div>
             </CardContent>
