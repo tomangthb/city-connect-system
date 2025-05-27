@@ -5,12 +5,12 @@ import { useAuth } from '@/contexts/AuthContext';
 export const useUserType = () => {
   const [userType, setUserType] = useState<'employee' | 'resident' | null>(null);
   
-  // Безпечно отримуємо дані з AuthContext
+  // Safely get data from AuthContext
   let authData;
   try {
     authData = useAuth();
   } catch (error) {
-    // Якщо AuthContext недоступний, повертаємо базові значення
+    // If AuthContext is not available, return basic values
     console.warn('AuthContext not available:', error);
     return { userType: null, setUserType: () => {} };
   }

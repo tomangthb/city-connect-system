@@ -21,12 +21,12 @@ const LoginSelection = ({ onUserTypeSelect }: LoginSelectionProps) => {
     setLanguage(language === 'en' ? 'uk' : 'en');
   };
 
-  const handlePortalClick = (userType: 'employee' | 'resident') => {
-    if (user) {
-      onUserTypeSelect(userType);
-    } else {
-      navigate('/auth');
-    }
+  const handleEmployeePortalClick = () => {
+    navigate('/auth');
+  };
+
+  const handleResidentPortalClick = () => {
+    navigate('/resident-auth');
   };
 
   return (
@@ -46,7 +46,7 @@ const LoginSelection = ({ onUserTypeSelect }: LoginSelectionProps) => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Employee Portal */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handlePortalClick('employee')}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={handleEmployeePortalClick}>
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,13 +68,13 @@ const LoginSelection = ({ onUserTypeSelect }: LoginSelectionProps) => {
                 <li>{language === 'en' ? '• Reporting and administration tools' : '• Інструменти звітності та адміністрування'}</li>
               </ul>
               <Button className="w-full mt-6">
-                {user ? t('accessEmployeePortal') : t('login') || 'Login'}
+                {t('accessEmployeePortal') || 'Access Employee Portal'}
               </Button>
             </CardContent>
           </Card>
 
           {/* Resident Portal */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handlePortalClick('resident')}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={handleResidentPortalClick}>
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,7 +96,7 @@ const LoginSelection = ({ onUserTypeSelect }: LoginSelectionProps) => {
                 <li>{language === 'en' ? '• Interactive city map and resources' : '• Інтерактивна карта міста та ресурси'}</li>
               </ul>
               <Button className="w-full mt-6" variant="outline">
-                {user ? t('accessResidentPortal') : t('login') || 'Login'}
+                {t('accessResidentPortal') || 'Access Resident Portal'}
               </Button>
             </CardContent>
           </Card>
@@ -106,18 +106,6 @@ const LoginSelection = ({ onUserTypeSelect }: LoginSelectionProps) => {
           <p className="text-sm text-gray-500">
             {t('needHelp')}
           </p>
-          {user && (
-            <Button 
-              variant="link" 
-              className="mt-4 text-red-600" 
-              onClick={async () => {
-                await signOut();
-                onUserTypeSelect(null as any);
-              }}
-            >
-              {t('logout') || 'Logout'}
-            </Button>
-          )}
         </div>
       </div>
     </div>
