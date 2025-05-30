@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,10 +6,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Bell, MessageCircle, Send } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const NewsSection = () => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [showComments, setShowComments] = useState(false);
   const [selectedNews, setSelectedNews] = useState<any>(null);
   const [newComment, setNewComment] = useState('');
@@ -71,7 +72,7 @@ const NewsSection = () => {
     setComments([
       {
         id: 1,
-        author: language === 'en' ? 'John Doe' : 'Іван Іваненко',
+        author: language === 'en' ? 'John Doe' : 'Іван Іванenko',
         text: language === 'en' ? 'Great news! Looking forward to it.' : 'Чудові новини! З нетерпінням чекаю.',
         date: '2024-05-21'
       },
@@ -100,6 +101,10 @@ const NewsSection = () => {
     setComments([comment, ...comments]);
     setNewComment('');
     toast.success(language === 'en' ? 'Comment added successfully' : 'Коментар успішно додано');
+  };
+
+  const handleViewAllNews = () => {
+    navigate('/resident-news');
   };
 
   return (
@@ -134,7 +139,7 @@ const NewsSection = () => {
               ))}
             </div>
           </ScrollArea>
-          <Button variant="outline" className="w-full mt-4">
+          <Button variant="outline" className="w-full mt-4" onClick={handleViewAllNews}>
             {language === 'en' ? 'View All News' : 'Переглянути всі новини'}
           </Button>
         </CardContent>

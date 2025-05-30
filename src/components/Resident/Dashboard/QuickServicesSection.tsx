@@ -22,17 +22,17 @@ const QuickServicesSection = () => {
   const navigate = useNavigate();
 
   const handlePayUtilities = () => {
-    navigate('/payments');
-    toast.success(`${language === 'en' ? 'Redirecting to Payments' : 'Перенаправлення на Платежі'}`);
+    navigate('/resident-payments');
+    toast.success(`${language === 'en' ? 'Redirecting to Payments & Billing' : 'Перенаправлення на Платежі та рахунки'}`);
   };
 
   const handleSubmitAppeal = () => {
-    navigate('/appeals');
+    navigate('/resident-appeals');
     toast.success(`${language === 'en' ? 'Redirecting to My Appeals' : 'Перенаправлення на Мої звернення'}`);
   };
 
   const handleBookAppointment = () => {
-    navigate('/resources');
+    navigate('/resident-resources');
     toast.success(`${language === 'en' ? 'Redirecting to City Resources' : 'Перенаправлення на Міські ресурси'}`);
   };
 

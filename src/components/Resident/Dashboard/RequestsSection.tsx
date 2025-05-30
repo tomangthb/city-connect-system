@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -17,6 +18,7 @@ interface Appeal {
 
 const RequestsSection = () => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [appeals, setAppeals] = useState<Appeal[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -89,6 +91,10 @@ const RequestsSection = () => {
     return status;
   };
 
+  const handleViewAllRequests = () => {
+    navigate('/resident-appeals');
+  };
+
   if (loading) {
     return (
       <Card>
@@ -116,6 +122,9 @@ const RequestsSection = () => {
         </CardHeader>
         <CardContent>
           <p className="text-gray-500">{language === 'en' ? 'No requests found' : 'Запитів не знайдено'}</p>
+          <Button variant="outline" className="w-full mt-4" onClick={handleViewAllRequests}>
+            {language === 'en' ? 'View All Requests' : 'Переглянути всі запити'}
+          </Button>
         </CardContent>
       </Card>
     );
@@ -158,7 +167,7 @@ const RequestsSection = () => {
             </span>
           </div>
         </div>
-        <Button variant="outline" className="w-full mt-4">
+        <Button variant="outline" className="w-full mt-4" onClick={handleViewAllRequests}>
           {language === 'en' ? 'View All Requests' : 'Переглянути всі запити'}
         </Button>
       </CardContent>
