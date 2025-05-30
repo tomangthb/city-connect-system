@@ -5,7 +5,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { MapPin } from 'lucide-react';
+import { MapPin, Settings } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
@@ -16,6 +16,19 @@ const InteractiveCityMap = () => {
   const [mapboxToken, setMapboxToken] = useState('');
   const [isTokenSet, setIsTokenSet] = useState(false);
   const [isMapLoading, setIsMapLoading] = useState(false);
+  const [showTokenInput, setShowTokenInput] = useState(false);
+
+  // Check for existing token on component mount
+  useEffect(() => {
+    const savedToken = localStorage.getItem('mapbox_token');
+    if (savedToken) {
+      setMapboxToken(savedToken);
+      setIsTokenSet(true);
+      setTimeout(() => {
+        initializeMap(savedToken);
+      }, 100);
+    }
+  }, []);
 
   const handleTokenSubmit = () => {
     if (!mapboxToken.trim()) {
@@ -23,22 +36,26 @@ const InteractiveCityMap = () => {
       return;
     }
     
+    // Save token to localStorage
+    localStorage.setItem('mapbox_token', mapboxToken);
+    
     setIsMapLoading(true);
     setIsTokenSet(true);
+    setShowTokenInput(false);
     
     setTimeout(() => {
-      initializeMap();
+      initializeMap(mapboxToken);
     }, 100);
   };
 
-  const initializeMap = () => {
-    if (!mapContainer.current || !mapboxToken) {
+  const initializeMap = (token: string) => {
+    if (!mapContainer.current || !token) {
       setIsMapLoading(false);
       return;
     }
 
     try {
-      mapboxgl.accessToken = mapboxToken;
+      mapboxgl.accessToken = token;
 
       if (map.current) {
         map.current.remove();
@@ -47,8 +64,9 @@ const InteractiveCityMap = () => {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/streets-v12',
-        center: [30.5234, 50.4501], // Kyiv coordinates
-        zoom: 12
+        center: [24.0315, 49.8397], // Lviv coordinates
+        zoom: 12,
+        attributionControl: false
       });
 
       map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
@@ -62,13 +80,31 @@ const InteractiveCityMap = () => {
       map.current.on('error', (e) => {
         console.error('Map error:', e);
         setIsMapLoading(false);
+        // Remove invalid token
+        localStorage.removeItem('mapbox_token');
+        setIsTokenSet(false);
+        setShowTokenInput(true);
         toast.error(language === 'en' ? 'Error loading map. Please check your token.' : 'Помилка завантаження карти. Перевірте ваш токен.');
       });
 
     } catch (error) {
       console.error('Error initializing map:', error);
       setIsMapLoading(false);
+      localStorage.removeItem('mapbox_token');
+      setIsTokenSet(false);
+      setShowTokenInput(true);
       toast.error(language === 'en' ? 'Error initializing map' : 'Помилка ініціалізації карти');
+    }
+  };
+
+  const handleChangeToken = () => {
+    localStorage.removeItem('mapbox_token');
+    setIsTokenSet(false);
+    setShowTokenInput(true);
+    setMapboxToken('');
+    if (map.current) {
+      map.current.remove();
+      map.current = null;
     }
   };
 
@@ -80,13 +116,15 @@ const InteractiveCityMap = () => {
     };
   }, []);
 
-  if (!isTokenSet) {
+  if (!isTokenSet || showTokenInput) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <MapPin className="h-5 w-5 mr-2" />
-            {language === 'en' ? 'Interactive City Map' : 'Інтерактивна карта міста'}
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center">
+              <MapPin className="h-5 w-5 mr-2" />
+              {language === 'en' ? 'Interactive City Map' : 'Інтерактивна карта міста'}
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -124,20 +162,30 @@ const InteractiveCityMap = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center">
-          <MapPin className="h-5 w-5 mr-2" />
-          {language === 'en' ? 'Interactive City Map' : 'Інтерактивна карта міста'}
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center">
+            <MapPin className="h-5 w-5 mr-2" />
+            {language === 'en' ? 'Interactive City Map' : 'Інтерактивна карта міста'}
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleChangeToken}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         {isMapLoading ? (
-          <div className="w-full h-96 rounded-lg bg-gray-100 flex items-center justify-center">
+          <div className="w-full h-96 rounded-b-lg bg-gray-100 flex items-center justify-center">
             <p className="text-gray-500">
               {language === 'en' ? 'Loading map...' : 'Завантаження карти...'}
             </p>
           </div>
         ) : (
-          <div ref={mapContainer} className="w-full h-96 rounded-lg" />
+          <div ref={mapContainer} className="w-full h-96 rounded-b-lg" />
         )}
       </CardContent>
     </Card>
