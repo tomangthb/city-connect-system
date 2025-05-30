@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Search, 
-  Filter,
   Building,
   Users,
   Truck,
@@ -15,8 +15,7 @@ import {
   Leaf,
   FileText,
   Clock,
-  Star,
-  X
+  Star
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
@@ -25,7 +24,6 @@ const ResidentServicesModule = () => {
   const { language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [filterOpen, setFilterOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<any>(null);
   const [applicationDialogOpen, setApplicationDialogOpen] = useState(false);
 
@@ -165,7 +163,7 @@ const ResidentServicesModule = () => {
         </p>
       </div>
 
-      {/* Search and Filter */}
+      {/* Search */}
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -176,47 +174,6 @@ const ResidentServicesModule = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        
-        <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              {language === 'en' ? 'Filter' : 'Фільтр'}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{language === 'en' ? 'Filter Services' : 'Фільтрувати послуги'}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  {language === 'en' ? 'Category' : 'Категорія'}
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {categories.map((category) => {
-                    const Icon = category.icon;
-                    return (
-                      <Button
-                        key={category.id}
-                        variant={selectedCategory === category.id ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setSelectedCategory(category.id)}
-                        className="flex items-center gap-2 justify-start"
-                      >
-                        <Icon className="h-4 w-4" />
-                        {category.name}
-                      </Button>
-                    );
-                  })}
-                </div>
-              </div>
-              <Button onClick={() => setFilterOpen(false)} className="w-full">
-                {language === 'en' ? 'Apply Filters' : 'Застосувати фільтри'}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
 
       {/* Categories */}

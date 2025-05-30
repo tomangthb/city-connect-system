@@ -16,23 +16,16 @@ import {
   Search
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-
-interface Appeal {
-  id: string;
-  title: string;
-  category: string;
-  content: string;
-  status: 'Under Review' | 'In Progress' | 'Completed' | 'Rejected';
-  priority: 'Low' | 'Medium' | 'High';
-  created_at: string;
-  updated_at: string;
-}
 
 const ResidentAppealsModule = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
-  const [selectedAppeal, setSelectedAppeal] = useState<Appeal | null>(null);
+  const [selectedAppeal, setSelectedAppeal] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [newAppeal, setNewAppeal] = useState({
@@ -40,46 +33,6 @@ const ResidentAppealsModule = () => {
     category: '',
     content: ''
   });
-
-  // Mock appeals data
-  const [appeals, setAppeals] = useState<Appeal[]>([
-    {
-      id: '001',
-      title: language === 'en' ? 'Street Light Repair Request' : 'Запит на ремонт вуличного освітлення',
-      category: language === 'en' ? 'Infrastructure' : 'Інфраструктура',
-      content: language === 'en' 
-        ? 'The street light on Main Street has been broken for two weeks...' 
-        : 'Вуличне освітлення на Головній вулиці не працює вже два тижні...',
-      status: 'In Progress',
-      priority: 'Medium',
-      created_at: '2024-05-10',
-      updated_at: '2024-05-12'
-    },
-    {
-      id: '002',
-      title: language === 'en' ? 'Noise Complaint' : 'Скарга на шум',
-      category: language === 'en' ? 'Public Order' : 'Громадський порядок',
-      content: language === 'en' 
-        ? 'Construction work starts too early in the morning...' 
-        : 'Будівельні роботи починаються занадто рано вранці...',
-      status: 'Under Review',
-      priority: 'Low',
-      created_at: '2024-05-08',
-      updated_at: '2024-05-08'
-    },
-    {
-      id: '003',
-      title: language === 'en' ? 'Pothole Repair' : 'Ремонт ями на дорозі',
-      category: language === 'en' ? 'Roads' : 'Дороги',
-      content: language === 'en' 
-        ? 'Large pothole causing damage to vehicles...' 
-        : 'Велика яма на дорозі завдає шкоди транспортним засобам...',
-      status: 'Completed',
-      priority: 'High',
-      created_at: '2024-05-05',
-      updated_at: '2024-05-15'
-    }
-  ]);
 
   const categories = [
     { value: 'infrastructure', label: language === 'en' ? 'Infrastructure' : 'Інфраструктура' },
@@ -97,6 +50,69 @@ const ResidentAppealsModule = () => {
     { value: 'Completed', label: language === 'en' ? 'Completed' : 'Завершено' },
     { value: 'Rejected', label: language === 'en' ? 'Rejected' : 'Відхилено' }
   ];
+
+  // Fetch appeals from Supabase
+  const { data: appeals, isLoading, refetch } = useQuery({
+    queryKey: ['resident-appeals', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from('appeals')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching appeals:', error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!user
+  });
+
+  const handleSubmitAppeal = async () => {
+    if (!newAppeal.title.trim() || !newAppeal.category || !newAppeal.content.trim()) {
+      toast.error(language === 'en' ? 'Please fill all fields' : 'Будь ласка, заповніть всі поля');
+      return;
+    }
+
+    if (!user) {
+      toast.error(language === 'en' ? 'Please log in to submit an appeal' : 'Будь ласка, увійдіть для подачі звернення');
+      return;
+    }
+
+    try {
+      const categoryLabel = categories.find(c => c.value === newAppeal.category)?.label || newAppeal.category;
+      
+      const { error } = await supabase
+        .from('appeals')
+        .insert([{
+          title: newAppeal.title,
+          category: categoryLabel,
+          content: newAppeal.content,
+          user_id: user.id,
+          submitted_by: user.email || 'Unknown User',
+          status: 'Under Review',
+          priority: 'Medium'
+        }]);
+
+      if (error) {
+        console.error('Error submitting appeal:', error);
+        toast.error(language === 'en' ? 'Error submitting appeal' : 'Помилка подачі звернення');
+        return;
+      }
+
+      toast.success(language === 'en' ? 'Appeal submitted successfully!' : 'Звернення подано успішно!');
+      setShowForm(false);
+      setNewAppeal({ title: '', category: '', content: '' });
+      refetch();
+    } catch (error) {
+      console.error('Error submitting appeal:', error);
+      toast.error(language === 'en' ? 'Error submitting appeal' : 'Помилка подачі звернення');
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -117,35 +133,45 @@ const ResidentAppealsModule = () => {
     }
   };
 
-  const handleSubmitAppeal = () => {
-    if (!newAppeal.title.trim() || !newAppeal.category || !newAppeal.content.trim()) {
-      toast.error(language === 'en' ? 'Please fill all fields' : 'Будь ласка, заповніть всі поля');
-      return;
+  const getStatusText = (status: string) => {
+    if (language === 'uk') {
+      switch (status) {
+        case 'Under Review': return 'На розгляді';
+        case 'In Progress': return 'В процесі';
+        case 'Completed': return 'Завершено';
+        case 'Rejected': return 'Відхилено';
+        default: return status;
+      }
     }
-
-    const appeal: Appeal = {
-      id: `00${appeals.length + 1}`,
-      title: newAppeal.title,
-      category: categories.find(c => c.value === newAppeal.category)?.label || newAppeal.category,
-      content: newAppeal.content,
-      status: 'Under Review',
-      priority: 'Medium',
-      created_at: new Date().toISOString().split('T')[0],
-      updated_at: new Date().toISOString().split('T')[0]
-    };
-
-    setAppeals([appeal, ...appeals]);
-    toast.success(language === 'en' ? 'Appeal submitted successfully!' : 'Звернення подано успішно!');
-    setShowForm(false);
-    setNewAppeal({ title: '', category: '', content: '' });
+    return status;
   };
 
-  const filteredAppeals = appeals.filter(appeal => {
+  const getPriorityText = (priority: string) => {
+    if (language === 'uk') {
+      switch (priority) {
+        case 'High': return 'Високий';
+        case 'Medium': return 'Середній';
+        case 'Low': return 'Низький';
+        default: return priority;
+      }
+    }
+    return priority;
+  };
+
+  const filteredAppeals = appeals?.filter(appeal => {
     const matchesSearch = appeal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         appeal.content.toLowerCase().includes(searchQuery.toLowerCase());
+                         appeal.content?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || appeal.status === statusFilter;
     return matchesSearch && matchesStatus;
-  });
+  }) || [];
+
+  if (isLoading) {
+    return (
+      <div className="p-6 flex justify-center">
+        <div>{language === 'en' ? 'Loading...' : 'Завантаження...'}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -263,14 +289,14 @@ const ResidentAppealsModule = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 mb-1">{appeal.title}</h3>
-                    <p className="text-sm text-gray-600">ID: {appeal.id} • {appeal.category}</p>
+                    <p className="text-sm text-gray-600">ID: {appeal.id.slice(0, 8)} • {appeal.category}</p>
                   </div>
                   <div className="flex space-x-2">
                     <Badge className={getStatusColor(appeal.status)}>
-                      {appeal.status}
+                      {getStatusText(appeal.status)}
                     </Badge>
                     <Badge className={getPriorityColor(appeal.priority)}>
-                      {appeal.priority}
+                      {getPriorityText(appeal.priority)}
                     </Badge>
                   </div>
                 </div>
@@ -281,11 +307,11 @@ const ResidentAppealsModule = () => {
                   <div className="flex items-center space-x-4 text-sm text-gray-600">
                     <div className="flex items-center">
                       <Clock className="h-4 w-4 mr-1" />
-                      {language === 'en' ? 'Created:' : 'Створено:'} {appeal.created_at}
+                      {language === 'en' ? 'Created:' : 'Створено:'} {new Date(appeal.created_at).toLocaleDateString()}
                     </div>
                     <div className="flex items-center">
                       <Clock className="h-4 w-4 mr-1" />
-                      {language === 'en' ? 'Updated:' : 'Оновлено:'} {appeal.updated_at}
+                      {language === 'en' ? 'Updated:' : 'Оновлено:'} {new Date(appeal.updated_at).toLocaleDateString()}
                     </div>
                   </div>
 
@@ -325,10 +351,10 @@ const ResidentAppealsModule = () => {
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
                 <Badge className={getStatusColor(selectedAppeal.status)}>
-                  {selectedAppeal.status}
+                  {getStatusText(selectedAppeal.status)}
                 </Badge>
                 <Badge className={getPriorityColor(selectedAppeal.priority)}>
-                  {selectedAppeal.priority}
+                  {getPriorityText(selectedAppeal.priority)}
                 </Badge>
                 <span className="text-sm text-gray-600">
                   {language === 'en' ? 'Category:' : 'Категорія:'} {selectedAppeal.category}
@@ -349,13 +375,13 @@ const ResidentAppealsModule = () => {
                   <label className="font-semibold block">
                     {language === 'en' ? 'Created' : 'Створено'}
                   </label>
-                  <p className="text-gray-600">{selectedAppeal.created_at}</p>
+                  <p className="text-gray-600">{new Date(selectedAppeal.created_at).toLocaleDateString()}</p>
                 </div>
                 <div>
                   <label className="font-semibold block">
                     {language === 'en' ? 'Last Updated' : 'Останнє оновлення'}
                   </label>
-                  <p className="text-gray-600">{selectedAppeal.updated_at}</p>
+                  <p className="text-gray-600">{new Date(selectedAppeal.updated_at).toLocaleDateString()}</p>
                 </div>
               </div>
               

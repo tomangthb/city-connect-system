@@ -4,10 +4,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { 
   CreditCard, 
   MessageSquare, 
-  Calendar, 
-  FileText 
+  Calendar
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 interface Service {
@@ -19,9 +19,21 @@ interface Service {
 
 const QuickServicesSection = () => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
 
-  const handleServiceClick = (serviceName: string) => {
-    toast.success(`${serviceName} ${language === 'en' ? 'clicked' : 'натиснуто'}`);
+  const handlePayUtilities = () => {
+    navigate('/payments');
+    toast.success(`${language === 'en' ? 'Redirecting to Payments' : 'Перенаправлення на Платежі'}`);
+  };
+
+  const handleSubmitAppeal = () => {
+    navigate('/appeals');
+    toast.success(`${language === 'en' ? 'Redirecting to My Appeals' : 'Перенаправлення на Мої звернення'}`);
+  };
+
+  const handleBookAppointment = () => {
+    navigate('/resources');
+    toast.success(`${language === 'en' ? 'Redirecting to City Resources' : 'Перенаправлення на Міські ресурси'}`);
   };
 
   const quickServices: Service[] = [
@@ -29,26 +41,20 @@ const QuickServicesSection = () => {
       title: language === 'en' ? 'Pay Utilities' : 'Сплатити комунальні', 
       icon: CreditCard, 
       color: 'bg-blue-100 text-blue-600',
-      action: () => handleServiceClick(language === 'en' ? 'Pay Utilities' : 'Сплатити комунальні')
+      action: handlePayUtilities
     },
     { 
       title: language === 'en' ? 'Submit Appeal' : 'Подати звернення', 
       icon: MessageSquare, 
       color: 'bg-green-100 text-green-600',
-      action: () => handleServiceClick(language === 'en' ? 'Submit Appeal' : 'Подати звернення')
+      action: handleSubmitAppeal
     },
     { 
       title: language === 'en' ? 'Book Appointment' : 'Записатися на прийом', 
       icon: Calendar, 
       color: 'bg-purple-100 text-purple-600',
-      action: () => handleServiceClick(language === 'en' ? 'Book Appointment' : 'Записатися на прийом')
-    },
-    { 
-      title: language === 'en' ? 'View Documents' : 'Переглянути документи', 
-      icon: FileText, 
-      color: 'bg-orange-100 text-orange-600',
-      action: () => handleServiceClick(language === 'en' ? 'View Documents' : 'Переглянути документи')
-    },
+      action: handleBookAppointment
+    }
   ];
 
   return (
@@ -56,7 +62,7 @@ const QuickServicesSection = () => {
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
         {language === 'en' ? 'Quick Services' : 'Швидкі послуги'}
       </h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {quickServices.map((service, index) => {
           const Icon = service.icon;
           return (

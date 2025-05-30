@@ -5,13 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Bell, ChevronUp, ChevronDown, MessageCircle, Send } from 'lucide-react';
+import { Bell, MessageCircle, Send } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
 const NewsSection = () => {
   const { language } = useLanguage();
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [showComments, setShowComments] = useState(false);
   const [selectedNews, setSelectedNews] = useState<any>(null);
   const [newComment, setNewComment] = useState('');
@@ -65,14 +64,6 @@ const NewsSection = () => {
     }
   ];
 
-  const handlePrevious = () => {
-    setCurrentIndex(prev => prev > 0 ? prev - 1 : cityNews.length - 1);
-  };
-
-  const handleNext = () => {
-    setCurrentIndex(prev => prev < cityNews.length - 1 ? prev + 1 : 0);
-  };
-
   const handleComments = (news: any) => {
     setSelectedNews(news);
     setShowComments(true);
@@ -115,29 +106,16 @@ const NewsSection = () => {
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Bell className="h-5 w-5 mr-2" />
-              {language === 'en' ? 'City News & Events' : 'Міські новини та події'}
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={handlePrevious}>
-                <ChevronUp className="h-4 w-4" />
-              </Button>
-              <span className="text-sm text-gray-500">
-                {currentIndex + 1} / {cityNews.length}
-              </span>
-              <Button variant="ghost" size="sm" onClick={handleNext}>
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </div>
+          <CardTitle className="flex items-center">
+            <Bell className="h-5 w-5 mr-2" />
+            {language === 'en' ? 'City News & Events' : 'Міські новини та події'}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-48">
             <div className="space-y-4 pr-4">
-              {cityNews.map((news, index) => (
-                <div key={news.id} className={`border-b border-gray-100 pb-3 ${index === currentIndex ? 'bg-blue-50 p-3 rounded-lg' : ''}`}>
+              {cityNews.map((news) => (
+                <div key={news.id} className="border-b border-gray-100 pb-3">
                   <h4 className="font-medium text-gray-900 mb-1">{news.title}</h4>
                   <p className="text-sm text-gray-600 mb-2">{news.summary}</p>
                   <div className="flex items-center justify-between">
