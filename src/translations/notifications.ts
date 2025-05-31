@@ -19,6 +19,10 @@ export const notificationTranslations: Record<string, TranslationRecord> = {
     en: 'Mark as read',
     uk: 'Позначити як прочитане'
   },
+  markAllAsRead: {
+    en: 'Mark all as read',
+    uk: 'Позначити всі як прочитані'
+  },
   newTaskAssigned: {
     en: 'New Task Assigned',
     uk: 'Призначено нове завдання'
@@ -50,5 +54,9 @@ export const notificationTranslations: Record<string, TranslationRecord> = {
   allNotificationsCleared: {
     en: 'All notifications cleared',
     uk: 'Усі сповіщення очищено'
+  },
+  allNotificationsMarkedAsRead: {
+    en: 'All notifications marked as read',
+    uk: 'Усі сповіщення позначено як прочитані'
   }
 };
