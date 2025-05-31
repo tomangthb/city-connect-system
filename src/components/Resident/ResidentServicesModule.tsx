@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Search, 
-  Filter,
   Building,
   Users,
   Truck,
@@ -18,11 +18,14 @@ import {
   Star
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from 'sonner';
 
 const ResidentServicesModule = () => {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [applicationDialogOpen, setApplicationDialogOpen] = useState(false);
 
   const categories = [
     { 
@@ -137,6 +140,16 @@ const ResidentServicesModule = () => {
     return matchesSearch && matchesCategory;
   });
 
+  const handleServiceDetails = (service: any) => {
+    setSelectedService(service);
+  };
+
+  const handleServiceApplication = (service: any) => {
+    setSelectedService(service);
+    setApplicationDialogOpen(true);
+    toast.success(`${language === 'en' ? 'Starting application for' : 'Починаємо подачу заявки на'}: ${service.name}`);
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -150,7 +163,7 @@ const ResidentServicesModule = () => {
         </p>
       </div>
 
-      {/* Search and Filter */}
+      {/* Search */}
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -161,15 +174,11 @@ const ResidentServicesModule = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Button variant="outline" className="flex items-center gap-2">
-          <Filter className="h-4 w-4" />
-          {language === 'en' ? 'Filter' : 'Фільтр'}
-        </Button>
       </div>
 
       {/* Categories */}
       <div className="flex flex-wrap gap-2">
-        {categories.map((category) => {
+        {categories.slice(0, 4).map((category) => {
           const Icon = category.icon;
           return (
             <Button
@@ -228,10 +237,18 @@ const ResidentServicesModule = () => {
               </div>
               
               <div className="flex gap-2">
-                <Button className="flex-1" size="sm">
+                <Button 
+                  className="flex-1" 
+                  size="sm"
+                  onClick={() => handleServiceApplication(service)}
+                >
                   {language === 'en' ? 'Apply' : 'Подати заявку'}
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleServiceDetails(service)}
+                >
                   {language === 'en' ? 'Learn More' : 'Докладніше'}
                 </Button>
               </div>
@@ -239,6 +256,128 @@ const ResidentServicesModule = () => {
           </Card>
         ))}
       </div>
+
+      {/* Service Details Dialog */}
+      <Dialog open={!!selectedService && !applicationDialogOpen} onOpenChange={() => setSelectedService(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{selectedService?.name}</DialogTitle>
+          </DialogHeader>
+          {selectedService && (
+            <div className="space-y-4">
+              <p className="text-gray-600">{selectedService.description}</p>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="font-semibold text-sm">
+                    {language === 'en' ? 'Processing Time' : 'Час обробки'}
+                  </label>
+                  <p className="text-gray-600">{selectedService.processingTime}</p>
+                </div>
+                <div>
+                  <label className="font-semibold text-sm">
+                    {language === 'en' ? 'Cost' : 'Вартість'}
+                  </label>
+                  <p className="text-gray-600">{selectedService.cost}</p>
+                </div>
+                <div>
+                  <label className="font-semibold text-sm">
+                    {language === 'en' ? 'Rating' : 'Рейтинг'}
+                  </label>
+                  <p className="text-gray-600">{selectedService.rating} / 5.0</p>
+                </div>
+                <div>
+                  <label className="font-semibold text-sm">
+                    {language === 'en' ? 'Status' : 'Статус'}
+                  </label>
+                  <Badge variant={selectedService.status === 'Available' ? 'default' : 'secondary'}>
+                    {selectedService.status === 'Available' 
+                      ? (language === 'en' ? 'Available' : 'Доступно')
+                      : (language === 'en' ? 'Unavailable' : 'Недоступно')
+                    }
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button 
+                  onClick={() => handleServiceApplication(selectedService)}
+                  className="flex-1"
+                >
+                  {language === 'en' ? 'Apply for Service' : 'Подати заявку на послугу'}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setSelectedService(null)}
+                >
+                  {language === 'en' ? 'Close' : 'Закрити'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Application Dialog */}
+      <Dialog open={applicationDialogOpen} onOpenChange={setApplicationDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'en' ? 'Apply for Service' : 'Подача заявки на послугу'}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedService && (
+            <div className="space-y-4">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h4 className="font-semibold">{selectedService.name}</h4>
+                <p className="text-sm text-gray-600">{selectedService.description}</p>
+              </div>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    {language === 'en' ? 'Full Name' : 'Повне ім\'я'}
+                  </label>
+                  <Input placeholder={language === 'en' ? 'Enter your full name' : 'Введіть повне ім\'я'} />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    {language === 'en' ? 'Contact Information' : 'Контактна інформація'}
+                  </label>
+                  <Input placeholder={language === 'en' ? 'Phone or email' : 'Телефон або електронна пошта'} />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    {language === 'en' ? 'Additional Notes' : 'Додаткові нотатки'}
+                  </label>
+                  <Input placeholder={language === 'en' ? 'Any additional information' : 'Будь-яка додаткова інформація'} />
+                </div>
+              </div>
+              
+              <div className="flex gap-3">
+                <Button 
+                  onClick={() => {
+                    toast.success(language === 'en' ? 'Application submitted successfully!' : 'Заявку подано успішно!');
+                    setApplicationDialogOpen(false);
+                    setSelectedService(null);
+                  }}
+                  className="flex-1"
+                >
+                  {language === 'en' ? 'Submit Application' : 'Подати заявку'}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setApplicationDialogOpen(false)}
+                >
+                  {language === 'en' ? 'Cancel' : 'Скасувати'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {filteredServices.length === 0 && (
         <div className="text-center py-12">
