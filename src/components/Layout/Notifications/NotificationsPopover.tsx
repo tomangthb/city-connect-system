@@ -97,9 +97,12 @@ const NotificationsPopover = ({ notifications, setNotifications }: Notifications
               {notifications.map((notification) => (
                 <NotificationItem
                   key={notification.id}
-                  notification={notification}
+                  id={notification.id}
+                  title={notification.title}
+                  message={notification.message}
+                  isRead={notification.isRead}
+                  timestamp={notification.timestamp}
                   onMarkAsRead={markAsRead}
-                  onDelete={deleteNotification}
                 />
               ))}
             </div>

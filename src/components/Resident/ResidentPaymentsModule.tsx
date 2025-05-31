@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,6 +44,7 @@ const ResidentPaymentsModule = () => {
   const { language } = useLanguage();
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [showAddPaymentMethod, setShowAddPaymentMethod] = useState(false);
 
   const currentBills: Bill[] = [
     {
@@ -113,42 +113,42 @@ const ResidentPaymentsModule = () => {
     switch (status) {
       case 'pending':
         return (
-          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
             <Clock className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Pending' : 'Очікує'}
           </Badge>
         );
       case 'paid':
         return (
-          <Badge variant="default" className="bg-green-100 text-green-800">
+          <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
             <CheckCircle className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Paid' : 'Сплачено'}
           </Badge>
         );
       case 'overdue':
         return (
-          <Badge variant="destructive" className="bg-red-100 text-red-800">
+          <Badge variant="destructive" className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
             <AlertTriangle className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Overdue' : 'Прострочено'}
           </Badge>
         );
       case 'completed':
         return (
-          <Badge variant="default" className="bg-green-100 text-green-800">
+          <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
             <CheckCircle className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Completed' : 'Завершено'}
           </Badge>
         );
       case 'processing':
         return (
-          <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+          <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
             <Clock className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Processing' : 'Обробляється'}
           </Badge>
         );
       case 'failed':
         return (
-          <Badge variant="destructive" className="bg-red-100 text-red-800">
+          <Badge variant="destructive" className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
             <AlertTriangle className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Failed' : 'Невдалий'}
           </Badge>
@@ -187,7 +187,18 @@ const ResidentPaymentsModule = () => {
   };
 
   const handlePayBill = (bill: Bill) => {
-    setSelectedBill(bill);
+    // Convert Bill to Payment format for PaymentDetailsDialog
+    const payment = {
+      id: bill.id,
+      type: bill.type,
+      typeUk: bill.typeUk,
+      amount: bill.amount,
+      status: bill.status as 'paid' | 'pending' | 'overdue' | 'completed' | 'failed' | 'refunded',
+      dueDate: bill.dueDate,
+      description: bill.description,
+      descriptionUk: bill.descriptionUk
+    };
+    setSelectedBill(payment);
     setShowPaymentDialog(true);
   };
 
@@ -206,7 +217,7 @@ const ResidentPaymentsModule = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="bg-white dark:bg-gray-800">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
               <AlertTriangle className="h-4 w-4 mr-2" />
@@ -218,7 +229,7 @@ const ResidentPaymentsModule = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white dark:bg-gray-800">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
               <CheckCircle className="h-4 w-4 mr-2" />
@@ -230,7 +241,7 @@ const ResidentPaymentsModule = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white dark:bg-gray-800">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
               <Calendar className="h-4 w-4 mr-2" />
@@ -248,28 +259,26 @@ const ResidentPaymentsModule = () => {
       {/* Main Content */}
       <Tabs defaultValue="current" className="space-y-4">
         <div className="flex justify-between items-center">
-          <TabsList>
-            <TabsTrigger value="current" className="flex items-center gap-2">
+          <TabsList className="bg-gray-100 dark:bg-gray-800">
+            <TabsTrigger value="current" className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
               <Receipt className="h-4 w-4" />
               {language === 'en' ? 'Current Bills' : 'Поточні рахунки'}
             </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-2">
+            <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
               <History className="h-4 w-4" />
               {language === 'en' ? 'Payment History' : 'Історія платежів'}
             </TabsTrigger>
           </TabsList>
 
-          <AddPaymentMethodDialog>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              {language === 'en' ? 'Add Payment Method' : 'Додати спосіб оплати'}
-            </Button>
-          </AddPaymentMethodDialog>
+          <Button onClick={() => setShowAddPaymentMethod(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            {language === 'en' ? 'Add Payment Method' : 'Додати спосіб оплати'}
+          </Button>
         </div>
 
         <TabsContent value="current" className="space-y-4">
           {currentBills.map((bill) => (
-            <Card key={bill.id} className="hover:shadow-md transition-shadow">
+            <Card key={bill.id} className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -314,7 +323,7 @@ const ResidentPaymentsModule = () => {
 
         <TabsContent value="history" className="space-y-4">
           {paymentHistory.map((payment) => (
-            <Card key={payment.id} className="hover:shadow-md transition-shadow">
+            <Card key={payment.id} className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -352,11 +361,17 @@ const ResidentPaymentsModule = () => {
       {/* Payment Dialog */}
       {selectedBill && (
         <PaymentDetailsDialog
-          bill={selectedBill}
+          payment={selectedBill}
           open={showPaymentDialog}
           onOpenChange={setShowPaymentDialog}
         />
       )}
+
+      {/* Add Payment Method Dialog */}
+      <AddPaymentMethodDialog
+        open={showAddPaymentMethod}
+        onOpenChange={setShowAddPaymentMethod}
+      />
     </div>
   );
 };
