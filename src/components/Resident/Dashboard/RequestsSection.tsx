@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { ExternalLink, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -67,7 +67,7 @@ const RequestsSection = () => {
   return (
     <Card className="enhanced-card enhanced-card-border">
       <CardHeader>
-        <CardTitle className="text-white dark:text-white font-semibold text-xl">
+        <CardTitle className="text-foreground">
           {language === 'en' ? 'My Recent Requests' : 'Мої останні запити'}
         </CardTitle>
       </CardHeader>
@@ -88,6 +88,7 @@ const RequestsSection = () => {
           className="w-full mt-4 shadow-sm hover:shadow-md transition-all duration-200"
           onClick={() => navigate('/resident-appeals')}
         >
+          <ExternalLink className="h-4 w-4 mr-2" />
           {language === 'en' ? 'View All Appeals' : 'Переглянути всі звернення'}
         </Button>
       </CardContent>

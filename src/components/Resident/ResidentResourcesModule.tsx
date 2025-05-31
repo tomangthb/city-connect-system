@@ -6,23 +6,22 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
-  MapPin, 
-  Clock, 
-  Calendar,
   Building,
-  TreePine,
-  Dumbbell,
-  GraduationCap,
-  Heart,
-  Car,
-  Filter,
-  BookOpen
+  MapPin,
+  Clock,
+  Users,
+  Phone,
+  Calendar,
+  Star,
+  Eye,
+  Share2
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from 'sonner';
 import ResourceBookingDialog from './ResourceBookingDialog';
 
 interface Resource {
-  id: number;
+  id: string;
   name: string;
   nameUk: string;
   category: string;
@@ -30,15 +29,14 @@ interface Resource {
   description: string;
   descriptionUk: string;
   location: string;
-  locationUk: string;
-  availability: 'available' | 'busy' | 'maintenance';
+  status: 'Available' | 'Unavailable' | 'Maintenance';
   workingHours: string;
-  workingHoursUk: string;
   contact: string;
-  amenities: string[];
-  amenitiesUk: string[];
-  icon: React.ComponentType<any>;
-  image?: string;
+  capacity?: number;
+  currentOccupancy?: number;
+  rating?: number;
+  features: string[];
+  featuresUk: string[];
 }
 
 const ResidentResourcesModule = () => {
@@ -46,175 +44,172 @@ const ResidentResourcesModule = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+
+  const categories = [
+    { id: 'all', name: language === 'en' ? 'All Resources' : 'Всі ресурси' },
+    { id: 'recreation', name: language === 'en' ? 'Recreation' : 'Відпочинок' },
+    { id: 'healthcare', name: language === 'en' ? 'Healthcare' : 'Охорона здоров\'я' },
+    { id: 'education', name: language === 'en' ? 'Education' : 'Освіта' },
+    { id: 'social', name: language === 'en' ? 'Social Services' : 'Соціальні послуги' },
+    { id: 'culture', name: language === 'en' ? 'Culture' : 'Культура' },
+    { id: 'sports', name: language === 'en' ? 'Sports' : 'Спорт' }
+  ];
 
   const resources: Resource[] = [
     {
-      id: 1,
-      name: 'Central Library',
-      nameUk: 'Центральна бібліотека',
-      category: 'Education',
+      id: '1',
+      name: 'Central Community Center',
+      nameUk: 'Центральний громадський центр',
+      category: 'social',
+      categoryUk: 'Соціальні послуги',
+      description: 'Multi-purpose community center with meeting rooms, event spaces, and social services.',
+      descriptionUk: 'Багатофункціональний громадський центр з конференц-залами, залами для заходів та соціальними послугами.',
+      location: '15 Community Street',
+      status: 'Available',
+      workingHours: '8:00 - 20:00',
+      contact: '+380 44 123-4567',
+      capacity: 200,
+      currentOccupancy: 45,
+      rating: 4.5,
+      features: ['Meeting Rooms', 'Event Spaces', 'Free WiFi', 'Parking', 'Accessibility'],
+      featuresUk: ['Конференц-зали', 'Зали для заходів', 'Безкоштовний WiFi', 'Парковка', 'Доступність']
+    },
+    {
+      id: '2',
+      name: 'City Sports Complex',
+      nameUk: 'Міський спортивний комплекс',
+      category: 'sports',
+      categoryUk: 'Спорт',
+      description: 'Modern sports facility with gym, swimming pool, and various sports courts.',
+      descriptionUk: 'Сучасний спортивний заклад з тренажерним залом, басейном та різними спортивними майданчиками.',
+      location: '88 Athletic Avenue',
+      status: 'Available',
+      workingHours: '6:00 - 22:00',
+      contact: '+380 44 234-5678',
+      capacity: 500,
+      currentOccupancy: 120,
+      rating: 4.8,
+      features: ['Gym', 'Swimming Pool', 'Basketball Court', 'Tennis Court', 'Locker Rooms'],
+      featuresUk: ['Тренажерний зал', 'Басейн', 'Баскетбольний майданчик', 'Тенісний корт', 'Роздягальні']
+    },
+    {
+      id: '3',
+      name: 'Public Library Main Branch',
+      nameUk: 'Головна філія публічної бібліотеки',
+      category: 'education',
       categoryUk: 'Освіта',
-      description: 'Modern library with digital resources and study spaces',
-      descriptionUk: 'Сучасна бібліотека з цифровими ресурсами та навчальними зонами',
-      location: 'Downtown, 15 Main Street',
-      locationUk: 'Центр міста, вул. Головна 15',
-      availability: 'available',
-      workingHours: 'Mon-Fri: 9:00-20:00, Sat-Sun: 10:00-18:00',
-      workingHoursUk: 'Пн-Пт: 9:00-20:00, Сб-Нд: 10:00-18:00',
-      contact: '+380 44 123 4567',
-      amenities: ['Wi-Fi', 'Study rooms', 'Computer access', 'Printing'],
-      amenitiesUk: ['Wi-Fi', 'Навчальні кімнати', 'Доступ до комп\'ютерів', 'Друк'],
-      icon: BookOpen
+      description: 'Comprehensive library with books, digital resources, and study areas.',
+      descriptionUk: 'Комплексна бібліотека з книгами, цифровими ресурсами та навчальними зонами.',
+      location: '42 Knowledge Street',
+      status: 'Available',
+      workingHours: '9:00 - 19:00',
+      contact: '+380 44 345-6789',
+      capacity: 150,
+      currentOccupancy: 67,
+      rating: 4.3,
+      features: ['Books', 'Digital Resources', 'Study Areas', 'Computer Access', 'Reading Rooms'],
+      featuresUk: ['Книги', 'Цифрові ресурси', 'Навчальні зони', 'Доступ до комп\'ютерів', 'Читальні зали']
     },
     {
-      id: 2,
-      name: 'Sports Complex',
-      nameUk: 'Спортивний комплекс',
-      category: 'Sports & Recreation',
-      categoryUk: 'Спорт та відпочинок',
-      description: 'Multi-purpose sports facility with gym and swimming pool',
-      descriptionUk: 'Багатофункціональний спортивний заклад з залом та басейном',
-      location: 'Sports District, 42 Athletic Avenue',
-      locationUk: 'Спортивний район, просп. Спортивний 42',
-      availability: 'available',
-      workingHours: 'Daily: 6:00-22:00',
-      workingHoursUk: 'Щодня: 6:00-22:00',
-      contact: '+380 44 123 4568',
-      amenities: ['Swimming pool', 'Gym', 'Basketball court', 'Locker rooms'],
-      amenitiesUk: ['Басейн', 'Тренажерний зал', 'Баскетбольний майданчик', 'Роздягальні'],
-      icon: Dumbbell
-    },
-    {
-      id: 3,
-      name: 'City Park',
-      nameUk: 'Міський парк',
-      category: 'Parks & Nature',
-      categoryUk: 'Парки та природа',
-      description: 'Beautiful city park with walking trails and picnic areas',
-      descriptionUk: 'Красивий міський парк з пішохідними стежками та зонами для пікніка',
-      location: 'Central Park Area, Green Street',
-      locationUk: 'Район центрального парку, вул. Зелена',
-      availability: 'available',
-      workingHours: '24/7 access',
-      workingHoursUk: 'Доступ 24/7',
-      contact: '+380 44 123 4569',
-      amenities: ['Walking trails', 'Picnic areas', 'Playground', 'Restrooms'],
-      amenitiesUk: ['Пішохідні стежки', 'Зони для пікніка', 'Дитячий майданчик', 'Туалети'],
-      icon: TreePine
-    },
-    {
-      id: 4,
-      name: 'Community Center',
-      nameUk: 'Громадський центр',
-      category: 'Community Services',
-      categoryUk: 'Громадські послуги',
-      description: 'Venue for community events and meetings',
-      descriptionUk: 'Місце для громадських заходів та зустрічей',
-      location: 'City Center, 8 Community Square',
-      locationUk: 'Центр міста, пл. Громадська 8',
-      availability: 'busy',
-      workingHours: 'Mon-Fri: 8:00-18:00',
-      workingHoursUk: 'Пн-Пт: 8:00-18:00',
-      contact: '+380 44 123 4570',
-      amenities: ['Meeting rooms', 'Event hall', 'Kitchen', 'Parking'],
-      amenitiesUk: ['Кімнати для зустрічей', 'Зал для заходів', 'Кухня', 'Паркування'],
-      icon: Building
-    },
-    {
-      id: 5,
-      name: 'Medical Center',
-      nameUk: 'Медичний центр',
-      category: 'Healthcare',
-      categoryUk: 'Охорона здоров\'я',
-      description: 'Primary healthcare facility with various medical services',
-      descriptionUk: 'Первинний медичний заклад з різними медичними послугами',
-      location: 'Medical District, 23 Health Street',
-      locationUk: 'Медичний район, вул. Здоров\'я 23',
-      availability: 'available',
-      workingHours: 'Mon-Fri: 7:00-19:00, Sat: 9:00-15:00',
-      workingHoursUk: 'Пн-Пт: 7:00-19:00, Сб: 9:00-15:00',
-      contact: '+380 44 123 4571',
-      amenities: ['General practice', 'Laboratory', 'Pharmacy', 'Emergency care'],
-      amenitiesUk: ['Загальна практика', 'Лабораторія', 'Аптека', 'Екстрена допомога'],
-      icon: Heart
-    },
-    {
-      id: 6,
-      name: 'Public Parking',
-      nameUk: 'Громадське паркування',
-      category: 'Transportation',
-      categoryUk: 'Транспорт',
-      description: 'Secure public parking facility in city center',
-      descriptionUk: 'Безпечне громадське паркування в центрі міста',
-      location: 'Downtown, 5 Parking Plaza',
-      locationUk: 'Центр міста, пл. Паркувальна 5',
-      availability: 'available',
-      workingHours: '24/7 access',
-      workingHoursUk: 'Доступ 24/7',
-      contact: '+380 44 123 4572',
-      amenities: ['Security cameras', '200 spaces', 'Card payment', 'Disabled access'],
-      amenitiesUk: ['Камери безпеки', '200 місць', 'Оплата карткою', 'Доступ для інвалідів'],
-      icon: Car
+      id: '4',
+      name: 'Cultural Arts Center',
+      nameUk: 'Центр культури та мистецтв',
+      category: 'culture',
+      categoryUk: 'Культура',
+      description: 'Center for arts, theater performances, and cultural events.',
+      descriptionUk: 'Центр мистецтв, театральних вистав та культурних заходів.',
+      location: '7 Arts Square',
+      status: 'Available',
+      workingHours: '10:00 - 20:00',
+      contact: '+380 44 567-8901',
+      capacity: 300,
+      currentOccupancy: 85,
+      rating: 4.6,
+      features: ['Theater Hall', 'Art Gallery', 'Workshop Rooms', 'Gift Shop', 'Café'],
+      featuresUk: ['Театральна зала', 'Художня галерея', 'Майстерні', 'Сувенірна крамниця', 'Кафе']
     }
   ];
 
-  const categories = [
-    { value: 'all', label: language === 'en' ? 'All Resources' : 'Всі ресурси' },
-    { value: 'Education', label: language === 'en' ? 'Education' : 'Освіта' },
-    { value: 'Sports & Recreation', label: language === 'en' ? 'Sports & Recreation' : 'Спорт та відпочинок' },
-    { value: 'Parks & Nature', label: language === 'en' ? 'Parks & Nature' : 'Парки та природа' },
-    { value: 'Community Services', label: language === 'en' ? 'Community Services' : 'Громадські послуги' },
-    { value: 'Healthcare', label: language === 'en' ? 'Healthcare' : 'Охорона здоров\'я' },
-    { value: 'Transportation', label: language === 'en' ? 'Transportation' : 'Транспорт' }
-  ];
-
   const filteredResources = resources.filter(resource => {
+    const name = language === 'en' ? resource.name : resource.nameUk;
+    const description = language === 'en' ? resource.description : resource.descriptionUk;
+    
     const matchesSearch = 
-      (language === 'en' ? resource.name : resource.nameUk).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (language === 'en' ? resource.description : resource.descriptionUk).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (language === 'en' ? resource.location : resource.locationUk).toLowerCase().includes(searchQuery.toLowerCase());
+      name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      resource.location.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesCategory = selectedCategory === 'all' || resource.category === selectedCategory;
     
     return matchesSearch && matchesCategory;
   });
 
-  const getAvailabilityBadge = (availability: string) => {
-    switch (availability) {
-      case 'available':
-        return (
-          <Badge variant="success" className="shadow-sm">
-            {language === 'en' ? 'Available' : 'Доступно'}
-          </Badge>
-        );
-      case 'busy':
-        return (
-          <Badge variant="warning" className="shadow-sm">
-            <Clock className="h-3 w-3 mr-1" />
-            {language === 'en' ? 'Busy' : 'Зайнято'}
-          </Badge>
-        );
-      case 'maintenance':
-        return (
-          <Badge variant="destructive" className="shadow-sm">
-            {language === 'en' ? 'Maintenance' : 'Обслуговування'}
-          </Badge>
-        );
-      default:
-        return null;
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Available': return 'bg-green-100 text-green-800';
+      case 'Unavailable': return 'bg-red-100 text-red-800';
+      case 'Maintenance': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'Available': return language === 'en' ? 'Available' : 'Доступно';
+      case 'Unavailable': return language === 'en' ? 'Unavailable' : 'Недоступно';
+      case 'Maintenance': return language === 'en' ? 'Maintenance' : 'Обслуговування';
+      default: return status;
+    }
+  };
+
+  const getOccupancyPercentage = (resource: Resource) => {
+    if (!resource.capacity || !resource.currentOccupancy) return 0;
+    return Math.round((resource.currentOccupancy / resource.capacity) * 100);
+  };
+
+  const getOccupancyColor = (percentage: number) => {
+    if (percentage >= 80) return 'text-red-600';
+    if (percentage >= 60) return 'text-yellow-600';
+    return 'text-green-600';
+  };
+
+  const handleBookResource = (resource: Resource) => {
+    setSelectedResource(resource);
+    setBookingDialogOpen(true);
+  };
+
+  const handleGetDirections = (resource: Resource) => {
+    toast.success(`${language === 'en' ? 'Opening directions to' : 'Відкриваємо маршрут до'}: ${language === 'en' ? resource.name : resource.nameUk}`);
+  };
+
+  const handleViewDetails = (resource: Resource) => {
+    toast.success(`${language === 'en' ? 'Viewing details for' : 'Перегляд деталей'}: ${language === 'en' ? resource.name : resource.nameUk}`);
+  };
+
+  const handleShareResource = (resource: Resource) => {
+    if (navigator.share) {
+      navigator.share({
+        title: language === 'en' ? resource.name : resource.nameUk,
+        text: language === 'en' ? resource.description : resource.descriptionUk,
+        url: window.location.href
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success(language === 'en' ? 'Link copied to clipboard' : 'Посилання скопійовано в буфер обміну');
     }
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white dark:text-white mb-2">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
           {language === 'en' ? 'City Resources' : 'Міські ресурси'}
         </h2>
-        <p className="text-gray-200 dark:text-gray-200">
+        <p className="text-gray-600">
           {language === 'en' 
-            ? 'Discover and book city facilities and resources available to residents.' 
-            : 'Відкрийте та забронюйте міські об\'єкти та ресурси, доступні для жителів.'}
+            ? 'Explore and book available city facilities and resources for residents.' 
+            : 'Досліджуйте та бронюйте доступні міські установи та ресурси для громадян.'}
         </p>
       </div>
 
@@ -222,107 +217,156 @@ const ResidentResourcesModule = () => {
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
+          <Input 
             placeholder={language === 'en' ? 'Search resources...' : 'Пошук ресурсів...'}
-            className="pl-10 search-input-enhanced"
+            className="pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <select 
-          className="p-2 border border-white bg-gray-800 text-white rounded-md min-w-[200px] focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-200"
+          className="p-2 border border-gray-300 rounded-md min-w-[200px]"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
           {categories.map(category => (
-            <option key={category.value} value={category.value} className="bg-gray-800 text-white">
-              {category.label}
+            <option key={category.id} value={category.id}>
+              {category.name}
             </option>
           ))}
         </select>
       </div>
 
-      {/* Resources Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredResources.map((resource) => {
-          const Icon = resource.icon;
-          return (
-            <Card key={resource.id} className="enhanced-card-block hover:shadow-lg transition-all duration-300">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 rounded-lg bg-blue-600/20 flex items-center justify-center">
-                      <Icon className="h-6 w-6 text-blue-400" />
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-white dark:text-white text-lg leading-tight">
-                        {language === 'en' ? resource.name : resource.nameUk}
-                      </CardTitle>
-                      <p className="text-sm text-blue-400 mt-1">
-                        {language === 'en' ? resource.category : resource.categoryUk}
-                      </p>
-                    </div>
-                  </div>
-                  {getAvailabilityBadge(resource.availability)}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-gray-200 dark:text-gray-200 leading-relaxed">
-                  {language === 'en' ? resource.description : resource.descriptionUk}
-                </p>
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="h-4 w-4 text-red-400" />
-                    <span className="text-gray-300">
-                      {language === 'en' ? resource.location : resource.locationUk}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-green-400" />
-                    <span className="text-gray-300">
-                      {language === 'en' ? resource.workingHours : resource.workingHoursUk}
-                    </span>
-                  </div>
-                </div>
+      {/* Category Buttons */}
+      <div className="flex flex-wrap gap-2">
+        {categories.slice(0, 4).map((category) => (
+          <Button
+            key={category.id}
+            variant={selectedCategory === category.id ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedCategory(category.id)}
+          >
+            {category.name}
+          </Button>
+        ))}
+      </div>
 
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {(language === 'en' ? resource.amenities : resource.amenitiesUk).slice(0, 3).map((amenity, index) => (
+      {/* Resources Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredResources.map((resource) => (
+          <Card key={resource.id} className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <CardTitle className="text-lg">
+                  {language === 'en' ? resource.name : resource.nameUk}
+                </CardTitle>
+                <Badge className={getStatusColor(resource.status)}>
+                  {getStatusText(resource.status)}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-blue-600">
+                  {language === 'en' ? resource.category : resource.categoryUk}
+                </p>
+                {resource.rating && (
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-sm font-medium">{resource.rating}</span>
+                  </div>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-gray-600 text-sm">
+                {language === 'en' ? resource.description : resource.descriptionUk}
+              </p>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-700">{resource.location}</span>
+                </div>
+                
+                <div className="flex items-center gap-2 text-sm">
+                  <Clock className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-700">{resource.workingHours}</span>
+                </div>
+                
+                <div className="flex items-center gap-2 text-sm">
+                  <Phone className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-700">{resource.contact}</span>
+                </div>
+                
+                {resource.capacity && resource.currentOccupancy !== undefined && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Users className="h-4 w-4 text-gray-500" />
+                    <span className={`${getOccupancyColor(getOccupancyPercentage(resource))} font-medium`}>
+                      {resource.currentOccupancy}/{resource.capacity} ({getOccupancyPercentage(resource)}%)
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Features */}
+              <div>
+                <p className="text-sm font-medium text-gray-900 mb-2">
+                  {language === 'en' ? 'Features:' : 'Особливості:'}
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {(language === 'en' ? resource.features : resource.featuresUk).slice(0, 3).map((feature, index) => (
                     <Badge key={index} variant="secondary" className="text-xs">
-                      {amenity}
+                      {feature}
                     </Badge>
                   ))}
-                  {resource.amenities.length > 3 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{resource.amenities.length - 3} {language === 'en' ? 'more' : 'ще'}
+                  {resource.features.length > 3 && (
+                    <Badge variant="secondary" className="text-xs">
+                      +{resource.features.length - 3} {language === 'en' ? 'more' : 'ще'}
                     </Badge>
                   )}
                 </div>
-
-                <div className="flex gap-2 mt-6">
-                  <Button 
-                    variant="success" 
-                    className="flex-1"
-                    disabled={resource.availability !== 'available'}
-                    onClick={() => setSelectedResource(resource)}
-                  >
-                    <Calendar className="h-4 w-4 mr-2" />
-                    {language === 'en' ? 'Book' : 'Забронювати'}
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    {language === 'en' ? 'Info' : 'Інфо'}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  className="flex-1" 
+                  size="sm"
+                  onClick={() => handleBookResource(resource)}
+                  disabled={resource.status !== 'Available'}
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  {language === 'en' ? 'Book Now' : 'Забронювати'}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleGetDirections(resource)}
+                >
+                  <MapPin className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleViewDetails(resource)}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleShareResource(resource)}
+                >
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {filteredResources.length === 0 && (
         <div className="text-center py-12">
-          <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-400">
+          <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500">
             {language === 'en' 
               ? 'No resources found matching your criteria.' 
               : 'Не знайдено ресурсів, що відповідають вашим критеріям.'}
@@ -330,13 +374,11 @@ const ResidentResourcesModule = () => {
         </div>
       )}
 
-      {selectedResource && (
-        <ResourceBookingDialog
-          resource={selectedResource}
-          isOpen={!!selectedResource}
-          onClose={() => setSelectedResource(null)}
-        />
-      )}
+      <ResourceBookingDialog
+        open={bookingDialogOpen}
+        onOpenChange={setBookingDialogOpen}
+        resource={selectedResource}
+      />
     </div>
   );
 };

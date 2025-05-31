@@ -2,20 +2,25 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
+  Search, 
   Star, 
   Clock, 
   MapPin, 
-  CreditCard,
-  CheckCircle,
-  AlertCircle,
+  Phone, 
+  Mail, 
+  ExternalLink,
   Calendar,
   FileText,
+  CreditCard,
   Users,
   Home,
   Building,
+  Wrench,
   Heart,
+  Filter,
   Leaf
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -46,6 +51,8 @@ interface Service {
 
 const ResidentServicesModule = () => {
   const { language } = useLanguage();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   const services: Service[] = [
     {
@@ -188,12 +195,35 @@ const ResidentServicesModule = () => {
     }
   ];
 
+  const categories = [
+    { value: 'all', label: language === 'en' ? 'All Services' : 'Всі послуги' },
+    { value: 'Housing & Utilities', label: language === 'en' ? 'Housing & Utilities' : 'Житлово-комунальні' },
+    { value: 'Permits & Registration', label: language === 'en' ? 'Permits & Registration' : 'Дозволи та реєстрація' },
+    { value: 'Social Services', label: language === 'en' ? 'Social Services' : 'Соціальні послуги' },
+    { value: 'Transport & Traffic', label: language === 'en' ? 'Transport & Traffic' : 'Транспорт та рух' },
+    { value: 'Education', label: language === 'en' ? 'Education' : 'Освіта' },
+    { value: 'Environmental', label: language === 'en' ? 'Environmental' : 'Екологічні' }
+  ];
+
+  const filteredServices = services.filter(service => {
+    const matchesSearch = 
+      (language === 'en' ? service.name : service.nameUk).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (language === 'en' ? service.description : service.descriptionUk).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (language === 'en' ? service.tags : service.tagsUk).some(tag => 
+        tag.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    
+    const matchesCategory = selectedCategory === 'all' || 
+      service.category === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
+
   const getAvailabilityBadge = (availability: string) => {
     switch (availability) {
       case 'available':
         return (
           <Badge variant="success" className="shadow-sm">
-            <CheckCircle className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Available' : 'Доступно'}
           </Badge>
         );
@@ -207,7 +237,6 @@ const ResidentServicesModule = () => {
       case 'unavailable':
         return (
           <Badge variant="destructive" className="shadow-sm">
-            <AlertCircle className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Unavailable' : 'Недоступно'}
           </Badge>
         );
@@ -229,6 +258,13 @@ const ResidentServicesModule = () => {
     ));
   };
 
+  const quickServiceCategories = [
+    { key: 'all', icon: Home, label: language === 'en' ? 'All Services' : 'Всі послуги' },
+    { key: 'Housing & Utilities', icon: Building, label: language === 'en' ? 'Housing & Utilities' : 'Житлово-комунальні' },
+    { key: 'Permits & Registration', icon: FileText, label: language === 'en' ? 'Permits & Registration' : 'Дозволи та реєстрація' },
+    { key: 'Social Services', icon: Users, label: language === 'en' ? 'Social Services' : 'Соціальні послуги' }
+  ];
+
   return (
     <div className="space-y-6">
       <div>
@@ -242,9 +278,56 @@ const ResidentServicesModule = () => {
         </p>
       </div>
 
+      {/* Search and Filter */}
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder={language === 'en' ? 'Search services...' : 'Пошук послуг...'}
+            className="pl-10 search-input-enhanced"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <select 
+          className="p-2 border border-white bg-gray-800 text-white rounded-md min-w-[200px] focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-200"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          {categories.map(category => (
+            <option key={category.value} value={category.value} className="bg-gray-800 text-white">
+              {category.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Quick Categories */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {quickServiceCategories.map((category) => {
+          const Icon = category.icon;
+          const isActive = selectedCategory === category.key;
+          return (
+            <Button
+              key={category.key}
+              variant={isActive ? "default" : "outline"}
+              className={`h-20 flex flex-col items-center gap-2 ${
+                isActive 
+                  ? 'bg-green-600 hover:bg-green-700 text-white' 
+                  : 'bg-gray-800 border-gray-600 text-gray-200 hover:bg-gray-700'
+              }`}
+              onClick={() => setSelectedCategory(category.key)}
+            >
+              <Icon className="h-6 w-6" />
+              <span className="text-xs text-center leading-tight">{category.label}</span>
+            </Button>
+          );
+        })}
+      </div>
+
       {/* Services Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {services.map((service) => {
+        {filteredServices.map((service) => {
           const Icon = service.icon;
           return (
             <Card key={service.id} className="enhanced-card-block hover:shadow-lg transition-all duration-300">
@@ -312,7 +395,6 @@ const ResidentServicesModule = () => {
                     className="flex-1"
                     disabled={service.availability === 'unavailable'}
                   >
-                    <Calendar className="h-4 w-4 mr-2" />
                     {language === 'en' ? 'Apply' : 'Подати заявку'}
                   </Button>
                   <Button variant="outline" size="sm">
@@ -324,6 +406,17 @@ const ResidentServicesModule = () => {
           );
         })}
       </div>
+
+      {filteredServices.length === 0 && (
+        <div className="text-center py-12">
+          <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-400">
+            {language === 'en' 
+              ? 'No services found matching your criteria.' 
+              : 'Не знайдено послуг, що відповідають вашим критеріям.'}
+          </p>
+        </div>
+      )}
     </div>
   );
 };
