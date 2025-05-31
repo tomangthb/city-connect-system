@@ -10,15 +10,16 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
-import { Globe } from 'lucide-react';
+import { Globe, ArrowLeft, Users } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 
-// Registration form schema - simplified to just basic info
+// Registration form schema for residents
 const registrationSchema = z.object({
   firstName: z.string().min(2, { message: "First name is required" }),
   lastName: z.string().min(2, { message: "Last name is required" }),
   patronymic: z.string().optional(),
+  address: z.string().min(5, { message: "Address is required" }),
   email: z.string().email({ message: "Invalid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   confirmPassword: z.string(),
@@ -33,7 +34,7 @@ const loginSchema = z.object({
   password: z.string().min(1, { message: "Password is required" }),
 });
 
-const Auth = () => {
+const ResidentAuth = () => {
   const { language, setLanguage, t } = useLanguage();
   const { session, signUp, signIn, loading } = useAuth();
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
@@ -56,6 +57,7 @@ const Auth = () => {
       firstName: '',
       lastName: '',
       patronymic: '',
+      address: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -80,19 +82,20 @@ const Auth = () => {
     } else {
       toast({
         title: "Login successful",
-        description: "Welcome back!",
+        description: "Welcome to the Resident Portal!",
       });
-      navigate('/');
+      navigate('/resident-portal');
     }
   };
 
-  // Handle registration submission - default to employee type
+  // Handle registration submission for residents
   const onRegisterSubmit = async (data: z.infer<typeof registrationSchema>) => {
     const { error } = await signUp(data.email, data.password, {
       firstName: data.firstName,
       lastName: data.lastName,
       patronymic: data.patronymic,
-      userType: 'employee' // Default to employee
+      address: data.address,
+      userType: 'resident'
     });
     
     if (error) {
@@ -110,13 +113,20 @@ const Auth = () => {
     }
   };
 
-  // If already authenticated, redirect to home
+  // If already authenticated, redirect to resident portal
   if (!loading && session) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/resident-portal" replace />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
+      <div className="absolute top-4 left-4">
+        <Button variant="ghost" onClick={() => navigate('/')} className="flex items-center">
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          {language === 'en' ? 'Back' : 'Назад'}
+        </Button>
+      </div>
+
       <div className="absolute top-4 right-4">
         <Button variant="ghost" onClick={toggleLanguage} className="flex items-center">
           <Globe className="h-5 w-5 mr-2" />
@@ -125,12 +135,20 @@ const Auth = () => {
       </div>
 
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>{authMode === 'login' ? t('login') || 'Login' : t('register') || 'Register'}</CardTitle>
+        <CardHeader className="text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Users className="h-8 w-8 text-green-600" />
+          </div>
+          <CardTitle className="text-green-900">
+            {authMode === 'login' ? 
+              (language === 'en' ? 'Resident Login' : 'Вхід для громадян') : 
+              (language === 'en' ? 'Resident Registration' : 'Реєстрація громадянина')
+            }
+          </CardTitle>
           <CardDescription>
             {authMode === 'login' 
-              ? t('loginDescription') || 'Access your account' 
-              : t('registerDescription') || 'Create a new account'
+              ? (language === 'en' ? 'Access your resident account' : 'Доступ до облікового запису громадянина')
+              : (language === 'en' ? 'Create a new resident account' : 'Створити новий обліковий запис громадянина')
             }
           </CardDescription>
         </CardHeader>
@@ -171,7 +189,9 @@ const Auth = () => {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full">{t('login') || 'Login'}</Button>
+                  <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
+                    {t('login') || 'Login'}
+                  </Button>
                 </form>
               </Form>
             </TabsContent>
@@ -225,6 +245,20 @@ const Auth = () => {
                   
                   <FormField
                     control={registrationForm.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('address') || 'Address'}</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Your address" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={registrationForm.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
@@ -265,7 +299,9 @@ const Auth = () => {
                     )}
                   />
                   
-                  <Button type="submit" className="w-full">{t('register') || 'Register'}</Button>
+                  <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
+                    {t('register') || 'Register'}
+                  </Button>
                 </form>
               </Form>
             </TabsContent>
@@ -276,4 +312,4 @@ const Auth = () => {
   );
 };
 
-export default Auth;
+export default ResidentAuth;
