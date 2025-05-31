@@ -1,11 +1,14 @@
 
 import React from 'react';
+import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import { Bell, Check, Trash2 } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { useLanguage } from '@/hooks/useLanguage';
+import { toast } from 'sonner';
 import NotificationItem from './NotificationItem';
 
 interface Notification {
@@ -21,105 +24,71 @@ interface NotificationsPopoverProps {
   setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
 }
 
-const NotificationsPopover = ({ notifications, setNotifications }: NotificationsPopoverProps) => {
+const NotificationsPopover = ({ 
+  notifications, 
+  setNotifications 
+}: NotificationsPopoverProps) => {
   const { t } = useLanguage();
   
+  // Count unread notifications
   const unreadCount = notifications.filter(n => !n.isRead).length;
-
+  
+  // Mark notification as read
   const markAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === id 
-          ? { ...notification, isRead: true }
-          : notification
-      )
-    );
+    setNotifications(notifications.map(notification => 
+      notification.id === id ? { ...notification, isRead: true } : notification
+    ));
+    toast.success(t('notificationMarkedAsRead') || 'Notification marked as read');
   };
-
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, isRead: true }))
-    );
-  };
-
-  const deleteNotification = (id: string) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id));
-  };
-
-  const clearAll = () => {
+  
+  // Clear all notifications
+  const clearAllNotifications = () => {
     setNotifications([]);
+    toast.success(t('allNotificationsCleared') || 'All notifications cleared');
   };
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="relative text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-        >
+        <Button variant="ghost" size="sm" className="relative">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <Badge 
-              variant="destructive" 
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-            >
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
               {unreadCount}
-            </Badge>
+            </span>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="p-4 border-b">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold">{t('notifications')}</h3>
-            {unreadCount > 0 && (
+      <PopoverContent className="w-80 p-0 max-h-96 overflow-auto">
+        <div className="p-4 border-b border-gray-200">
+          <div className="flex justify-between items-center">
+            <h3 className="font-medium">{t('notifications')}</h3>
+            {notifications.length > 0 && (
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={markAllAsRead}
-                className="h-auto p-1 text-xs"
+                className="text-xs text-blue-600 hover:text-blue-800"
+                onClick={clearAllNotifications}
               >
-                <Check className="h-3 w-3 mr-1" />
-                {t('markAllAsRead')}
+                {t('clearAll')}
               </Button>
             )}
           </div>
         </div>
         
-        <ScrollArea className="max-h-64">
-          {notifications.length === 0 ? (
-            <div className="p-4 text-center text-gray-500">
-              {t('noNotifications')}
-            </div>
-          ) : (
-            <div className="divide-y">
-              {notifications.map((notification) => (
-                <NotificationItem
-                  key={notification.id}
-                  id={notification.id}
-                  title={notification.title}
-                  message={notification.message}
-                  isRead={notification.isRead}
-                  timestamp={notification.timestamp}
-                  onMarkAsRead={markAsRead}
-                />
-              ))}
-            </div>
-          )}
-        </ScrollArea>
-        
-        {notifications.length > 0 && (
-          <div className="p-2 border-t">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={clearAll}
-              className="w-full justify-center text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              {t('clearAll')}
-            </Button>
+        {notifications.length > 0 ? (
+          <div className="divide-y divide-gray-100">
+            {notifications.map((notification) => (
+              <NotificationItem
+                key={notification.id}
+                {...notification}
+                onMarkAsRead={markAsRead}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="p-4 text-center text-gray-500">
+            <p>{t('noNotifications')}</p>
           </div>
         )}
       </PopoverContent>

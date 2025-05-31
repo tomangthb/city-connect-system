@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -10,19 +9,12 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent bg-green-600 text-white hover:bg-green-700 shadow-sm",
+          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
         secondary:
-          "border-transparent bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700",
+          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive:
-          "border-transparent bg-red-600 text-white hover:bg-red-700 shadow-sm",
-        outline: "text-foreground border-border hover:bg-accent",
-        success: "border-transparent bg-green-500 text-white hover:bg-green-600 shadow-sm",
-        warning: "border-transparent bg-yellow-500 text-white hover:bg-yellow-600 shadow-sm",
-        info: "border-transparent bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-900/50",
-        pending: "border-transparent bg-yellow-500 text-white hover:bg-yellow-600 shadow-sm",
-        overdue: "border-transparent bg-red-500 text-white hover:bg-red-600 shadow-sm",
-        paid: "border-transparent bg-green-500 text-white hover:bg-green-600 shadow-sm",
-        completed: "border-transparent bg-green-500 text-white hover:bg-green-600 shadow-sm",
+          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+        outline: "text-foreground",
       },
     },
     defaultVariants: {

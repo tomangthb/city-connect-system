@@ -9,8 +9,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import ResidentAuth from "./pages/ResidentAuth";
-import ResidentPortal from "./pages/ResidentPortal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,8 +25,6 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/resident-auth" element={<ResidentAuth />} />
-                <Route path="/resident-portal" element={<ResidentPortal />} />
                 <Route path="/dashboard" element={<Index />} />
                 <Route path="/resources" element={<Index />} />
                 <Route path="/services" element={<Index />} />
@@ -47,13 +43,6 @@ const App = () => (
                 <Route path="/news" element={<Index />} />
                 <Route path="/account" element={<Index />} />
                 <Route path="/payments" element={<Index />} />
-                {/* Resident portal routes */}
-                <Route path="/resident-services" element={<ResidentPortal />} />
-                <Route path="/resident-appeals" element={<ResidentPortal />} />
-                <Route path="/resident-resources" element={<ResidentPortal />} />
-                <Route path="/resident-news" element={<ResidentPortal />} />
-                <Route path="/resident-account" element={<ResidentPortal />} />
-                <Route path="/resident-payments" element={<ResidentPortal />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

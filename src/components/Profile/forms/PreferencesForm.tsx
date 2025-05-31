@@ -29,46 +29,41 @@ const PreferencesForm = ({
   };
 
   return (
-    <Card className="theme-transition">
+    <Card>
       <CardHeader>
         <CardTitle>{t('preferences') || 'Налаштування'}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-          <Label className="flex items-center mb-3 text-foreground">
+          <Label className="flex items-center mb-3">
             {t('language') || 'Мова'}
           </Label>
           <div className="flex gap-2">
             <Button 
               variant={language === 'en' ? 'default' : 'outline'}
               onClick={() => onLanguageChange('en')}
-              className="theme-transition"
             >
               English
             </Button>
             <Button 
               variant={language === 'uk' ? 'default' : 'outline'}
               onClick={() => onLanguageChange('uk')}
-              className="theme-transition"
             >
               Українська
             </Button>
           </div>
         </div>
         
-        <div className="flex items-center justify-between p-4 rounded-lg bg-accent/50 theme-transition">
+        <div className="flex items-center justify-between">
           <div>
-            <Label className="text-foreground font-medium">
-              {t('darkMode') || 'Темна тема'}
-            </Label>
-            <p className="text-sm text-muted-foreground mt-1">
+            <Label>{t('darkMode') || 'Темна тема'}</Label>
+            <p className="text-sm text-gray-600">
               {t('switchDarkTheme') || 'Перемкнути на темну тему'}
             </p>
           </div>
           <Switch 
             checked={theme === 'dark'} 
             onCheckedChange={handleThemeToggle}
-            className="data-[state=checked]:bg-green-600"
           />
         </div>
       </CardContent>

@@ -18,7 +18,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { addActivity } from '@/utils/activityUtils';
 import ComprehensiveAppealsModule from './ComprehensiveAppealsModule';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface AppealsModuleProps {
   userType: 'employee' | 'resident';
@@ -26,7 +25,6 @@ interface AppealsModuleProps {
 
 const AppealsModule = ({ userType }: AppealsModuleProps) => {
   const { t } = useLanguage();
-  const { user } = useAuth();
 
   // For employees, show the comprehensive module
   if (userType === 'employee') {
@@ -42,14 +40,11 @@ const AppealsModule = ({ userType }: AppealsModuleProps) => {
   });
 
   const { data: appeals, isLoading, refetch } = useQuery({
-    queryKey: ['appeals', user?.id],
+    queryKey: ['appeals'],
     queryFn: async () => {
-      if (!user) return [];
-      
       const { data, error } = await supabase
         .from('appeals')
         .select('*')
-        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
       if (error) {
@@ -57,8 +52,7 @@ const AppealsModule = ({ userType }: AppealsModuleProps) => {
         return [];
       }
       return data || [];
-    },
-    enabled: !!user
+    }
   });
 
   const handleSubmitAppeal = async () => {
@@ -67,18 +61,15 @@ const AppealsModule = ({ userType }: AppealsModuleProps) => {
       return;
     }
 
-    if (!user) {
-      toast.error('User not authenticated');
-      return;
-    }
-
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { error } = await supabase
         .from('appeals')
         .insert([{
           ...newAppeal,
-          user_id: user.id,
-          submitted_by: user.email || 'Unknown User',
+          user_id: user?.id,
+          submitted_by: user?.email || 'Unknown User',
           status: 'Under Review',
           priority: 'Medium'
         }]);
