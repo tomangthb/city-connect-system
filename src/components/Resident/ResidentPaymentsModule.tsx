@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -113,42 +114,42 @@ const ResidentPaymentsModule = () => {
     switch (status) {
       case 'pending':
         return (
-          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
             <Clock className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Pending' : 'Очікує'}
           </Badge>
         );
       case 'paid':
         return (
-          <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+          <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
             <CheckCircle className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Paid' : 'Сплачено'}
           </Badge>
         );
       case 'overdue':
         return (
-          <Badge variant="destructive" className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+          <Badge variant="destructive" className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
             <AlertTriangle className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Overdue' : 'Прострочено'}
           </Badge>
         );
       case 'completed':
         return (
-          <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+          <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
             <CheckCircle className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Completed' : 'Завершено'}
           </Badge>
         );
       case 'processing':
         return (
-          <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+          <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
             <Clock className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Processing' : 'Обробляється'}
           </Badge>
         );
       case 'failed':
         return (
-          <Badge variant="destructive" className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+          <Badge variant="destructive" className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
             <AlertTriangle className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Failed' : 'Невдалий'}
           </Badge>
@@ -206,7 +207,7 @@ const ResidentPaymentsModule = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-white dark:bg-gray-800">
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
               <AlertTriangle className="h-4 w-4 mr-2" />
@@ -218,7 +219,7 @@ const ResidentPaymentsModule = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800">
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
               <CheckCircle className="h-4 w-4 mr-2" />
@@ -230,7 +231,7 @@ const ResidentPaymentsModule = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800">
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
               <Calendar className="h-4 w-4 mr-2" />
@@ -267,7 +268,7 @@ const ResidentPaymentsModule = () => {
 
         <TabsContent value="current" className="space-y-4">
           {currentBills.map((bill) => (
-            <Card key={bill.id} className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800">
+            <Card key={bill.id} className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -295,7 +296,7 @@ const ResidentPaymentsModule = () => {
                     {bill.status !== 'paid' && (
                       <Button 
                         onClick={() => handlePayBill(bill)}
-                        className="bg-green-600 hover:bg-green-700"
+                        className="bg-green-600 hover:bg-green-700 text-white"
                       >
                         {language === 'en' ? 'Pay Now' : 'Сплатити зараз'}
                       </Button>
@@ -312,7 +313,7 @@ const ResidentPaymentsModule = () => {
 
         <TabsContent value="history" className="space-y-4">
           {paymentHistory.map((payment) => (
-            <Card key={payment.id} className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800">
+            <Card key={payment.id} className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">

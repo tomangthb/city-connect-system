@@ -10,17 +10,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-green-600 text-white hover:bg-green-700 shadow-lg hover:shadow-xl transform hover:scale-105",
+        default: "bg-green-600 text-white hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700 shadow-lg hover:shadow-xl transform hover:scale-105",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg hover:shadow-xl",
+          "bg-red-600 text-white hover:bg-red-700 dark:bg-destructive dark:text-destructive-foreground dark:hover:bg-destructive/90 shadow-lg hover:shadow-xl",
         outline:
-          "border border-white bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-white dark:text-white hover:border-gray-400 dark:hover:border-gray-500 shadow-sm hover:shadow-md",
+          "border border-gray-300 bg-white text-gray-900 hover:bg-gray-50 dark:border-white dark:bg-transparent dark:text-white dark:hover:bg-gray-100 dark:hover:text-gray-900 shadow-sm hover:shadow-md",
         secondary:
-          "bg-transparent border border-white text-white hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 shadow-sm hover:shadow-md",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-        success: "bg-green-600 text-white hover:bg-green-700 shadow-lg hover:shadow-xl transform hover:scale-105",
-        info: "bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl transform hover:scale-105",
+          "bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-transparent dark:border dark:border-white dark:text-white dark:hover:bg-gray-100 dark:hover:text-gray-900 shadow-sm hover:shadow-md",
+        ghost: "hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-accent dark:hover:text-accent-foreground",
+        link: "text-green-600 underline-offset-4 hover:underline dark:text-primary",
+        success: "bg-green-600 text-white hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700 shadow-lg hover:shadow-xl transform hover:scale-105",
+        info: "bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700 shadow-lg hover:shadow-xl transform hover:scale-105",
       },
       size: {
         default: "h-10 px-4 py-2",
