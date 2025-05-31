@@ -303,7 +303,7 @@
 }
 
 .appeals-card {
-  @apply bg-gray-800 dark:bg-gray-800 border-gray-600 dark:border-gray-600 hover:bg-gray-750 dark:hover:bg-gray-750;
+  @apply bg-gray-800 dark:bg-gray-800 border-gray-600 dark:border-gray-600 hover:bg-gray-700 dark:hover:bg-gray-700;
 }
 
 .appeals-title {

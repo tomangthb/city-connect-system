@@ -20,7 +20,8 @@ import {
   Building,
   Wrench,
   Heart,
-  Filter
+  Filter,
+  Leaf
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
