@@ -347,7 +347,7 @@ const ResidentNewsModule = () => {
                         </Badge>
                       </div>
                       
-                      <h3 className="text-xl font-semibold text-white dark:text-white mb-2 leading-tight">
+                      <h3 className="text-xl font-bold text-white dark:text-white mb-2 leading-tight">
                         {language === 'en' ? news.title : news.titleUk}
                       </h3>
                       
