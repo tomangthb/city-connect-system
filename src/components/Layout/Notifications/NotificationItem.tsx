@@ -20,27 +20,45 @@ const NotificationItem = ({
   timestamp, 
   onMarkAsRead 
 }: NotificationItemProps) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   const formatTimestamp = (date: Date) => {
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
     
-    if (diffInMinutes < 1) return 'щойно';
-    if (diffInMinutes < 60) return `${diffInMinutes} хв тому`;
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours} год тому`;
-    
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays} дн тому`;
-    
-    return date.toLocaleDateString('uk-UA', { 
-      day: 'numeric', 
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (language === 'uk') {
+      if (diffInMinutes < 1) return 'щойно';
+      if (diffInMinutes < 60) return `${diffInMinutes} хв тому`;
+      
+      const diffInHours = Math.floor(diffInMinutes / 60);
+      if (diffInHours < 24) return `${diffInHours} год тому`;
+      
+      const diffInDays = Math.floor(diffInHours / 24);
+      if (diffInDays < 7) return `${diffInDays} дн тому`;
+      
+      return date.toLocaleDateString('uk-UA', { 
+        day: 'numeric', 
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } else {
+      if (diffInMinutes < 1) return 'just now';
+      if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+      
+      const diffInHours = Math.floor(diffInMinutes / 60);
+      if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+      
+      const diffInDays = Math.floor(diffInHours / 24);
+      if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+      
+      return date.toLocaleDateString('en-US', { 
+        day: 'numeric', 
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
   };
   
   return (

@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, UserPlus } from 'lucide-react';
+import { Search, UserPlus, Edit, Trash2 } from 'lucide-react';
 import CreateUserDialog from './CreateUserDialog';
+import EditUserDialog from './EditUserDialog';
 import UserFilters from './UserFilters';
 
 interface User {
@@ -109,6 +111,44 @@ const UserAccountsTab = () => {
     });
   }, [users, searchTerm, filters]);
 
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm(language === 'en' ? 'Are you sure you want to delete this user?' : 'Ви впевнені, що хочете видалити цього користувача?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.admin.deleteUser(userId);
+      
+      if (error) throw error;
+
+      refetch();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  };
+
+  const getUserTypeText = (userType: string) => {
+    switch (userType) {
+      case 'employee':
+        return language === 'en' ? 'Employee' : 'Співробітник';
+      case 'resident':
+        return language === 'en' ? 'Resident' : 'Мешканець';
+      default:
+        return userType;
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    return (
+      <Badge variant={status === 'active' ? 'default' : 'secondary'}>
+        {status === 'active' ? 
+          (language === 'en' ? 'Active' : 'Активний') : 
+          (language === 'en' ? 'Inactive' : 'Неактивний')
+        }
+      </Badge>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -150,29 +190,78 @@ const UserAccountsTab = () => {
               {filteredUsers.map((user) => (
                 <div key={user.id} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium">
-                        {user.first_name} {user.last_name}
-                      </h3>
-                      <p className="text-sm text-gray-600">{user.email}</p>
-                      <p className="text-sm text-gray-500">
-                        {language === 'en' ? 'Type:' : 'Тип:'} {user.user_type}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {language === 'en' ? 'Roles:' : 'Ролі:'} {user.roles.join(', ')}
-                      </p>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-medium text-lg">
+                          {user.first_name} {user.last_name}
+                          {user.patronymic && ` ${user.patronymic}`}
+                        </h3>
+                        {getStatusBadge(user.status)}
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
+                        <p>
+                          <span className="font-medium">Email:</span> {user.email}
+                        </p>
+                        <p>
+                          <span className="font-medium">
+                            {language === 'en' ? 'Type:' : 'Тип:'}
+                          </span> {getUserTypeText(user.user_type)}
+                        </p>
+                        {user.phone && (
+                          <p>
+                            <span className="font-medium">
+                              {language === 'en' ? 'Phone:' : 'Телефон:'}
+                            </span> {user.phone}
+                          </p>
+                        )}
+                        {user.address && (
+                          <p>
+                            <span className="font-medium">
+                              {language === 'en' ? 'Address:' : 'Адреса:'}
+                            </span> {user.address}
+                          </p>
+                        )}
+                        <p>
+                          <span className="font-medium">
+                            {language === 'en' ? 'Roles:' : 'Ролі:'}
+                          </span> {user.roles.length > 0 ? user.roles.join(', ') : (language === 'en' ? 'No roles' : 'Без ролей')}
+                        </p>
+                        <p>
+                          <span className="font-medium">
+                            {language === 'en' ? 'Created:' : 'Створено:'}
+                          </span> {new Date(user.created_at).toLocaleDateString(language === 'en' ? 'en-US' : 'uk-UA')}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        {language === 'en' ? 'Edit' : 'Редагувати'}
-                      </Button>
-                      <Button variant="outline" size="sm">
+                    
+                    <div className="flex gap-2 ml-4">
+                      <EditUserDialog user={user} onUserUpdated={refetch}>
+                        <Button variant="outline" size="sm">
+                          <Edit className="h-4 w-4 mr-1" />
+                          {language === 'en' ? 'Edit' : 'Редагувати'}
+                        </Button>
+                      </EditUserDialog>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => handleDeleteUser(user.id)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
                         {language === 'en' ? 'Delete' : 'Видалити'}
                       </Button>
                     </div>
                   </div>
                 </div>
               ))}
+              
+              {filteredUsers.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">
+                    {language === 'en' ? 'No users found' : 'Користувачі не знайдені'}
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
