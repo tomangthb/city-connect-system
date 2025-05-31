@@ -6,7 +6,6 @@ import WelcomeSection from './Dashboard/WelcomeSection';
 import QuickServicesSection from './Dashboard/QuickServicesSection';
 import NewsSection from './Dashboard/NewsSection';
 import RequestsSection from './Dashboard/RequestsSection';
-import HomeMapSection from './Dashboard/HomeMapSection';
 
 const ResidentDashboard = () => {
   const { language } = useLanguage();
@@ -34,8 +33,6 @@ const ResidentDashboard = () => {
         <NewsSection />
         <RequestsSection />
       </div>
-
-      <HomeMapSection />
     </div>
   );
 };

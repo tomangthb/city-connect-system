@@ -1,174 +1,95 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ExternalLink, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-
-interface Appeal {
-  id: string;
-  title: string;
-  status: string;
-  created_at: string;
-  category: string;
-}
 
 const RequestsSection = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [appeals, setAppeals] = useState<Appeal[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchAppeals();
-  }, [user]);
-
-  const fetchAppeals = async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('appeals')
-        .select('id, title, status, created_at, category')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (error) {
-        console.error('Error fetching appeals:', error);
-        setAppeals([]);
-      } else {
-        setAppeals(data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching appeals:', error);
-      setAppeals([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePrevious = () => {
-    setCurrentIndex(prev => prev > 0 ? prev - 1 : appeals.length - 1);
-  };
-
-  const handleNext = () => {
-    setCurrentIndex(prev => prev < appeals.length - 1 ? prev + 1 : 0);
-  };
-
-  const getStatusColor = (status: string) => {
-    const englishStatus = status === 'Завершено' ? 'Completed' : 
-                         status === 'В процесі' ? 'In Progress' : 
-                         status === 'На розгляді' ? 'Under Review' : status;
-    
-    switch (englishStatus) {
-      case 'Completed':
-        return 'bg-green-100 text-green-800';
-      case 'In Progress':
-        return 'bg-blue-100 text-blue-800';
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return (
+          <Badge className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-200 dark:hover:bg-green-900/50">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            {language === 'en' ? 'Completed' : 'Завершено'}
+          </Badge>
+        );
+      case 'pending':
+        return (
+          <Badge className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800 hover:bg-yellow-200 dark:hover:bg-yellow-900/50">
+            <Clock className="h-3 w-3 mr-1" />
+            {language === 'en' ? 'Pending' : 'Очікує'}
+          </Badge>
+        );
+      case 'in-progress':
+        return (
+          <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-900/50">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            {language === 'en' ? 'In Progress' : 'В процесі'}
+          </Badge>
+        );
       default:
-        return 'bg-yellow-100 text-yellow-800';
+        return (
+          <Badge variant="outline" className="border-border text-muted-foreground">
+            {status}
+          </Badge>
+        );
     }
   };
 
-  const getStatusText = (status: string) => {
-    if (language === 'uk') {
-      switch (status) {
-        case 'Under Review': return 'На розгляді';
-        case 'In Progress': return 'В процесі';
-        case 'Completed': return 'Завершено';
-        default: return status;
-      }
+  const mockRequests = [
+    {
+      id: 1,
+      title: language === 'en' ? 'Street Light Repair' : 'Ремонт вуличного освітлення',
+      date: '2024-03-15',
+      status: 'completed'
+    },
+    {
+      id: 2,
+      title: language === 'en' ? 'Garbage Collection Issue' : 'Проблема з вивозом сміття',
+      date: '2024-03-18',
+      status: 'in-progress'
+    },
+    {
+      id: 3,
+      title: language === 'en' ? 'Park Maintenance Request' : 'Запит на утримання парку',
+      date: '2024-03-20',
+      status: 'pending'
     }
-    return status;
-  };
-
-  const handleViewAllRequests = () => {
-    navigate('/resident-appeals');
-  };
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <FileText className="h-5 w-5 mr-2" />
-            {language === 'en' ? 'My Recent Requests' : 'Мої останні запити'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-500">{language === 'en' ? 'Loading...' : 'Завантаження...'}</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (appeals.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <FileText className="h-5 w-5 mr-2" />
-            {language === 'en' ? 'My Recent Requests' : 'Мої останні запити'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-500">{language === 'en' ? 'No requests found' : 'Запитів не знайдено'}</p>
-          <Button variant="outline" className="w-full mt-4" onClick={handleViewAllRequests}>
-            {language === 'en' ? 'View All Requests' : 'Переглянути всі запити'}
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
+  ];
 
   return (
-    <Card>
+    <Card className="bg-card border-border theme-transition">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center">
-            <FileText className="h-5 w-5 mr-2" />
-            {language === 'en' ? 'My Recent Requests' : 'Мої останні запити'}
-          </div>
-          {appeals.length > 1 && (
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={handlePrevious}>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm text-gray-500">
-                {currentIndex + 1} / {appeals.length}
-              </span>
-              <Button variant="ghost" size="sm" onClick={handleNext}>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
+        <CardTitle className="text-foreground">
+          {language === 'en' ? 'My Recent Requests' : 'Мої останні запити'}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div>
-              <p className="font-medium text-gray-900">{appeals[currentIndex].title}</p>
-              <p className="text-sm text-gray-600">
-                #{appeals[currentIndex].id.slice(0, 8)} • {new Date(appeals[currentIndex].created_at).toLocaleDateString()}
-              </p>
+      <CardContent className="space-y-4">
+        {mockRequests.map((request) => (
+          <div key={request.id} className="flex items-center justify-between p-3 rounded-lg bg-accent/50 hover:bg-accent/70 transition-colors duration-200">
+            <div className="flex-1">
+              <p className="font-medium text-foreground text-sm">{request.title}</p>
+              <p className="text-xs text-muted-foreground mt-1">{request.date}</p>
             </div>
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(appeals[currentIndex].status)}`}>
-              {getStatusText(appeals[currentIndex].status)}
-            </span>
+            <div className="flex items-center space-x-2">
+              {getStatusBadge(request.status)}
+            </div>
           </div>
-        </div>
-        <Button variant="outline" className="w-full mt-4" onClick={handleViewAllRequests}>
-          {language === 'en' ? 'View All Requests' : 'Переглянути всі запити'}
+        ))}
+        <Button 
+          variant="outline" 
+          className="w-full mt-4 border-border hover:bg-accent theme-transition"
+          onClick={() => navigate('/resident-appeals')}
+        >
+          <ExternalLink className="h-4 w-4 mr-2" />
+          {language === 'en' ? 'View All Appeals' : 'Переглянути всі звернення'}
         </Button>
       </CardContent>
     </Card>

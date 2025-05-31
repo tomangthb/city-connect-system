@@ -40,26 +40,26 @@ const QuickServicesSection = () => {
     { 
       title: language === 'en' ? 'Pay Utilities' : 'Сплатити комунальні', 
       icon: CreditCard, 
-      color: 'bg-blue-100 text-blue-600',
+      color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
       action: handlePayUtilities
     },
     { 
       title: language === 'en' ? 'Submit Appeal' : 'Подати звернення', 
       icon: MessageSquare, 
-      color: 'bg-green-100 text-green-600',
+      color: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
       action: handleSubmitAppeal
     },
     { 
       title: language === 'en' ? 'Book Appointment' : 'Записатися на прийом', 
       icon: Calendar, 
-      color: 'bg-purple-100 text-purple-600',
+      color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
       action: handleBookAppointment
     }
   ];
 
   return (
     <div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <h3 className="text-lg font-semibold text-foreground mb-4">
         {language === 'en' ? 'Quick Services' : 'Швидкі послуги'}
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -68,14 +68,14 @@ const QuickServicesSection = () => {
           return (
             <Card 
               key={index} 
-              className="hover:shadow-md transition-shadow cursor-pointer"
+              className="hover:shadow-lg dark:hover:shadow-gray-900/50 transition-all duration-300 cursor-pointer transform hover:scale-105 bg-card border-border theme-transition"
               onClick={service.action}
             >
               <CardContent className="p-6 text-center">
-                <div className={`w-12 h-12 rounded-full ${service.color} flex items-center justify-center mx-auto mb-3`}>
-                  <Icon className="h-6 w-6" />
+                <div className={`w-14 h-14 rounded-full ${service.color} flex items-center justify-center mx-auto mb-3 transition-transform duration-200 hover:scale-110`}>
+                  <Icon className="h-7 w-7" />
                 </div>
-                <p className="text-sm font-medium text-gray-900">{service.title}</p>
+                <p className="text-sm font-medium text-foreground">{service.title}</p>
               </CardContent>
             </Card>
           );
