@@ -15,21 +15,21 @@ const RequestsSection = () => {
     switch (status) {
       case 'completed':
         return (
-          <Badge className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-200 dark:hover:bg-green-900/50">
+          <Badge variant="success" className="shadow-sm">
             <CheckCircle className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Completed' : 'Завершено'}
           </Badge>
         );
       case 'pending':
         return (
-          <Badge className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800 hover:bg-yellow-200 dark:hover:bg-yellow-900/50">
+          <Badge variant="warning" className="shadow-sm">
             <Clock className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Pending' : 'Очікує'}
           </Badge>
         );
       case 'in-progress':
         return (
-          <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-900/50">
+          <Badge variant="info" className="shadow-sm">
             <AlertCircle className="h-3 w-3 mr-1" />
             {language === 'en' ? 'In Progress' : 'В процесі'}
           </Badge>
@@ -65,7 +65,7 @@ const RequestsSection = () => {
   ];
 
   return (
-    <Card className="bg-card border-border theme-transition">
+    <Card className="enhanced-card enhanced-card-border">
       <CardHeader>
         <CardTitle className="text-foreground">
           {language === 'en' ? 'My Recent Requests' : 'Мої останні запити'}
@@ -73,7 +73,7 @@ const RequestsSection = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         {mockRequests.map((request) => (
-          <div key={request.id} className="flex items-center justify-between p-3 rounded-lg bg-accent/50 hover:bg-accent/70 transition-colors duration-200">
+          <div key={request.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-all duration-300 border border-gray-200 dark:border-gray-700">
             <div className="flex-1">
               <p className="font-medium text-foreground text-sm">{request.title}</p>
               <p className="text-xs text-muted-foreground mt-1">{request.date}</p>
@@ -85,7 +85,7 @@ const RequestsSection = () => {
         ))}
         <Button 
           variant="outline" 
-          className="w-full mt-4 border-border hover:bg-accent theme-transition"
+          className="w-full mt-4 shadow-sm hover:shadow-md transition-all duration-200"
           onClick={() => navigate('/resident-appeals')}
         >
           <ExternalLink className="h-4 w-4 mr-2" />

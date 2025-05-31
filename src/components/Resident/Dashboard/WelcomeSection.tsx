@@ -15,7 +15,7 @@ const WelcomeSection = ({ searchQuery, setSearchQuery, onSearch }: WelcomeSectio
   const { language } = useLanguage();
 
   return (
-    <div className="bg-gradient-to-r from-slate-700 to-slate-800 dark:from-slate-800 dark:to-slate-900 text-white rounded-lg p-6 theme-transition">
+    <div className="bg-gradient-to-r from-gray-700 to-gray-800 dark:from-gray-800 dark:to-gray-900 text-white rounded-lg p-6 theme-transition shadow-lg">
       <h2 className="text-2xl font-bold mb-2 text-white">
         {language === 'en' ? 'Welcome to the City Portal' : 'Ласкаво просимо до Міського порталу'}
       </h2>
@@ -29,15 +29,15 @@ const WelcomeSection = ({ searchQuery, setSearchQuery, onSearch }: WelcomeSectio
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input 
             placeholder={language === 'en' ? 'Search services, information...' : 'Пошук послуг, інформації...'}
-            className="pl-10 bg-gray-800 dark:bg-gray-900 text-white placeholder:text-gray-400 border-gray-600 dark:border-gray-700 focus:border-green-500 focus:ring-green-500/20"
+            className="pl-10 search-input-enhanced"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <Button 
-          variant="secondary" 
+          variant="success" 
           onClick={onSearch}
-          className="bg-white/10 text-white hover:bg-white/20 border-white/20 theme-transition"
+          className="shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
         >
           {language === 'en' ? 'Search' : 'Пошук'}
         </Button>

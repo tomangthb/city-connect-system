@@ -88,7 +88,7 @@ const ResidentSidebar = ({ activeTab, onTabChange }: ResidentSidebarProps) => {
       
       <SidebarContent className="bg-sidebar">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/70">
+          <SidebarGroupLabel className="text-sidebar-foreground/70 font-medium">
             {language === 'en' ? 'Navigation' : 'Навігація'}
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -98,22 +98,12 @@ const ResidentSidebar = ({ activeTab, onTabChange }: ResidentSidebarProps) => {
                   <SidebarMenuButton 
                     onClick={() => onTabChange(item.url)}
                     isActive={activeTab === item.url}
-                    className={`
-                      flex items-center space-x-3 w-full px-3 py-2 rounded-lg transition-all duration-300 group
-                      ${activeTab === item.url 
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-900 dark:text-green-100 border-l-4 border-green-600 shadow-sm font-medium' 
-                        : 'text-sidebar-foreground hover:bg-white/5 dark:hover:bg-white/5 hover:text-green-700 dark:hover:text-green-300 hover:shadow-sm'
-                      }
-                    `}
+                    className={`nav-menu-item ${activeTab === item.url ? 'active' : ''}`}
                   >
-                    <item.icon className={`h-5 w-5 transition-all duration-200 ${
-                      activeTab === item.url 
-                        ? 'text-green-600 dark:text-green-400 scale-110' 
-                        : 'text-sidebar-foreground/70 group-hover:text-green-600 dark:group-hover:text-green-400 group-hover:scale-105'
+                    <item.icon className={`h-5 w-5 nav-menu-icon ${
+                      activeTab === item.url ? 'active' : 'text-sidebar-foreground/70 group-hover:text-green-600 dark:group-hover:text-green-400'
                     }`} />
-                    <span className={`transition-all duration-200 ${
-                      activeTab === item.url ? 'font-medium' : 'group-hover:font-medium'
-                    }`}>
+                    <span className="transition-all duration-200">
                       {item.title}
                     </span>
                   </SidebarMenuButton>

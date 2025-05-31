@@ -68,11 +68,11 @@ const QuickServicesSection = () => {
           return (
             <Card 
               key={index} 
-              className="hover:shadow-lg dark:hover:shadow-gray-900/50 transition-all duration-300 cursor-pointer transform hover:scale-105 bg-card border-border theme-transition"
+              className="enhanced-card enhanced-card-border cursor-pointer transform hover:scale-105 hover:shadow-lg dark:hover:shadow-gray-900/30 transition-all duration-300"
               onClick={service.action}
             >
               <CardContent className="p-6 text-center">
-                <div className={`w-14 h-14 rounded-full ${service.color} flex items-center justify-center mx-auto mb-3 transition-transform duration-200 hover:scale-110`}>
+                <div className={`w-14 h-14 rounded-full ${service.color} flex items-center justify-center mx-auto mb-3 transition-all duration-200 hover:scale-110 shadow-sm`}>
                   <Icon className="h-7 w-7" />
                 </div>
                 <p className="text-sm font-medium text-foreground">{service.title}</p>
