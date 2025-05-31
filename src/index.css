@@ -199,16 +199,58 @@
 
 /* Enhanced search input */
 .search-input-enhanced {
-  @apply bg-gray-800 dark:bg-gray-800 border-2 border-gray-600 dark:border-gray-600 text-gray-100 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:border-blue-400 dark:focus:border-blue-400 focus:ring-4 focus:ring-blue-400/20 dark:focus:ring-blue-400/20 transition-all duration-200 shadow-sm hover:shadow-md;
+  @apply bg-gray-800 dark:bg-gray-800 border-2 border-white dark:border-white text-gray-100 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-300 focus:border-blue-400 dark:focus:border-blue-400 focus:ring-4 focus:ring-blue-400/20 dark:focus:ring-blue-400/20 transition-all duration-200 shadow-sm hover:shadow-md;
+  font-size: 16px;
 }
 
 /* Enhanced price display */
 .price-display {
-  @apply text-lg font-semibold text-gray-900 dark:text-gray-100;
+  @apply text-xl font-bold text-gray-900 dark:text-gray-100;
+  font-size: 20px;
 }
 
 .price-percentage {
   @apply text-sm font-medium text-green-600 dark:text-green-400;
+}
+
+/* Enhanced text contrast */
+.text-primary-enhanced {
+  @apply text-white dark:text-white font-semibold;
+}
+
+.text-secondary-enhanced {
+  @apply text-gray-200 dark:text-gray-200;
+}
+
+.text-muted-enhanced {
+  @apply text-gray-300 dark:text-gray-300;
+}
+
+/* Enhanced card blocks */
+.enhanced-card-block {
+  @apply bg-card border border-gray-600 dark:border-gray-600 shadow-md hover:shadow-lg dark:hover:shadow-gray-900/30 transition-all duration-300 rounded-lg p-4 mb-4;
+}
+
+/* Enhanced status badges */
+.status-pending {
+  @apply bg-yellow-500 text-white;
+}
+
+.status-overdue {
+  @apply bg-red-500 text-white;
+}
+
+.status-paid {
+  @apply bg-green-500 text-white;
+}
+
+.status-completed {
+  @apply bg-green-500 text-white;
+}
+
+/* Icon enhancements */
+.icon-enhanced {
+  @apply text-white dark:text-white transition-colors duration-200 hover:text-blue-400 dark:hover:text-blue-400;
 }
 
 /* Navigation menu enhancements */

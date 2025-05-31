@@ -12,7 +12,10 @@ import {
   Download,
   Eye,
   Plus,
-  Search
+  Search,
+  Clock,
+  AlertTriangle,
+  CheckCircle
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
@@ -141,12 +144,12 @@ const ResidentPaymentsModule = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'paid':
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'overdue': return 'bg-red-100 text-red-800';
-      case 'failed': return 'bg-red-100 text-red-800';
-      case 'refunded': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'completed': return 'completed';
+      case 'pending': return 'pending';
+      case 'overdue': return 'overdue';
+      case 'failed': return 'overdue';
+      case 'refunded': return 'info';
+      default: return 'secondary';
     }
   };
 
@@ -160,6 +163,20 @@ const ResidentPaymentsModule = () => {
       refunded: { en: 'Refunded', uk: 'Повернено' }
     };
     return statusMap[status]?.[language] || status;
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Clock className="h-3 w-3 mr-1" />;
+      case 'overdue':
+        return <AlertTriangle className="h-3 w-3 mr-1" />;
+      case 'paid':
+      case 'completed':
+        return <CheckCircle className="h-3 w-3 mr-1" />;
+      default:
+        return null;
+    }
   };
 
   const handlePayBill = (bill: Payment) => {
@@ -199,10 +216,10 @@ const ResidentPaymentsModule = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold text-primary-enhanced mb-2">
           {language === 'en' ? 'Payments & Billing' : 'Платежі та рахунки'}
         </h2>
-        <p className="text-gray-600">
+        <p className="text-secondary-enhanced">
           {language === 'en' 
             ? 'Manage your payments, view bills, and track payment history.' 
             : 'Керуйте своїми платежами, переглядайте рахунки та відстежуйте історію платежів.'}
@@ -211,63 +228,66 @@ const ResidentPaymentsModule = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+        <Card className="enhanced-card-block">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-muted-enhanced">
                   {language === 'en' ? 'Total Pending' : 'Всього до сплати'}
                 </p>
-                <p className="text-2xl font-bold text-red-600">
-                  ₴{totalPending.toFixed(2)}
-                </p>
+                <div className="flex items-center space-x-2">
+                  <AlertTriangle className="h-5 w-5 text-red-500" />
+                  <p className="price-display text-red-400">
+                    ₴{totalPending.toFixed(2)}
+                  </p>
+                </div>
               </div>
-              <DollarSign className="h-8 w-8 text-red-600" />
+              <DollarSign className="h-8 w-8 text-red-400 icon-enhanced" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="enhanced-card-block">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-muted-enhanced">
                   {language === 'en' ? 'Paid This Month' : 'Сплачено цього місяця'}
                 </p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="price-display text-green-400">
                   ₴{paymentHistory.filter(p => p.status === 'completed' && new Date(p.date).getMonth() === new Date().getMonth()).reduce((sum, p) => sum + p.amount, 0).toFixed(2)}
                 </p>
               </div>
-              <CreditCard className="h-8 w-8 text-green-600" />
+              <CreditCard className="h-8 w-8 text-green-400 icon-enhanced" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="enhanced-card-block">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-muted-enhanced">
                   {language === 'en' ? 'Next Due Date' : 'Наступна дата платежу'}
                 </p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="price-display text-blue-400">
                   {upcomingBills.filter(b => b.status !== 'paid').sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0]?.dueDate.split('-').reverse().join('.') || 'N/A'}
                 </p>
               </div>
-              <Calendar className="h-8 w-8 text-blue-600" />
+              <Calendar className="h-8 w-8 text-blue-400 icon-enhanced" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+      <div className="flex space-x-1 bg-gray-800 p-1 rounded-lg">
         <Button
           variant={activeTab === 'bills' ? 'default' : 'ghost'}
           onClick={() => setActiveTab('bills')}
           className="flex-1"
         >
-          <Receipt className="h-4 w-4 mr-2" />
+          <Receipt className="h-4 w-4 mr-2 icon-enhanced" />
           {language === 'en' ? 'Current Bills' : 'Поточні рахунки'}
         </Button>
         <Button
@@ -275,7 +295,7 @@ const ResidentPaymentsModule = () => {
           onClick={() => setActiveTab('history')}
           className="flex-1"
         >
-          <History className="h-4 w-4 mr-2" />
+          <History className="h-4 w-4 mr-2 icon-enhanced" />
           {language === 'en' ? 'Payment History' : 'Історія платежів'}
         </Button>
       </div>
@@ -284,33 +304,34 @@ const ResidentPaymentsModule = () => {
       {activeTab === 'bills' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-primary-enhanced">
               {language === 'en' ? 'Upcoming Bills' : 'Майбутні рахунки'}
             </h3>
             <Button onClick={() => setAddPaymentMethodOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-2 icon-enhanced" />
               {language === 'en' ? 'Add Payment Method' : 'Додати спосіб оплати'}
             </Button>
           </div>
 
           <div className="grid gap-4">
             {upcomingBills.map((bill) => (
-              <Card key={bill.id} className="hover:shadow-md transition-shadow">
+              <Card key={bill.id} className="enhanced-card-block">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-lg font-semibold text-gray-900">
+                        <h4 className="text-lg font-semibold text-primary-enhanced">
                           {language === 'en' ? bill.type : bill.typeUk}
                         </h4>
-                        <Badge className={getStatusColor(bill.status)}>
+                        <Badge variant={getStatusColor(bill.status)}>
+                          {getStatusIcon(bill.status)}
                           {getStatusText(bill.status)}
                         </Badge>
                       </div>
-                      <p className="text-gray-600 mb-2">
+                      <p className="text-secondary-enhanced mb-2">
                         {language === 'en' ? bill.description : bill.descriptionUk}
                       </p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <div className="flex items-center gap-4 text-sm text-muted-enhanced">
                         <span>
                           {language === 'en' ? 'Due:' : 'Термін:'} {bill.dueDate.split('-').reverse().join('.')}
                         </span>
@@ -322,7 +343,7 @@ const ResidentPaymentsModule = () => {
                       </div>
                     </div>
                     <div className="text-right ml-6">
-                      <p className="text-2xl font-bold text-gray-900">
+                      <p className="price-display">
                         ₴{bill.amount.toFixed(2)}
                       </p>
                       <div className="flex gap-2 mt-2">
@@ -336,7 +357,7 @@ const ResidentPaymentsModule = () => {
                           size="sm"
                           onClick={() => handleViewDetails(bill)}
                         >
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-4 w-4 icon-enhanced" />
                         </Button>
                         {bill.status === 'paid' && (
                           <Button 
@@ -344,7 +365,7 @@ const ResidentPaymentsModule = () => {
                             size="sm"
                             onClick={() => handleDownloadReceipt(bill)}
                           >
-                            <Download className="h-4 w-4" />
+                            <Download className="h-4 w-4 icon-enhanced" />
                           </Button>
                         )}
                       </div>
@@ -362,16 +383,16 @@ const ResidentPaymentsModule = () => {
         <div className="space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 icon-enhanced" />
               <Input
                 placeholder={language === 'en' ? 'Search payments...' : 'Пошук платежів...'}
-                className="pl-10"
+                className="pl-10 search-input-enhanced"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <select 
-              className="p-2 border border-gray-300 rounded-md min-w-[200px]"
+              className="p-2 border border-white bg-gray-800 text-white rounded-md min-w-[200px] focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-200"
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
             >
@@ -385,19 +406,20 @@ const ResidentPaymentsModule = () => {
 
           <div className="grid gap-4">
             {filteredHistory.map((payment) => (
-              <Card key={payment.id} className="hover:shadow-md transition-shadow">
+              <Card key={payment.id} className="enhanced-card-block">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-lg font-semibold text-gray-900">
+                        <h4 className="text-lg font-semibold text-primary-enhanced">
                           {language === 'en' ? payment.type : payment.typeUk}
                         </h4>
-                        <Badge className={getStatusColor(payment.status)}>
+                        <Badge variant={getStatusColor(payment.status)}>
+                          {getStatusIcon(payment.status)}
                           {getStatusText(payment.status)}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <div className="flex items-center gap-4 text-sm text-muted-enhanced">
                         <span>
                           {language === 'en' ? 'Date:' : 'Дата:'} {payment.date.split('-').reverse().join('.')}
                         </span>
@@ -407,7 +429,7 @@ const ResidentPaymentsModule = () => {
                       </div>
                     </div>
                     <div className="text-right ml-6">
-                      <p className="text-2xl font-bold text-gray-900">
+                      <p className="price-display">
                         ₴{payment.amount.toFixed(2)}
                       </p>
                       <div className="flex gap-2 mt-2">
@@ -416,7 +438,7 @@ const ResidentPaymentsModule = () => {
                           size="sm"
                           onClick={() => handleViewDetails(payment)}
                         >
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-4 w-4 icon-enhanced" />
                         </Button>
                         {payment.status === 'completed' && (
                           <Button 
@@ -424,7 +446,7 @@ const ResidentPaymentsModule = () => {
                             size="sm"
                             onClick={() => handleDownloadReceipt(payment)}
                           >
-                            <Download className="h-4 w-4" />
+                            <Download className="h-4 w-4 icon-enhanced" />
                           </Button>
                         )}
                       </div>
@@ -437,8 +459,8 @@ const ResidentPaymentsModule = () => {
 
           {filteredHistory.length === 0 && (
             <div className="text-center py-12">
-              <History className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">
+              <History className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+              <p className="text-muted-enhanced">
                 {language === 'en' 
                   ? 'No payment history found matching your criteria.' 
                   : 'Не знайдено історії платежів, що відповідає вашим критеріям.'}
