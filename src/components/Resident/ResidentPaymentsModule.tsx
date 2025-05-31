@@ -25,7 +25,7 @@ interface Bill {
   typeUk: string;
   amount: number;
   dueDate: string;
-  status: 'pending' | 'paid' | 'overdue';
+  status: 'pending' | 'paid' | 'overdue' | 'completed' | 'failed' | 'refunded';
   description: string;
   descriptionUk: string;
 }
@@ -187,18 +187,7 @@ const ResidentPaymentsModule = () => {
   };
 
   const handlePayBill = (bill: Bill) => {
-    // Convert Bill to Payment format for PaymentDetailsDialog
-    const payment = {
-      id: bill.id,
-      type: bill.type,
-      typeUk: bill.typeUk,
-      amount: bill.amount,
-      status: bill.status as 'paid' | 'pending' | 'overdue' | 'completed' | 'failed' | 'refunded',
-      dueDate: bill.dueDate,
-      description: bill.description,
-      descriptionUk: bill.descriptionUk
-    };
-    setSelectedBill(payment);
+    setSelectedBill(bill);
     setShowPaymentDialog(true);
   };
 
