@@ -39,10 +39,10 @@ const ResidentPortal = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center theme-transition">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -91,16 +91,16 @@ const ResidentPortal = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
+      <div className="min-h-screen flex w-full bg-background theme-transition">
         <ResidentSidebar activeTab={activeTab} onTabChange={handleTabChange} />
-        <SidebarInset>
+        <SidebarInset className="flex-1">
           <ResidentHeader 
             userName={user?.email || 'User'}
             notifications={notifications}
             setNotifications={setNotifications}
             onLogout={handleLogout}
           />
-          <main className="p-6">
+          <main className="p-6 bg-background theme-transition">
             {renderContent()}
           </main>
         </SidebarInset>

@@ -53,21 +53,30 @@ const ResidentUserMenu = ({ userName }: ResidentUserMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-10 w-10 rounded-full p-0">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-green-100 text-green-600">
+        <Button variant="ghost" size="sm" className="h-10 w-10 rounded-full p-0 theme-transition">
+          <Avatar className="h-8 w-8 avatar-shadow">
+            <AvatarFallback className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 font-medium theme-transition">
               {getUserInitials()}
             </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-md z-50">
-        <DropdownMenuItem onClick={handleSettings}>
+      <DropdownMenuContent 
+        align="end" 
+        className="bg-background border border-border shadow-md z-50 theme-transition"
+      >
+        <DropdownMenuItem 
+          onClick={handleSettings}
+          className="hover:bg-accent theme-transition"
+        >
           <Settings className="h-4 w-4 mr-2" />
           {language === 'en' ? 'My Account' : 'Мій акаунт'}
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
+        <DropdownMenuSeparator className="bg-border" />
+        <DropdownMenuItem 
+          onClick={handleLogout}
+          className="hover:bg-accent theme-transition text-destructive hover:text-destructive"
+        >
           <LogOut className="h-4 w-4 mr-2" />
           {language === 'en' ? 'Logout' : 'Вийти'}
         </DropdownMenuItem>

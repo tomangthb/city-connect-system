@@ -6,6 +6,7 @@ import { Globe } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import NotificationsPopover from '@/components/Layout/Notifications/NotificationsPopover';
 import ResidentUserMenu from './ResidentUserMenu';
+import ThemeToggle from '@/components/Layout/ThemeToggle/ThemeToggle';
 
 interface Notification {
   id: string;
@@ -30,20 +31,26 @@ const ResidentHeader = ({ userName, notifications, setNotifications }: ResidentH
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+    <header className="bg-background border-b border-border px-6 py-4 theme-transition">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <SidebarTrigger />
-          <h1 className="text-xl font-semibold text-green-900">
+          <h1 className="text-xl font-semibold text-foreground">
             {language === 'en' ? 'Resident Portal' : 'Портал громадянина'}
           </h1>
         </div>
         
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" onClick={toggleLanguage} className="flex items-center">
+          <Button 
+            variant="ghost" 
+            onClick={toggleLanguage} 
+            className="flex items-center theme-transition hover:bg-accent"
+          >
             <Globe className="h-5 w-5 mr-2" />
             {language === 'en' ? 'УКР' : 'ENG'}
           </Button>
+          
+          <ThemeToggle />
           
           <NotificationsPopover 
             notifications={notifications}
