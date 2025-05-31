@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,7 +45,7 @@ const ResidentAppealsModule = () => {
     subject: '',
     description: '',
     category: '',
-    priority: 'medium' as const
+    priority: 'medium' as 'low' | 'medium' | 'high'
   });
 
   const appeals: Appeal[] = [
@@ -184,7 +183,7 @@ const ResidentAppealsModule = () => {
       subject: '',
       description: '',
       category: '',
-      priority: 'medium'
+      priority: 'medium' as 'low' | 'medium' | 'high'
     });
   };
 
