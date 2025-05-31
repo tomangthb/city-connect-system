@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,8 @@ import {
   FileText,
   CheckCircle,
   AlertCircle,
-  XCircle
+  XCircle,
+  Eye
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
@@ -32,6 +34,7 @@ interface Appeal {
   status: 'pending' | 'in-review' | 'resolved' | 'rejected';
   priority: 'low' | 'medium' | 'high';
   dateSubmitted: string;
+  dateUpdated: string;
   responseTime: string;
   assignedTo?: string;
 }
@@ -50,16 +53,17 @@ const ResidentAppealsModule = () => {
 
   const appeals: Appeal[] = [
     {
-      id: '1',
+      id: '9f531ca3',
       subject: 'Pothole on Main Street',
-      subjectUk: 'Яма на Головній вулиці',
-      description: 'Large pothole causing damage to vehicles near intersection with Oak Ave',
-      descriptionUk: 'Велика яма, що завдає шкоди транспортним засобам біля перехрестя з вул. Дубовою',
+      subjectUk: 'Погане освітлення',
+      description: 'на вул. Лукаша не працюють деякі ліхтарі',
+      descriptionUk: 'на вул. Лукаша не працюють деякі ліхтарі',
       category: 'Infrastructure',
       categoryUk: 'Інфраструктура',
-      status: 'in-review',
-      priority: 'high',
-      dateSubmitted: '2024-05-15',
+      status: 'resolved',
+      priority: 'medium',
+      dateSubmitted: '30.05.2025',
+      dateUpdated: '30.05.2025',
       responseTime: '2-3 business days',
       assignedTo: 'John Smith'
     },
@@ -74,6 +78,7 @@ const ResidentAppealsModule = () => {
       status: 'pending',
       priority: 'medium',
       dateSubmitted: '2024-05-12',
+      dateUpdated: '2024-05-12',
       responseTime: '5-7 business days'
     },
     {
@@ -84,9 +89,10 @@ const ResidentAppealsModule = () => {
       descriptionUk: 'Будівельні роботи починаються занадто рано в житловому районі',
       category: 'Environmental',
       categoryUk: 'Екологічні',
-      status: 'resolved',
+      status: 'in-review',
       priority: 'low',
       dateSubmitted: '2024-05-10',
+      dateUpdated: '2024-05-15',
       responseTime: '3-5 business days',
       assignedTo: 'Maria Garcia'
     }
@@ -115,7 +121,8 @@ const ResidentAppealsModule = () => {
     
     const matchesSearch = 
       subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      description.toLowerCase().includes(searchQuery.toLowerCase());
+      description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      appeal.id.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesStatus = selectedStatus === 'all' || appeal.status === selectedStatus;
     
@@ -142,7 +149,7 @@ const ResidentAppealsModule = () => {
         return (
           <Badge variant="default" className="bg-green-100 text-green-800">
             <CheckCircle className="h-3 w-3 mr-1" />
-            {language === 'en' ? 'Resolved' : 'Вирішено'}
+            {language === 'en' ? 'Completed' : 'Completed'}
           </Badge>
         );
       case 'rejected':
@@ -162,7 +169,7 @@ const ResidentAppealsModule = () => {
       case 'high':
         return <Badge variant="destructive">{language === 'en' ? 'High' : 'Високий'}</Badge>;
       case 'medium':
-        return <Badge variant="secondary">{language === 'en' ? 'Medium' : 'Середній'}</Badge>;
+        return <Badge variant="secondary">{language === 'en' ? 'Medium' : 'Medium'}</Badge>;
       case 'low':
         return <Badge variant="outline">{language === 'en' ? 'Low' : 'Низький'}</Badge>;
       default:
@@ -195,8 +202,8 @@ const ResidentAppealsModule = () => {
         </h2>
         <p className="text-gray-600 dark:text-gray-300">
           {language === 'en' 
-            ? 'Submit and track your appeals to city services.' 
-            : 'Подавайте та відстежуйте свої звернення до міських служб.'}
+            ? 'Submit and track your appeals to the city administration.' 
+            : 'Подавайте та відстежуйте свої звернення до міської адміністрації.'}
         </p>
       </div>
 
@@ -314,47 +321,44 @@ const ResidentAppealsModule = () => {
       <div className="grid gap-4">
         {filteredAppeals.map((appeal) => (
           <Card key={appeal.id} className="hover:shadow-md transition-shadow">
-            <CardHeader>
-              <div className="flex items-start justify-between">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <CardTitle className="text-lg text-gray-900 dark:text-white">
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-lg mb-1">
                     {language === 'en' ? appeal.subject : appeal.subjectUk}
-                  </CardTitle>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Badge variant="outline">
-                      {language === 'en' ? appeal.category : appeal.categoryUk}
-                    </Badge>
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    ID: {appeal.id} • {language === 'en' ? appeal.category : appeal.categoryUk}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(appeal.status)}
                     {getPriorityBadge(appeal.priority)}
                   </div>
                 </div>
-                {getStatusBadge(appeal.status)}
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-600 dark:text-gray-300">
+
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
                 {language === 'en' ? appeal.description : appeal.descriptionUk}
               </p>
               
-              <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-                <div className="flex items-center gap-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
-                    <span>{appeal.dateSubmitted}</span>
+                    <span>
+                      {language === 'en' ? 'Created:' : 'Створено:'} {appeal.dateSubmitted}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{appeal.responseTime}</span>
+                    <Calendar className="h-4 w-4" />
+                    <span>
+                      {language === 'en' ? 'Updated:' : 'Оновлено:'} {appeal.dateUpdated}
+                    </span>
                   </div>
-                  {appeal.assignedTo && (
-                    <div className="flex items-center gap-1">
-                      <User className="h-4 w-4" />
-                      <span>{appeal.assignedTo}</span>
-                    </div>
-                  )}
                 </div>
                 <Button variant="outline" size="sm">
-                  <FileText className="h-4 w-4 mr-2" />
-                  {language === 'en' ? 'View Details' : 'Деталі'}
+                  <Eye className="h-4 w-4 mr-2" />
+                  {language === 'en' ? 'View Details' : 'Переглянути деталі'}
                 </Button>
               </div>
             </CardContent>
