@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -202,10 +203,10 @@ const ResidentResourcesModule = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white dark:text-white mb-2">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
           {language === 'en' ? 'City Resources' : 'Міські ресурси'}
         </h2>
-        <p className="text-gray-200 dark:text-gray-200">
+        <p className="text-gray-600">
           {language === 'en' 
             ? 'Explore and book available city facilities and resources for residents.' 
             : 'Досліджуйте та бронюйте доступні міські установи та ресурси для громадян.'}
