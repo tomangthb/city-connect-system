@@ -265,12 +265,12 @@ const ResidentNewsModule = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold text-white dark:text-white mb-2">
           {language === 'en' ? 'City News & Events' : 'Міські новини та події'}
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-200 dark:text-gray-200">
           {language === 'en' 
             ? 'Stay informed about city news, events, and important announcements.' 
             : 'Будьте в курсі міських новин, подій та важливих оголошень.'}
@@ -283,18 +283,18 @@ const ResidentNewsModule = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input 
             placeholder={language === 'en' ? 'Search news...' : 'Пошук новин...'}
-            className="pl-10"
+            className="pl-10 search-input-enhanced"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <select 
-          className="p-2 border border-gray-300 rounded-md min-w-[200px]"
+          className="p-2 border border-white bg-gray-800 text-white rounded-md min-w-[200px] focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-200"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
           {categories.map(category => (
-            <option key={category.id} value={category.id}>
+            <option key={category.id} value={category.id} className="bg-gray-800 text-white">
               {category.name}
             </option>
           ))}
@@ -318,7 +318,7 @@ const ResidentNewsModule = () => {
       {/* News Grid */}
       <div className="space-y-6">
         {sortedNews.map((news) => (
-          <Card key={news.id} className={`hover:shadow-md transition-shadow ${news.isPinned ? 'ring-2 ring-blue-200' : ''}`}>
+          <Card key={news.id} className={`enhanced-card-block ${news.isPinned ? 'ring-2 ring-blue-400' : ''}`}>
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row gap-6">
                 {/* News Image */}
@@ -338,7 +338,7 @@ const ResidentNewsModule = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         {news.isPinned && (
-                          <Badge variant="outline" className="text-blue-600 border-blue-200">
+                          <Badge variant="outline" className="text-blue-400 border-blue-400">
                             {language === 'en' ? 'Pinned' : 'Закріплено'}
                           </Badge>
                         )}
@@ -347,15 +347,15 @@ const ResidentNewsModule = () => {
                         </Badge>
                       </div>
                       
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      <h3 className="text-xl font-semibold text-white dark:text-white mb-2 leading-tight">
                         {language === 'en' ? news.title : news.titleUk}
                       </h3>
                       
-                      <p className="text-gray-600 mb-3">
+                      <p className="text-gray-200 dark:text-gray-200 mb-3 leading-relaxed">
                         {language === 'en' ? news.summary : news.summaryUk}
                       </p>
                       
-                      <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                      <div className="flex items-center gap-4 text-sm text-gray-300 dark:text-gray-300 mb-4">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           {formatDate(news.date)}
@@ -376,7 +376,7 @@ const ResidentNewsModule = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleLike(news.id)}
-                        className={`flex items-center gap-1 ${likedNews.has(news.id) ? 'text-red-600' : 'text-gray-600'}`}
+                        className={`flex items-center gap-1 ${likedNews.has(news.id) ? 'text-red-400' : 'text-gray-300'} hover:text-red-400`}
                       >
                         <Heart className={`h-4 w-4 ${likedNews.has(news.id) ? 'fill-current' : ''}`} />
                         {news.likes + (likedNews.has(news.id) ? 1 : 0)}
@@ -386,7 +386,7 @@ const ResidentNewsModule = () => {
                         variant="ghost" 
                         size="sm" 
                         onClick={() => handleComments(news)}
-                        className="flex items-center gap-1 text-gray-600"
+                        className="flex items-center gap-1 text-gray-300 hover:text-blue-400"
                       >
                         <MessageCircle className="h-4 w-4" />
                         {getNewsComments(news.id).length}
@@ -396,7 +396,7 @@ const ResidentNewsModule = () => {
                         variant="ghost" 
                         size="sm" 
                         onClick={() => handleShare(news)}
-                        className="flex items-center gap-1 text-gray-600"
+                        className="flex items-center gap-1 text-gray-300 hover:text-green-400"
                       >
                         <Share2 className="h-4 w-4" />
                         {language === 'en' ? 'Share' : 'Поділитись'}
@@ -428,11 +428,11 @@ const ResidentNewsModule = () => {
           </DialogHeader>
           {selectedNewsForComments && (
             <div className="space-y-4">
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <h5 className="font-medium text-sm">
+              <div className="bg-gray-800 p-3 rounded-lg border border-gray-600">
+                <h5 className="font-medium text-sm text-gray-100">
                   {language === 'en' ? selectedNewsForComments.title : selectedNewsForComments.titleUk}
                 </h5>
-                <p className="text-xs text-gray-500">{selectedNewsForComments.date}</p>
+                <p className="text-xs text-gray-400">{selectedNewsForComments.date}</p>
               </div>
               
               <div className="flex gap-2">
@@ -440,7 +440,7 @@ const ResidentNewsModule = () => {
                   placeholder={language === 'en' ? 'Write a comment...' : 'Написати коментар...'}
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  className="flex-1"
+                  className="flex-1 bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-400"
                   rows={2}
                 />
                 <Button onClick={handleAddComment} size="sm">
@@ -450,12 +450,12 @@ const ResidentNewsModule = () => {
 
               <div className="max-h-64 overflow-y-auto space-y-3">
                 {getNewsComments(selectedNewsForComments.id).map((comment) => (
-                  <div key={comment.id} className="bg-gray-50 p-3 rounded-lg">
+                  <div key={comment.id} className="bg-gray-800 p-3 rounded-lg border border-gray-600">
                     <div className="flex justify-between items-start mb-1">
-                      <span className="font-medium text-sm">{comment.author}</span>
-                      <span className="text-xs text-gray-500">{comment.date}</span>
+                      <span className="font-medium text-sm text-gray-100">{comment.author}</span>
+                      <span className="text-xs text-gray-400">{comment.date}</span>
                     </div>
-                    <p className="text-sm text-gray-700">{comment.text}</p>
+                    <p className="text-sm text-gray-200">{comment.text}</p>
                   </div>
                 ))}
               </div>
@@ -468,7 +468,7 @@ const ResidentNewsModule = () => {
       <Dialog open={!!selectedNews} onOpenChange={() => setSelectedNews(null)}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl">
+            <DialogTitle className="text-xl text-gray-100">
               {selectedNews && (language === 'en' ? selectedNews.title : selectedNews.titleUk)}
             </DialogTitle>
           </DialogHeader>
@@ -486,24 +486,24 @@ const ResidentNewsModule = () => {
                 <Badge className={getCategoryColor(selectedNews.category)}>
                   {language === 'en' ? selectedNews.category : selectedNews.categoryUk}
                 </Badge>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-400">
                   {formatDate(selectedNews.date)} • {selectedNews.author}
                 </span>
               </div>
               
               <div className="prose max-w-none">
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-gray-200 leading-relaxed">
                   {language === 'en' ? selectedNews.content : selectedNews.contentUk}
                 </p>
               </div>
               
-              <div className="flex items-center justify-between pt-4 border-t">
+              <div className="flex items-center justify-between pt-4 border-t border-gray-600">
                 <div className="flex items-center gap-4">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleLike(selectedNews.id)}
-                    className={`flex items-center gap-2 ${likedNews.has(selectedNews.id) ? 'text-red-600' : 'text-gray-600'}`}
+                    className={`flex items-center gap-2 ${likedNews.has(selectedNews.id) ? 'text-red-400' : 'text-gray-300'} hover:text-red-400`}
                   >
                     <Heart className={`h-4 w-4 ${likedNews.has(selectedNews.id) ? 'fill-current' : ''}`} />
                     {language === 'en' ? 'Like' : 'Лайк'} ({selectedNews.likes + (likedNews.has(selectedNews.id) ? 1 : 0)})
@@ -513,7 +513,7 @@ const ResidentNewsModule = () => {
                     variant="ghost" 
                     size="sm"
                     onClick={() => handleShare(selectedNews)}
-                    className="flex items-center gap-2 text-gray-600"
+                    className="flex items-center gap-2 text-gray-300 hover:text-green-400"
                   >
                     <Share2 className="h-4 w-4" />
                     {language === 'en' ? 'Share' : 'Поділитись'}
@@ -532,7 +532,7 @@ const ResidentNewsModule = () => {
       {sortedNews.length === 0 && (
         <div className="text-center py-12">
           <Newspaper className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">
+          <p className="text-gray-400">
             {language === 'en' 
               ? 'No news found matching your criteria.' 
               : 'Не знайдено новин, що відповідають вашим критеріям.'}
