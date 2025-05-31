@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,8 +37,24 @@ const UserAccountsTab = () => {
   const { data: users, isLoading, refetch } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
-      console.log('Fetching users...');
+      console.log('Fetching users from Supabase...');
       
+      // First, get all auth users
+      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      
+      if (authError) {
+        console.error('Error fetching auth users:', authError);
+        throw authError;
+      }
+
+      console.log('Auth users found:', authUsers.users.length);
+      console.log('Auth users data:', authUsers.users);
+
+      if (!authUsers.users || authUsers.users.length === 0) {
+        return [];
+      }
+
+      // Get profiles for all users
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select(`
@@ -56,34 +71,57 @@ const UserAccountsTab = () => {
 
       if (profilesError) {
         console.error('Profiles error:', profilesError);
-        throw profilesError;
       }
 
-      if (!profiles || profiles.length === 0) {
-        return [];
-      }
+      console.log('Profiles found:', profiles?.length || 0);
+      console.log('Profiles data:', profiles);
 
-      const usersWithRoles = await Promise.all(
-        profiles.map(async (profile) => {
+      // Combine auth users with their profiles
+      const usersWithProfiles = await Promise.all(
+        authUsers.users.map(async (authUser) => {
+          const profile = profiles?.find(p => p.id === authUser.id);
+          
           try {
             const { data: roleData, error: roleError } = await supabase
               .from('user_roles')
               .select('role')
-              .eq('user_id', profile.id);
+              .eq('user_id', authUser.id);
 
             if (roleError) {
-              console.error('Role error for user:', profile.id, roleError);
+              console.error('Role error for user:', authUser.id, roleError);
             }
 
-            return {
-              ...profile,
+            // Create user object with auth data as fallback
+            const userObject: User = {
+              id: authUser.id,
+              email: profile?.email || authUser.email || '',
+              first_name: profile?.first_name || authUser.user_metadata?.first_name || authUser.email?.split('@')[0] || 'Unknown',
+              last_name: profile?.last_name || authUser.user_metadata?.last_name || '',
+              patronymic: profile?.patronymic || authUser.user_metadata?.patronymic || '',
+              user_type: profile?.user_type || authUser.user_metadata?.user_type || 'resident',
+              address: profile?.address || authUser.user_metadata?.address || '',
+              phone: profile?.phone || authUser.user_metadata?.phone || '',
+              created_at: profile?.created_at || authUser.created_at,
               roles: roleData?.map(r => r.role) || [],
               status: 'active'
-            } as User;
+            };
+
+            console.log('Processed user:', userObject);
+            return userObject;
           } catch (roleError) {
-            console.error('Error fetching roles for user:', profile.id, roleError);
+            console.error('Error fetching roles for user:', authUser.id, roleError);
+            
+            // Return user even if role fetch fails
             return {
-              ...profile,
+              id: authUser.id,
+              email: profile?.email || authUser.email || '',
+              first_name: profile?.first_name || authUser.user_metadata?.first_name || authUser.email?.split('@')[0] || 'Unknown',
+              last_name: profile?.last_name || authUser.user_metadata?.last_name || '',
+              patronymic: profile?.patronymic || authUser.user_metadata?.patronymic || '',
+              user_type: profile?.user_type || authUser.user_metadata?.user_type || 'resident',
+              address: profile?.address || authUser.user_metadata?.address || '',
+              phone: profile?.phone || authUser.user_metadata?.phone || '',
+              created_at: profile?.created_at || authUser.created_at,
               roles: [],
               status: 'active'
             } as User;
@@ -91,8 +129,8 @@ const UserAccountsTab = () => {
         })
       );
 
-      console.log('Users with roles:', usersWithRoles);
-      return usersWithRoles;
+      console.log('Final users with profiles:', usersWithProfiles);
+      return usersWithProfiles;
     }
   });
 
@@ -187,6 +225,10 @@ const UserAccountsTab = () => {
             </div>
           ) : (
             <div className="space-y-4">
+              <div className="text-sm text-gray-500 mb-4">
+                {language === 'en' ? `Found ${filteredUsers.length} users` : `Знайдено ${filteredUsers.length} користувачів`}
+              </div>
+              
               {filteredUsers.map((user) => (
                 <div key={user.id} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start">
@@ -255,7 +297,7 @@ const UserAccountsTab = () => {
                 </div>
               ))}
               
-              {filteredUsers.length === 0 && (
+              {filteredUsers.length === 0 && !isLoading && (
                 <div className="text-center py-8">
                   <p className="text-gray-500">
                     {language === 'en' ? 'No users found' : 'Користувачі не знайдені'}

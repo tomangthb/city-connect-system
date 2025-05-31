@@ -51,13 +51,42 @@ const EditUserDialog = ({ children, user, onUserUpdated }: EditUserDialogProps) 
     setIsUpdating(true);
 
     try {
-      // Update profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update(formData)
-        .eq('id', user.id);
+      console.log('Updating user:', user.id, formData);
 
-      if (profileError) throw profileError;
+      // Check if profile exists
+      const { data: existingProfile, error: checkError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('Error checking profile:', checkError);
+        throw checkError;
+      }
+
+      if (existingProfile) {
+        // Update existing profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update(formData)
+          .eq('id', user.id);
+
+        if (profileError) {
+          console.error('Error updating profile:', profileError);
+          throw profileError;
+        }
+      } else {
+        // Create new profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([{ ...formData, id: user.id }]);
+
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+          throw profileError;
+        }
+      }
 
       // Update roles - first delete existing roles
       const { error: deleteError } = await supabase
@@ -65,15 +94,26 @@ const EditUserDialog = ({ children, user, onUserUpdated }: EditUserDialogProps) 
         .delete()
         .eq('user_id', user.id);
 
-      if (deleteError) throw deleteError;
+      if (deleteError) {
+        console.error('Error deleting roles:', deleteError);
+        throw deleteError;
+      }
 
-      // Insert new roles one by one
-      for (const role of selectedRoles) {
+      // Insert new roles
+      if (selectedRoles.length > 0) {
+        const rolesToInsert = selectedRoles.map(role => ({
+          user_id: user.id,
+          role: role as 'admin' | 'employee' | 'resident'
+        }));
+
         const { error: insertError } = await supabase
           .from('user_roles')
-          .insert([{ user_id: user.id, role: role as 'admin' | 'employee' | 'resident' }]);
+          .insert(rolesToInsert);
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error('Error inserting roles:', insertError);
+          throw insertError;
+        }
       }
 
       toast.success(language === 'en' ? 'User updated successfully' : 'Користувача оновлено успішно');
