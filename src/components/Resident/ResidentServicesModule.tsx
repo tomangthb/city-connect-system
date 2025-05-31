@@ -24,6 +24,7 @@ import {
   Leaf
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from 'sonner';
 
 interface Service {
   id: number;
@@ -223,13 +224,13 @@ const ResidentServicesModule = () => {
     switch (availability) {
       case 'available':
         return (
-          <Badge variant="success" className="shadow-sm">
+          <Badge variant="default" className="shadow-sm bg-green-600 text-white">
             {language === 'en' ? 'Available' : 'Доступно'}
           </Badge>
         );
       case 'busy':
         return (
-          <Badge variant="warning" className="shadow-sm">
+          <Badge variant="secondary" className="shadow-sm">
             <Clock className="h-3 w-3 mr-1" />
             {language === 'en' ? 'Busy' : 'Зайнято'}
           </Badge>
@@ -252,26 +253,27 @@ const ResidentServicesModule = () => {
         className={`h-4 w-4 ${
           i < Math.floor(rating) 
             ? 'text-yellow-400 fill-yellow-400' 
-            : 'text-gray-600 dark:text-gray-400'
+            : 'text-gray-300 dark:text-gray-600'
         }`}
       />
     ));
   };
 
-  const quickServiceCategories = [
-    { key: 'all', icon: Home, label: language === 'en' ? 'All Services' : 'Всі послуги' },
-    { key: 'Housing & Utilities', icon: Building, label: language === 'en' ? 'Housing & Utilities' : 'Житлово-комунальні' },
-    { key: 'Permits & Registration', icon: FileText, label: language === 'en' ? 'Permits & Registration' : 'Дозволи та реєстрація' },
-    { key: 'Social Services', icon: Users, label: language === 'en' ? 'Social Services' : 'Соціальні послуги' }
-  ];
+  const handleApply = (service: Service) => {
+    toast.success(`${language === 'en' ? 'Applied for' : 'Подано заявку на'}: ${language === 'en' ? service.name : service.nameUk}`);
+  };
+
+  const handleLearnMore = (service: Service) => {
+    toast.info(`${language === 'en' ? 'More information about' : 'Більше інформації про'}: ${language === 'en' ? service.name : service.nameUk}`);
+  };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white dark:text-white mb-2">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           {language === 'en' ? 'City Services' : 'Міські послуги'}
         </h2>
-        <p className="text-gray-200 dark:text-gray-200">
+        <p className="text-gray-600 dark:text-gray-300">
           {language === 'en' 
             ? 'Access all available city services and submit requests online.' 
             : 'Отримайте доступ до всіх доступних міських послуг та подавайте запити онлайн.'}
@@ -284,45 +286,22 @@ const ResidentServicesModule = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder={language === 'en' ? 'Search services...' : 'Пошук послуг...'}
-            className="pl-10 search-input-enhanced"
+            className="pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <select 
-          className="p-2 border border-white bg-gray-800 text-white rounded-md min-w-[200px] focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-200"
+          className="p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-md min-w-[200px] focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-200"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
           {categories.map(category => (
-            <option key={category.value} value={category.value} className="bg-gray-800 text-white">
+            <option key={category.value} value={category.value} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
               {category.label}
             </option>
           ))}
         </select>
-      </div>
-
-      {/* Quick Categories */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {quickServiceCategories.map((category) => {
-          const Icon = category.icon;
-          const isActive = selectedCategory === category.key;
-          return (
-            <Button
-              key={category.key}
-              variant={isActive ? "default" : "outline"}
-              className={`h-20 flex flex-col items-center gap-2 ${
-                isActive 
-                  ? 'bg-green-600 hover:bg-green-700 text-white' 
-                  : 'bg-gray-800 border-gray-600 text-gray-200 hover:bg-gray-700'
-              }`}
-              onClick={() => setSelectedCategory(category.key)}
-            >
-              <Icon className="h-6 w-6" />
-              <span className="text-xs text-center leading-tight">{category.label}</span>
-            </Button>
-          );
-        })}
       </div>
 
       {/* Services Grid */}
@@ -330,22 +309,22 @@ const ResidentServicesModule = () => {
         {filteredServices.map((service) => {
           const Icon = service.icon;
           return (
-            <Card key={service.id} className="enhanced-card-block hover:shadow-lg transition-all duration-300">
+            <Card key={service.id} className="hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 rounded-lg bg-green-600/20 flex items-center justify-center">
-                      <Icon className="h-6 w-6 text-green-400" />
+                      <Icon className="h-6 w-6 text-green-600 dark:text-green-400" />
                     </div>
                     <div className="flex-1">
-                      <CardTitle className="text-white dark:text-white text-lg leading-tight">
+                      <CardTitle className="text-gray-900 dark:text-white text-lg leading-tight">
                         {language === 'en' ? service.name : service.nameUk}
                       </CardTitle>
                       <div className="flex items-center space-x-2 mt-1">
                         <div className="flex space-x-1">
                           {renderStars(service.rating)}
                         </div>
-                        <span className="text-sm text-gray-300">
+                        <span className="text-sm text-gray-600 dark:text-gray-300">
                           {service.rating.toFixed(1)}
                         </span>
                       </div>
@@ -355,27 +334,27 @@ const ResidentServicesModule = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-gray-200 dark:text-gray-200 leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                   {language === 'en' ? service.description : service.descriptionUk}
                 </p>
                 
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center space-x-2">
-                    <CreditCard className="h-4 w-4 text-green-400" />
-                    <span className="text-gray-300">
+                    <CreditCard className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <span className="text-gray-600 dark:text-gray-300">
                       {language === 'en' ? 'Cost:' : 'Вартість:'} 
-                      <span className="price-display ml-1 text-white">{service.price}</span>
+                      <span className="ml-1 text-gray-900 dark:text-white font-medium">{service.price}</span>
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-blue-400" />
-                    <span className="text-gray-300">
+                    <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <span className="text-gray-600 dark:text-gray-300">
                       {language === 'en' ? 'Processing time:' : 'Час обробки:'} {language === 'en' ? service.duration : service.durationUk}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <MapPin className="h-4 w-4 text-red-400" />
-                    <span className="text-gray-300">
+                    <MapPin className="h-4 w-4 text-red-500 dark:text-red-400" />
+                    <span className="text-gray-600 dark:text-gray-300">
                       {language === 'en' ? service.location : service.locationUk}
                     </span>
                   </div>
@@ -391,13 +370,17 @@ const ResidentServicesModule = () => {
 
                 <div className="flex gap-2 mt-6">
                   <Button 
-                    variant="success" 
-                    className="flex-1"
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                     disabled={service.availability === 'unavailable'}
+                    onClick={() => handleApply(service)}
                   >
                     {language === 'en' ? 'Apply' : 'Подати заявку'}
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleLearnMore(service)}
+                  >
                     {language === 'en' ? 'Learn More' : 'Детальніше'}
                   </Button>
                 </div>
@@ -410,7 +393,7 @@ const ResidentServicesModule = () => {
       {filteredServices.length === 0 && (
         <div className="text-center py-12">
           <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-400">
+          <p className="text-gray-500 dark:text-gray-400">
             {language === 'en' 
               ? 'No services found matching your criteria.' 
               : 'Не знайдено послуг, що відповідають вашим критеріям.'}

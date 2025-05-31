@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -120,11 +121,11 @@ const NewsSection = () => {
           <ScrollArea className="h-48">
             <div className="space-y-4 pr-4">
               {cityNews.map((news) => (
-                <div key={news.id} className="border-b border-gray-100 pb-3">
-                  <h4 className="font-medium text-gray-900 mb-1">{news.title}</h4>
-                  <p className="text-sm text-gray-600 mb-2">{news.summary}</p>
+                <div key={news.id} className="border-b border-gray-100 dark:border-gray-700 pb-3">
+                  <h4 className="font-medium text-gray-900 dark:text-white mb-1">{news.title}</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{news.summary}</p>
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-gray-500">{news.date}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{news.date}</p>
                     <Button 
                       variant="ghost" 
                       size="sm" 
@@ -155,9 +156,9 @@ const NewsSection = () => {
           </DialogHeader>
           <div className="space-y-4">
             {selectedNews && (
-              <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                 <h5 className="font-medium text-sm">{selectedNews.title}</h5>
-                <p className="text-xs text-gray-500">{selectedNews.date}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{selectedNews.date}</p>
               </div>
             )}
             
@@ -176,12 +177,12 @@ const NewsSection = () => {
 
             <div className="max-h-64 overflow-y-auto space-y-3">
               {comments.map((comment) => (
-                <div key={comment.id} className="bg-gray-50 p-3 rounded-lg">
+                <div key={comment.id} className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                   <div className="flex justify-between items-start mb-1">
                     <span className="font-medium text-sm">{comment.author}</span>
-                    <span className="text-xs text-gray-500">{comment.date}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{comment.date}</span>
                   </div>
-                  <p className="text-sm text-gray-700">{comment.text}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">{comment.text}</p>
                 </div>
               ))}
             </div>

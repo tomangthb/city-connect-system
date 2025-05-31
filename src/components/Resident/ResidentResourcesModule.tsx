@@ -203,10 +203,10 @@ const ResidentResourcesModule = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           {language === 'en' ? 'City Resources' : 'Міські ресурси'}
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-300">
           {language === 'en' 
             ? 'Explore and book available city facilities and resources for residents.' 
             : 'Досліджуйте та бронюйте доступні міські установи та ресурси для громадян.'}
@@ -225,7 +225,7 @@ const ResidentResourcesModule = () => {
           />
         </div>
         <select 
-          className="p-2 border border-gray-300 rounded-md min-w-[200px]"
+          className="p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-md min-w-[200px]"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
@@ -277,24 +277,24 @@ const ResidentResourcesModule = () => {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
                 {language === 'en' ? resource.description : resource.descriptionUk}
               </p>
               
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-700">{resource.location}</span>
+                  <span className="text-gray-700 dark:text-gray-300">{resource.location}</span>
                 </div>
                 
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-700">{resource.workingHours}</span>
+                  <span className="text-gray-700 dark:text-gray-300">{resource.workingHours}</span>
                 </div>
                 
                 <div className="flex items-center gap-2 text-sm">
                   <Phone className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-700">{resource.contact}</span>
+                  <span className="text-gray-700 dark:text-gray-300">{resource.contact}</span>
                 </div>
                 
                 {resource.capacity && resource.currentOccupancy !== undefined && (
@@ -309,7 +309,7 @@ const ResidentResourcesModule = () => {
 
               {/* Features */}
               <div>
-                <p className="text-sm font-medium text-gray-900 mb-2">
+                <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
                   {language === 'en' ? 'Features:' : 'Особливості:'}
                 </p>
                 <div className="flex flex-wrap gap-1">
@@ -366,7 +366,7 @@ const ResidentResourcesModule = () => {
       {filteredResources.length === 0 && (
         <div className="text-center py-12">
           <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-gray-400">
             {language === 'en' 
               ? 'No resources found matching your criteria.' 
               : 'Не знайдено ресурсів, що відповідають вашим критеріям.'}
