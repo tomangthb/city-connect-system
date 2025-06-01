@@ -88,35 +88,42 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
     {
       title: language === 'en' ? 'Total Appeals' : 'Загальна кількість звернень',
       value: totalAppeals,
-      change: '+12%',
-      trend: 'up' as const,
+      change: 12,
       icon: FileText,
-      color: 'blue'
+      color: 'text-blue-600'
     },
     {
       title: language === 'en' ? 'Pending Appeals' : 'Звернення на розгляді',
       value: pendingAppeals,
-      change: '-5%',
-      trend: 'down' as const,
+      change: -5,
       icon: Clock,
-      color: 'yellow'
+      color: 'text-yellow-600'
     },
     {
       title: language === 'en' ? 'Active Services' : 'Активні послуги',
       value: activeServices,
-      change: '+8%',
-      trend: 'up' as const,
+      change: 8,
       icon: CheckCircle,
-      color: 'green'
+      color: 'text-green-600'
     },
     {
       title: language === 'en' ? 'This Month' : 'Цього місяця',
       value: monthlyAppeals,
-      change: '+15%',
-      trend: 'up' as const,
+      change: 15,
       icon: Calendar,
-      color: 'purple'
+      color: 'text-purple-600'
     }
+  ];
+
+  // Sample data for metrics chart
+  const chartData = [
+    { date: '2024-01-01', value: 10 },
+    { date: '2024-01-02', value: 15 },
+    { date: '2024-01-03', value: 12 },
+    { date: '2024-01-04', value: 20 },
+    { date: '2024-01-05', value: 18 },
+    { date: '2024-01-06', value: 25 },
+    { date: '2024-01-07', value: 22 }
   ];
 
   return (
@@ -159,7 +166,11 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
 
         {/* Metrics Chart */}
         <div className="lg:col-span-2">
-          <MetricsChart />
+          <MetricsChart 
+            title={language === 'en' ? 'Weekly Activity' : 'Тижнева активність'}
+            data={chartData}
+            type="line"
+          />
         </div>
       </div>
 
