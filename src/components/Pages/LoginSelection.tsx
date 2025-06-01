@@ -67,7 +67,16 @@ const LoginSelection = ({ onUserTypeSelect }: LoginSelectionProps) => {
                 <li>{language === 'en' ? '• Document management system' : '• Система управління документами'}</li>
                 <li>{language === 'en' ? '• Reporting and administration tools' : '• Інструменти звітності та адміністрування'}</li>
               </ul>
-              <Button className="w-full mt-6">
+              <Button 
+                className="w-full mt-6 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200" 
+                style={{ backgroundColor: '#96b7f6' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#8bb1f5';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#96b7f6';
+                }}
+              >
                 {t('accessEmployeePortal') || 'Access Employee Portal'}
               </Button>
             </CardContent>
@@ -95,7 +104,16 @@ const LoginSelection = ({ onUserTypeSelect }: LoginSelectionProps) => {
                 <li>{language === 'en' ? '• City news and events' : '• Міські новини та події'}</li>
                 <li>{language === 'en' ? '• Interactive city map and resources' : '• Інтерактивна карта міста та ресурси'}</li>
               </ul>
-              <Button className="w-full mt-6" variant="outline">
+              <Button 
+                className="w-full mt-6 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200" 
+                style={{ backgroundColor: '#16a34a' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#15803d';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#16a34a';
+                }}
+              >
                 {t('accessResidentPortal') || 'Access Resident Portal'}
               </Button>
             </CardContent>
