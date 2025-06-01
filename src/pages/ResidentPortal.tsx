@@ -13,6 +13,7 @@ import ResidentNewsModule from '@/components/Resident/ResidentNewsModule';
 import ResidentAccountModule from '@/components/Resident/ResidentAccountModule';
 import ResidentPaymentsModule from '@/components/Resident/ResidentPaymentsModule';
 import ResidentResourcesModule from '@/components/Resident/ResidentResourcesModule';
+import FAQChatbot from '@/components/Resident/FAQChatbot';
 import { useResidentNotifications } from '@/hooks/useResidentNotifications';
 
 const ResidentPortal = () => {
@@ -104,6 +105,9 @@ const ResidentPortal = () => {
             {renderContent()}
           </main>
         </SidebarInset>
+        
+        {/* Add FAQ Chatbot */}
+        <FAQChatbot />
       </div>
     </SidebarProvider>
   );

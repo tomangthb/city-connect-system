@@ -285,6 +285,48 @@ export type Database = {
         }
         Relationships: []
       }
+      faq_items: {
+        Row: {
+          answer: string
+          answer_uk: string
+          category: string | null
+          category_uk: string | null
+          created_at: string
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          question: string
+          question_uk: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          answer_uk: string
+          category?: string | null
+          category_uk?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          question: string
+          question_uk: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          answer_uk?: string
+          category?: string | null
+          category_uk?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          question?: string
+          question_uk?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       infrastructure_projects: {
         Row: {
           actual_completion_date: string | null
