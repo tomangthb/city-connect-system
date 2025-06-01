@@ -7,8 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, Star, Clock, Users, ArrowRight } from 'lucide-react';
+import { Search, Star, Clock, Users, ArrowRight, Calendar } from 'lucide-react';
 import ServiceDetailDialog from '@/components/Services/ServiceDetailDialog';
+import BookAppointmentDialog from '@/components/Services/BookAppointmentDialog';
 
 const ResidentServicesModule = () => {
   const { language } = useLanguage();
@@ -126,7 +127,7 @@ const ResidentServicesModule = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {popularServices.map((service) => (
-              <Card key={service.id} className="hover:shadow-md transition-shadow cursor-pointer">
+              <Card key={service.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="font-medium text-gray-900 line-clamp-2">
@@ -140,7 +141,7 @@ const ResidentServicesModule = () => {
                   <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                     {language === 'en' ? service.description : service.description_uk}
                   </p>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center">
                       {service.average_rating > 0 && (
                         <div className="flex items-center">
@@ -159,6 +160,14 @@ const ResidentServicesModule = () => {
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </div>
+                  <div className="flex gap-2">
+                    <BookAppointmentDialog service={service}>
+                      <Button className="flex-1" size="sm">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        {language === 'en' ? 'Book Appointment' : 'Записатися на прийом'}
+                      </Button>
+                    </BookAppointmentDialog>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -173,7 +182,7 @@ const ResidentServicesModule = () => {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredServices.map((service) => (
-            <Card key={service.id} className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card key={service.id} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -232,12 +241,21 @@ const ResidentServicesModule = () => {
                   </div>
                 </div>
 
-                <Button 
-                  className="w-full"
-                  onClick={() => setSelectedService(service)}
-                >
-                  {language === 'en' ? 'View Details' : 'Переглянути деталі'}
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setSelectedService(service)}
+                  >
+                    {language === 'en' ? 'View Details' : 'Переглянути деталі'}
+                  </Button>
+                  <BookAppointmentDialog service={service}>
+                    <Button className="flex-1">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      {language === 'en' ? 'Book Appointment' : 'Записатися на прийом'}
+                    </Button>
+                  </BookAppointmentDialog>
+                </div>
               </CardContent>
             </Card>
           ))}
