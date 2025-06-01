@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { addActivity } from '@/utils/activityUtils';
+import { sendAppealStatusNotification } from '@/utils/notificationUtils';
 import AppealDetailsView from './AppealDetailsView';
 import AppealReviewForm from './AppealReviewForm';
 
@@ -41,6 +42,16 @@ const AppealReviewDialog = ({ appeal, open, onOpenChange, onAppealUpdated }: App
         .eq('id', appeal.id);
 
       if (error) throw error;
+
+      // Send notification to the user if the appeal has a user_id
+      if (appeal.user_id) {
+        await sendAppealStatusNotification(
+          appeal.id,
+          status,
+          appeal.user_id,
+          appeal.title
+        );
+      }
 
       await addActivity({
         title: `Appeal reviewed: ${appeal.title}`,

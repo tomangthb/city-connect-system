@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 export const sendAppealStatusNotification = async (
   appealId: string, 
   newStatus: string, 
-  userEmail: string,
+  userId: string,
   appealTitle: string
 ) => {
   try {
@@ -12,13 +12,9 @@ export const sendAppealStatusNotification = async (
     const { error: notificationError } = await supabase
       .from('notifications')
       .insert({
-        user_email: userEmail,
+        user_id: userId,
         title: 'Appeal Status Update',
-        title_uk: 'Оновлення статусу звернення',
-        message: `Your appeal "${appealTitle}" status has been updated to: ${newStatus}`,
-        message_uk: `Статус вашого звернення "${appealTitle}" було оновлено на: ${newStatus}`,
-        type: 'appeal',
-        related_id: appealId,
+        content: `Your appeal "${appealTitle}" status has been updated to: ${newStatus}`,
         is_read: false
       });
 
