@@ -1,73 +1,76 @@
-# Welcome to your Lovable project
+# 🌆 City Connect System
 
-## Project info
+**City Connect System** — це сучасна веб-платформа для взаємодії мешканців міста з цифровими сервісами міської інфраструктури.  
+Проєкт реалізовано як навчальну роботу з курсу «Організація баз даних».
 
-**URL**: https://lovable.dev/projects/0c06da3b-2259-46a3-8146-5273c9acc1be
+---
 
-## How can I edit this code?
+## 🎯 Мета проєкту
 
-There are several ways of editing your application.
+Розробити систему з базою даних, яка дозволяє:
 
-**Use Lovable**
+- взаємодіяти з геоданими (мапа міста),
+- створювати заявки чи повідомлення про проблеми,
+- зберігати дані користувачів у безпечний спосіб,
+- надавати адміністраторам доступ до звітності й модерації.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/0c06da3b-2259-46a3-8146-5273c9acc1be) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🚀 Основні можливості
 
-**Use your preferred IDE**
+- 🔐 Аутентифікація користувачів через Supabase Auth
+- 🗺️ Інтерактивна мапа з використанням Mapbox
+- 📝 Реєстрація проблем/подій у місті через інтерфейс
+- 📊 Графіки аналітики на базі Recharts
+- 📂 Завантаження файлів та фото до заявки
+- ⚙️ Рольова модель: мешканець / адміністратор
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🧠 Технології
 
-Follow these steps:
+| Категорія     | Технології                            |
+|---------------|----------------------------------------|
+| **Фронтенд**  | React, TypeScript, Vite                |
+| **UI/Styling**| TailwindCSS, Radix UI, Lucide Icons    |
+| **Запити/Дані**| Supabase JS, React Query, Axios       |
+| **Маршрутизація** | React Router                        |
+| **Форми**     | React Hook Form, Zod                   |
+| **Графіка**   | Recharts, Mapbox GL                    |
+| **Завантаження** | React Dropzone                      |
+| **UX**        | Sonner (toast-повідомлення), Embla Carousel |
+| **Інструменти**| ESLint, PostCSS, Autoprefixer         |
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 📦 Встановлення проєкту
 
-# Step 3: Install the necessary dependencies.
-npm i
+> ⚠️ Вимоги: Node.js ≥ 18, pnpm або bun, API-ключі Supabase + Mapbox
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+1. Клонувати репозиторій:
+```bash
+git clone https://github.com/tomangthb/city-connect-system.git
+cd city-connect-system
+npm install
 npm run dev
-```
 
-**Edit a file directly in GitHub**
+📂 Структура папок
+src/
+├── app/              # Головне розміщення layout та root компонентів
+├── components/       # Повторно використовувані UI-компоненти
+├── features/         # Модулі функціоналу (auth, reports, map, admin тощо)
+├── lib/              # API-клієнти, утиліти, налаштування
+├── pages/            # Сторінки для маршрутизації
+├── types/            # Спільні TS-типи
+└── index.tsx         # Точка входу
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
 
-**Use GitHub Codespaces**
+🧪 Тестування
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+    Автентифікація Supabase перевіряється вручну.
 
-## What technologies are used for this project?
+    Запити протестовано через React Query Devtools.
 
-This project is built with:
+    Валідація форм — через Zod.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/0c06da3b-2259-46a3-8146-5273c9acc1be) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+    Графіки, drag-drop — інтерактивно через UI.
