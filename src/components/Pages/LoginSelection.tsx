@@ -71,10 +71,10 @@ const LoginSelection = ({ onUserTypeSelect }: LoginSelectionProps) => {
                 className="w-full mt-6 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200" 
                 style={{ backgroundColor: '#96b7f6' }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#8bb1f5';
+                  e.currentTarget.style.backgroundColor = '#1e3a8a';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#96b7f6';
+                  e.currentTarget.style.backgroundColor = '#2563eb';
                 }}
               >
                 {t('accessEmployeePortal') || 'Access Employee Portal'}
