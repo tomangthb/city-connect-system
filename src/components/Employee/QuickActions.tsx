@@ -166,7 +166,7 @@ const QuickActions = ({ onTabChange, onOpenSettings }: QuickActionsProps) => {
           <Button 
             variant="outline" 
             className="h-24 flex flex-col hover:bg-gray-50 transition-colors w-full p-2"
-            onClick={handleSettings}
+            onClick={onOpenSettings}
           >
             <Settings className="h-6 w-6 mb-2" />
             <span className="text-xs text-center leading-tight">{t('settings')}</span>
