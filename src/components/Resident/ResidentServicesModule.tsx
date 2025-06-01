@@ -256,8 +256,9 @@ const ResidentServicesModule = () => {
       {selectedService && (
         <ServiceDetailDialog
           service={selectedService}
-          isOpen={!!selectedService}
+          userType="resident"
           onClose={() => setSelectedService(null)}
+          onBookAppointment={() => setSelectedService(null)}
         />
       )}
     </div>
