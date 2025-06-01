@@ -11,12 +11,26 @@ import {
   FileText, 
   Image, 
   File,
-  Upload
+  Upload,
+  Trash2
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import UploadDocumentDialog from './UploadDocumentDialog';
 import DocumentFiltersDialog from './DocumentFiltersDialog';
+
+interface Document {
+  id: string;
+  name: string;
+  category: string;
+  file_path?: string;
+  file_size: string;
+  file_type: string;
+  created_at: string;
+  uploaded_by?: string;
+}
 
 const DocumentsModule = () => {
   const { language } = useLanguage();
@@ -27,91 +41,84 @@ const DocumentsModule = () => {
     status: 'all',
     dateRange: 'all'
   });
+  const queryClient = useQueryClient();
 
-  // Sample documents data
-  const documents = [
-    {
-      id: '1',
-      name: 'Довідка про прописку',
-      nameEn: 'Residence Certificate',
-      type: 'pdf',
-      size: '2.4 MB',
-      category: 'certificates',
-      uploadDate: '2024-01-15',
-      status: 'approved'
-    },
-    {
-      id: '2',
-      name: 'Заява на субсидію',
-      nameEn: 'Subsidy Application',
-      type: 'docx',
-      size: '1.2 MB',
-      category: 'applications',
-      uploadDate: '2024-01-10',
-      status: 'pending'
-    },
-    {
-      id: '3',
-      name: 'Паспорт (копія)',
-      nameEn: 'Passport Copy',
-      type: 'jpg',
-      size: '3.1 MB',
-      category: 'identity',
-      uploadDate: '2024-01-08',
-      status: 'approved'
+  // Fetch documents from database
+  const { data: documents = [], isLoading } = useQuery({
+    queryKey: ['documents'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     }
-  ];
+  });
+
+  // Delete document mutation
+  const deleteDocumentMutation = useMutation({
+    mutationFn: async (documentId: string) => {
+      const { error } = await supabase
+        .from('documents')
+        .delete()
+        .eq('id', documentId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      toast.success(language === 'en' ? 'Document deleted successfully' : 'Документ успішно видалено');
+    },
+    onError: () => {
+      toast.error(language === 'en' ? 'Error deleting document' : 'Помилка видалення документа');
+    }
+  });
 
   const getFileIcon = (type: string) => {
     switch (type.toLowerCase()) {
       case 'pdf':
+      case 'application/pdf':
         return <FileText className="h-8 w-8 text-red-500" />;
       case 'jpg':
       case 'jpeg':
       case 'png':
+      case 'image/jpeg':
+      case 'image/png':
+      case 'image/jpg':
         return <Image className="h-8 w-8 text-blue-500" />;
       default:
         return <File className="h-8 w-8 text-gray-500" />;
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return (
-          <Badge className="bg-green-100 text-green-800">
-            {language === 'en' ? 'Approved' : 'Схвалено'}
-          </Badge>
-        );
-      case 'pending':
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800">
-            {language === 'en' ? 'Pending' : 'На розгляді'}
-          </Badge>
-        );
-      case 'rejected':
-        return (
-          <Badge className="bg-red-100 text-red-800">
-            {language === 'en' ? 'Rejected' : 'Відхилено'}
-          </Badge>
-        );
-      default:
-        return null;
-    }
+  const getCategoryName = (category: string) => {
+    const categories = {
+      financial: language === 'en' ? 'Financial' : 'Фінансовий',
+      planning: language === 'en' ? 'Planning' : 'Планування',
+      services: language === 'en' ? 'Services' : 'Послуги',
+      environment: language === 'en' ? 'Environment' : 'Довкілля',
+      legal: language === 'en' ? 'Legal' : 'Правовий',
+      contracts: language === 'en' ? 'Contracts' : 'Договори',
+      reports: language === 'en' ? 'Reports' : 'Звіти',
+      policies: language === 'en' ? 'Policies' : 'Політики',
+      procedures: language === 'en' ? 'Procedures' : 'Процедури',
+      forms: language === 'en' ? 'Forms' : 'Форми',
+      correspondence: language === 'en' ? 'Correspondence' : 'Листування',
+      other: language === 'en' ? 'Other' : 'Інше'
+    };
+    return categories[category as keyof typeof categories] || category;
   };
 
   const filteredDocuments = documents.filter(doc => {
-    const matchesSearch = (language === 'en' ? doc.nameEn : doc.name)
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    
+    const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filters.category === 'all' || doc.category === filters.category;
-    const matchesType = filters.type === 'all' || doc.type === filters.type;
-    const matchesStatus = filters.status === 'all' || doc.status === filters.status;
+    const matchesType = filters.type === 'all' || doc.file_type.includes(filters.type);
     
     let matchesDate = true;
     if (filters.dateRange !== 'all') {
-      const docDate = new Date(doc.uploadDate);
+      const docDate = new Date(doc.created_at);
       const now = new Date();
       
       switch (filters.dateRange) {
@@ -133,30 +140,50 @@ const DocumentsModule = () => {
       }
     }
     
-    return matchesSearch && matchesCategory && matchesType && matchesStatus && matchesDate;
+    return matchesSearch && matchesCategory && matchesType && matchesDate;
   });
 
-  const handleViewDocument = (doc: any) => {
-    // Simulate opening document in new tab
-    const blob = new Blob(['Document content'], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
-    toast.success(language === 'en' ? 'Opening document...' : 'Відкриваємо документ...');
+  const handleViewDocument = async (doc: Document) => {
+    if (doc.file_path) {
+      const { data } = supabase.storage.from('documents').getPublicUrl(doc.file_path);
+      window.open(data.publicUrl, '_blank');
+    } else {
+      toast.error(language === 'en' ? 'File not found' : 'Файл не знайдено');
+    }
   };
 
-  const handleDownloadDocument = (doc: any) => {
-    // Simulate file download
-    const link = document.createElement('a');
-    link.href = '#';
-    link.download = `${doc.name}.${doc.type}`;
-    link.click();
-    toast.success(language === 'en' ? 'Downloading document...' : 'Завантажуємо документ...');
+  const handleDownloadDocument = async (doc: Document) => {
+    if (doc.file_path) {
+      const { data } = supabase.storage.from('documents').getPublicUrl(doc.file_path);
+      const link = document.createElement('a');
+      link.href = data.publicUrl;
+      link.download = doc.name;
+      link.click();
+      toast.success(language === 'en' ? 'Downloading document...' : 'Завантажуємо документ...');
+    } else {
+      toast.error(language === 'en' ? 'File not found' : 'Файл не знайдено');
+    }
+  };
+
+  const handleDeleteDocument = (doc: Document) => {
+    if (window.confirm(language === 'en' ? 'Are you sure you want to delete this document?' : 'Ви впевнені, що хочете видалити цей документ?')) {
+      deleteDocumentMutation.mutate(doc.id);
+    }
   };
 
   const handleDocumentUploaded = () => {
-    // Refresh documents list
-    toast.success(language === 'en' ? 'Document uploaded successfully' : 'Документ успішно завантажено');
+    queryClient.invalidateQueries({ queryKey: ['documents'] });
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <div className="text-center">
+          <p>{language === 'en' ? 'Loading documents...' : 'Завантаження документів...'}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -209,23 +236,23 @@ const DocumentsModule = () => {
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  {getFileIcon(doc.type)}
+                  {getFileIcon(doc.file_type)}
                   <div>
-                    <h3 className="font-medium text-gray-900">
-                      {language === 'en' ? doc.nameEn : doc.name}
-                    </h3>
+                    <h3 className="font-medium text-gray-900">{doc.name}</h3>
                     <p className="text-sm text-gray-500">
-                      {doc.type.toUpperCase()} • {doc.size}
+                      {doc.file_type.split('/').pop()?.toUpperCase()} • {doc.file_size}
                     </p>
                   </div>
                 </div>
-                {getStatusBadge(doc.status)}
+                <Badge variant="outline">
+                  {getCategoryName(doc.category)}
+                </Badge>
               </div>
               
               <div className="text-sm text-gray-600 mb-4">
                 <p>
                   {language === 'en' ? 'Uploaded:' : 'Завантажено:'} {' '}
-                  {new Date(doc.uploadDate).toLocaleDateString(
+                  {new Date(doc.created_at).toLocaleDateString(
                     language === 'en' ? 'en-US' : 'uk-UA'
                   )}
                 </p>
@@ -244,11 +271,17 @@ const DocumentsModule = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="flex-1"
                   onClick={() => handleDownloadDocument(doc)}
                 >
-                  <Download className="h-4 w-4 mr-2" />
-                  {language === 'en' ? 'Download' : 'Завантажити'}
+                  <Download className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleDeleteDocument(doc)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
             </CardContent>

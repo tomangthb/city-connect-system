@@ -249,6 +249,42 @@ export type Database = {
           },
         ]
       }
+      documents: {
+        Row: {
+          category: string
+          created_at: string
+          file_path: string | null
+          file_size: string | null
+          file_type: string | null
+          id: string
+          name: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          file_path?: string | null
+          file_size?: string | null
+          file_type?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          file_path?: string | null
+          file_size?: string | null
+          file_type?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       infrastructure_projects: {
         Row: {
           actual_completion_date: string | null

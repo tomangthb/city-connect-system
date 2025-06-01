@@ -10,20 +10,6 @@ import UserSearch from './UserSearch';
 import UsersListView from './UsersListView';
 import { useUserData } from './hooks/useUserData';
 
-interface User {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  patronymic: string;
-  user_type: 'employee' | 'resident';
-  address: string;
-  phone: string;
-  created_at: string;
-  roles: string[];
-  status: string;
-}
-
 const UserAccountsTab = () => {
   const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,9 +41,16 @@ const UserAccountsTab = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>
-              {language === 'en' ? 'User Accounts' : 'Облікові записи користувачів'}
-            </span>
+            <div>
+              <span>
+                {language === 'en' ? 'User Accounts' : 'Облікові записи користувачів'}
+              </span>
+              <p className="text-sm text-gray-600 mt-1">
+                {language === 'en' 
+                  ? `Total users: ${users?.length || 0}` 
+                  : `Всього користувачів: ${users?.length || 0}`}
+              </p>
+            </div>
             <CreateUserDialog onUserCreated={refetch}>
               <Button>
                 <UserPlus className="h-4 w-4 mr-2" />

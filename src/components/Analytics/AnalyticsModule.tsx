@@ -13,21 +13,8 @@ const AnalyticsModule = () => {
   const { language } = useLanguage();
   const [dateRange, setDateRange] = useState('month');
 
-  // Fetch analytics data
-  const { data: analyticsData, isLoading } = useQuery({
-    queryKey: ['analytics', dateRange],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('analytics_data')
-        .select('*')
-        .order('date', { ascending: true });
-
-      if (error) throw error;
-      return data || [];
-    }
-  });
-
-  const { data: appeals } = useQuery({
+  // Fetch real appeals data
+  const { data: appeals, isLoading: appealsLoading } = useQuery({
     queryKey: ['appeals-analytics'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -39,34 +26,67 @@ const AnalyticsModule = () => {
     }
   });
 
-  const { data: services } = useQuery({
+  // Fetch real services data
+  const { data: services, isLoading: servicesLoading } = useQuery({
     queryKey: ['services-analytics'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('services')
-        .select('category, requests, name');
+        .select('category, requests, name, name_uk');
 
       if (error) throw error;
       return data || [];
     }
   });
 
-  // Process data for charts
+  // Fetch real documents data
+  const { data: documents } = useQuery({
+    queryKey: ['documents-analytics'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('documents')
+        .select('created_at, category');
+
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Fetch user profiles data
+  const { data: profiles } = useQuery({
+    queryKey: ['profiles-analytics'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('created_at, user_type');
+
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Process appeals by status
   const appealsByStatus = React.useMemo(() => {
     if (!appeals) return [];
     
     const statusCounts = appeals.reduce((acc, appeal) => {
       const status = appeal.status || 'Unknown';
-      acc[status] = (acc[status] || 0) + 1;
+      const statusKey = language === 'en' ? status : 
+        status === 'Under Review' ? 'На розгляді' :
+        status === 'Resolved' ? 'Вирішено' :
+        status === 'In Progress' ? 'В процесі' : status;
+      
+      acc[statusKey] = (acc[statusKey] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
     return Object.entries(statusCounts).map(([status, count]) => ({
-      status: language === 'en' ? status : status,
+      status,
       count
     }));
   }, [appeals, language]);
 
+  // Process service requests
   const serviceRequests = React.useMemo(() => {
     if (!services) return [];
     
@@ -75,14 +95,55 @@ const AnalyticsModule = () => {
       .sort((a, b) => b.requests - a.requests)
       .slice(0, 10)
       .map(service => ({
-        name: language === 'en' ? service.name : service.name,
+        name: language === 'en' ? service.name : (service.name_uk || service.name),
         requests: service.requests || 0
       }));
   }, [services, language]);
 
+  // Process appeals by category
+  const appealsByCategory = React.useMemo(() => {
+    if (!appeals) return [];
+    
+    const categoryCounts = appeals.reduce((acc, appeal) => {
+      const category = appeal.category || 'Other';
+      acc[category] = (acc[category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(categoryCounts).map(([category, count]) => ({
+      category: language === 'en' ? category : category,
+      count
+    }));
+  }, [appeals, language]);
+
+  // Calculate statistics
+  const totalAppeals = appeals?.length || 0;
+  const activeServices = services?.filter(s => s.requests > 0).length || 0;
+  const totalDocuments = documents?.length || 0;
+  const totalUsers = profiles?.length || 0;
+
+  // Calculate monthly appeals
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const monthlyAppeals = appeals?.filter(appeal => {
+    const appealDate = new Date(appeal.created_at);
+    return appealDate.getMonth() === currentMonth && appealDate.getFullYear() === currentYear;
+  })?.length || 0;
+
+  // Calculate growth rate
+  const lastMonth = new Date().getMonth() - 1;
+  const lastMonthAppeals = appeals?.filter(appeal => {
+    const appealDate = new Date(appeal.created_at);
+    return appealDate.getMonth() === lastMonth && appealDate.getFullYear() === currentYear;
+  })?.length || 0;
+
+  const growthRate = lastMonthAppeals > 0 
+    ? Math.round(((monthlyAppeals - lastMonthAppeals) / lastMonthAppeals) * 100)
+    : 0;
+
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
-  if (isLoading) {
+  if (appealsLoading || servicesLoading) {
     return (
       <div className="p-6">
         <div className="text-center">
@@ -117,7 +178,7 @@ const AnalyticsModule = () => {
                 <p className="text-sm font-medium text-gray-600">
                   {language === 'en' ? 'Total Appeals' : 'Загальна кількість звернень'}
                 </p>
-                <p className="text-2xl font-bold text-gray-900">{appeals?.length || 1}</p>
+                <p className="text-2xl font-bold text-gray-900">{totalAppeals}</p>
               </div>
               <FileText className="h-8 w-8 text-blue-600" />
             </div>
@@ -131,7 +192,7 @@ const AnalyticsModule = () => {
                 <p className="text-sm font-medium text-gray-600">
                   {language === 'en' ? 'Active Services' : 'Активні послуги'}
                 </p>
-                <p className="text-2xl font-bold text-gray-900">{services?.length || 13}</p>
+                <p className="text-2xl font-bold text-gray-900">{activeServices}</p>
               </div>
               <Users className="h-8 w-8 text-green-600" />
             </div>
@@ -145,9 +206,7 @@ const AnalyticsModule = () => {
                 <p className="text-sm font-medium text-gray-600">
                   {language === 'en' ? 'This Month' : 'Цього місяця'}
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {appeals?.filter(a => new Date(a.created_at).getMonth() === new Date().getMonth()).length || 1}
-                </p>
+                <p className="text-2xl font-bold text-gray-900">{monthlyAppeals}</p>
               </div>
               <Calendar className="h-8 w-8 text-purple-600" />
             </div>
@@ -161,7 +220,9 @@ const AnalyticsModule = () => {
                 <p className="text-sm font-medium text-gray-600">
                   {language === 'en' ? 'Growth Rate' : 'Темп зростання'}
                 </p>
-                <p className="text-2xl font-bold text-gray-900">+12%</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {growthRate > 0 ? '+' : ''}{growthRate}%
+                </p>
               </div>
               <TrendingUp className="h-8 w-8 text-orange-600" />
             </div>
@@ -265,6 +326,30 @@ const AnalyticsModule = () => {
                   </p>
                 </div>
               </div>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>{language === 'en' ? 'Appeals by Category' : 'Звернення за категоріями'}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={appealsByCategory}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="category" 
+                        tick={{ fontSize: 12 }}
+                        interval={0}
+                        angle={-45}
+                        textAnchor="end"
+                        height={100}
+                      />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="count" fill="#00C49F" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
             </CardContent>
           </Card>
         </TabsContent>
@@ -339,13 +424,29 @@ const AnalyticsModule = () => {
                   <h3 className="font-medium text-gray-800">
                     {language === 'en' ? 'Total Registered Users' : 'Всього зареєстрованих користувачів'}
                   </h3>
-                  <p className="text-2xl font-bold text-gray-900">1,245</p>
+                  <p className="text-2xl font-bold text-gray-900">{totalUsers}</p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="font-medium text-gray-800">
-                    {language === 'en' ? 'Active This Month' : 'Активних цього місяця'}
+                    {language === 'en' ? 'Employees' : 'Працівники'}
                   </h3>
-                  <p className="text-2xl font-bold text-gray-900">892</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {profiles?.filter(p => p.user_type === 'employee').length || 0}
+                  </p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-medium text-gray-800">
+                    {language === 'en' ? 'Residents' : 'Громадяни'}
+                  </h3>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {profiles?.filter(p => p.user_type === 'resident').length || 0}
+                  </p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-medium text-gray-800">
+                    {language === 'en' ? 'Total Documents' : 'Всього документів'}
+                  </h3>
+                  <p className="text-2xl font-bold text-gray-900">{totalDocuments}</p>
                 </div>
               </div>
             </CardContent>
