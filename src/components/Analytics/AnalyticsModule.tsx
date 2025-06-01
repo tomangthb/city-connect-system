@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,7 +6,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, Users, FileText, Calendar, Download } from 'lucide-react';
+import { TrendingUp, Users, FileText, Calendar, Download, Eye } from 'lucide-react';
 
 const AnalyticsModule = () => {
   const { language } = useLanguage();
@@ -130,16 +129,8 @@ const AnalyticsModule = () => {
     return appealDate.getMonth() === currentMonth && appealDate.getFullYear() === currentYear;
   })?.length || 0;
 
-  // Calculate growth rate
-  const lastMonth = new Date().getMonth() - 1;
-  const lastMonthAppeals = appeals?.filter(appeal => {
-    const appealDate = new Date(appeal.created_at);
-    return appealDate.getMonth() === lastMonth && appealDate.getFullYear() === currentYear;
-  })?.length || 0;
-
-  const growthRate = lastMonthAppeals > 0 
-    ? Math.round(((monthlyAppeals - lastMonthAppeals) / lastMonthAppeals) * 100)
-    : 0;
+  // Mock data for page views (this would typically come from analytics service)
+  const monthlyPageViews = 2847;
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
@@ -218,13 +209,13 @@ const AnalyticsModule = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">
-                  {language === 'en' ? 'Growth Rate' : 'Темп зростання'}
+                  {language === 'en' ? 'Page Views' : 'Перегляди сторінок'}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {growthRate > 0 ? '+' : ''}{growthRate}%
+                  {monthlyPageViews.toLocaleString()}
                 </p>
               </div>
-              <TrendingUp className="h-8 w-8 text-orange-600" />
+              <Eye className="h-8 w-8 text-orange-600" />
             </div>
           </CardContent>
         </Card>

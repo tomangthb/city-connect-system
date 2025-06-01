@@ -17,7 +17,9 @@ import {
   Activity,
   Plus,
   BarChart3,
-  Settings
+  Settings,
+  UserPlus,
+  Eye
 } from 'lucide-react';
 import KPICard from './KPICard';
 import QuickActions from './QuickActions';
@@ -69,6 +71,19 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
     }
   });
 
+  // Fetch user profiles data for new registrations
+  const { data: profiles } = useQuery({
+    queryKey: ['profiles-stats'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('created_at, user_type');
+
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
   // Calculate statistics
   const totalAppeals = appealsData?.length || 0;
   const pendingAppeals = appealsData?.filter(appeal => appeal.status === 'Under Review')?.length || 0;
@@ -76,13 +91,16 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
   const activeServices = servicesData?.filter(service => service.status === 'Available')?.length || 0;
   const totalDocuments = documentsData?.length || 0;
 
-  // Calculate monthly appeals
+  // Calculate monthly new user registrations
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
-  const monthlyAppeals = appealsData?.filter(appeal => {
-    const appealDate = new Date(appeal.created_at);
-    return appealDate.getMonth() === currentMonth && appealDate.getFullYear() === currentYear;
+  const monthlyNewUsers = profiles?.filter(profile => {
+    const registrationDate = new Date(profile.created_at);
+    return registrationDate.getMonth() === currentMonth && registrationDate.getFullYear() === currentYear;
   })?.length || 0;
+
+  // Mock data for page views (this would typically come from analytics service)
+  const monthlyPageViews = 2847; // This would be real data from analytics
 
   const kpiData = [
     {
@@ -107,10 +125,10 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
       color: 'text-green-600'
     },
     {
-      title: language === 'en' ? 'This Month' : 'Цього місяця',
-      value: monthlyAppeals,
-      change: 15,
-      icon: Calendar,
+      title: language === 'en' ? 'New Registrations' : 'Нові реєстрації',
+      value: monthlyNewUsers,
+      change: 23,
+      icon: UserPlus,
       color: 'text-purple-600'
     }
   ];
@@ -252,31 +270,31 @@ const EmployeeDashboard = ({ onTabChange, onOpenSettings }: EmployeeDashboardPro
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              {language === 'en' ? 'System Health' : 'Стан системи'}
+              {language === 'en' ? 'Monthly Page Views' : 'Перегляди сторінок'}
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">
-                  {language === 'en' ? 'Uptime' : 'Час роботи'}
+                  {language === 'en' ? 'Total Views' : 'Всього переглядів'}
                 </span>
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  99.9%
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                  {monthlyPageViews.toLocaleString()}
                 </Badge>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">
-                  {language === 'en' ? 'Response Time' : 'Час відповіді'}
+                  {language === 'en' ? 'Unique Visitors' : 'Унікальні відвідувачі'}
                 </span>
-                <Badge variant="outline">120ms</Badge>
+                <Badge variant="outline">1,847</Badge>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">
-                  {language === 'en' ? 'Active Users' : 'Активні користувачі'}
+                  {language === 'en' ? 'Bounce Rate' : 'Показник відмов'}
                 </span>
-                <Badge variant="outline">245</Badge>
+                <Badge variant="outline">32%</Badge>
               </div>
             </div>
           </CardContent>
